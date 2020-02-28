@@ -1,5 +1,2847 @@
-<html>
-  <body>
-    <h4>Not that triggered hello, CMS 5G with H4 html style</h4>
-  </body>
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CMS HPE5g Carrier Stack</title>
+</head>
+<body >
+<input id="_uniqueInputId" value="1" type="hidden" placeholder="Hidden input recording the html id for dynamic delete buttons"/>
+<table border=0 width="100%">
+<td valign="top" align="left">
+<H1>CMS HPE5g Carrier Stack</H1>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-02-28 Version 0.51</a></p>
+<p>
+<label for="quickDescription">Description :</label>
+<input id="quickDescription" size="150" name="quickDescription" placeholder="One line HPE5g stack description"/>
+</p>
+</td>
+<td valign="top" align="right">
+<img id=HPElogo  alt="logo.png">
+</td>
+</table>
+
+<H3>Summary: <a id="summary" href="#endOfUserArea" >Outputs and Result</a></H3>
+
+<form>
+<div id="tableInsertionPoint"></div>
+</form>
+
+<hr>
+<TABLE border=0 cellspacing="5">
+<tr>
+<td valign="top">Build the Heat Openstack template</td><td valign="top"><input class="buildButton" type="button" value="Build" onclick="buildHeatTemplate()"></td>
+<td valign="top">deploying OpenShift 
+<select id="oc_version">
+<option name="3.11" selected>3.11</option>
+<option name="3.9">3.9</option>
+</select>
+</td>
+
+<td valign="top"><input class="helpButton" type="button" value="Help" onclick="deploymentHelp()"></td> 
+</tr><tr>
+<td valign="top">Save the current session</td><td valign="top"><input class="helpButton" type="button" value="Save" onclick="saveSession()"></td>
+</tr>
+</table>
+
+<!-- Link to the end of the user area, useful to focus the user on the result on long pages -->
+<p>Quick links: <a id="endOfUserArea" href="#endOfUserArea" >Outputs and Result</a></p>
+<p>
+<textarea readonly rows="20" cols="200" id="userArea"></textarea>
+<a name="endOfUserArea"></a>
+</p>
+<iframe width="1500" height="200" name="importedDocument" style="display:none"></iframe>
+<P class="copyright">&copy; 2020 Hewlett Packard Enterprise Development LP</P>
+<script>
+
+// Define an HPE standard style
+var HPEStyle = "{font-family: arial; font-size: small}"+
+	"body {font: 12px arial, sans-serif; color: #C6C9CA; background-color: black;}"+
+	"th, table { font: 12px arial, sans-serif; color: #C6C9CA; background-color: black;}"+
+	"h1, {color: #FF8D6D;}"+
+	"h2, h3, h4, h5 {color: #C6C9CA;}"+
+	"input, select {border: none; font: 12px arial, sans-serif; color: #01a982; background-color: black;}"+
+	".buildButton { background-color: #FF8D6D; border: none; color: black; text-align: center; text-decoration: none; display: inline-block; border-radius: 2px;}"+
+	".buildButton:hover { background-color: #4CAF50; color: white;}"+
+	".helpButton { background-color: #2AD2C9; border: none; color: black; text-align: center; text-decoration: none; display: inline-block; border-radius: 2px;}"+
+	".helpButton:hover { background-color: blue; color: white;}"+
+	"a:link, a:visited { text-decoration: none; color: #80746E;}";
+// Base 64 encoded logo and icon
+var HPEicon="AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAAAAD///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////AYe0AP+ItAD/h7QA/4e0AP+ItAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4i0AP+HtAD/h7QA/4e0AP+ItAD/h7QA/4e0AP+HtAD/iLQA/4e0AP+HtAD/h7QA/4e0AP////8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wGHtAD/h7QA/4e0AP+HtAD/////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8Bh7QA/4i0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4i0AP+HtAD/iLQA/4i0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/iLQA/4e0AP+ItAD/h7QA/4e0AP+HtAD/iLQA/4e0AP+HtAD/h7QA/4e0AP+HtAD/iLQA/////wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8BAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//w==";
+var HPElogo="iVBORw0KGgoAAAANSUhEUgAAAU0AAACBCAYAAABErei/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAABo/SURBVHhe7Z0JuFVV+YcXIgpqqDjhVGZqZWamleX0hAaBlg2PkuY8JIQpfzUnxKkcM6KQHMqhIjON1JzIoUwrMzKVnCg0ckYlJUVEAfd/veusb7POZp97z773XOVyf+/zfPfss9bae6+99tm/++019vJkTgghRFMsFz+FEEI0gURTCCEqINEUQogKSDSFEKICEk0hhKiARFMIISog0RRCiApINIUQogISTSGEqIBEUwghKiDRFEKICkg0hRCiAhJNIYSogERTCCEqINEUQogKSDSFEKICEk0hhKiARFMIISog0RRCiApINIUQogISTSGEqIBEUwghKiDRFEKICkg0hRCiAhJNIYSogERTCCEqINEUQogK9PJkcVt0lqyHFGWvXnFDiJ6HRLNVIJgr9nFuhRWce+utGLiM0du/mMx9vXZ9Ek7RQ5FotoJQgv7PAUNddtSeXljmh+BljlVXdr0OOde5qY9KNEWPRaLZCkw0hw9y2YjdnXttGRbN0ROce+AxiabosUg0W4GJ5p5eNEcmornSis4t183b2hYtcu71N2vbiOb/ne/c/TMkmqLHItFsBdYAtM9glx20q3PzvGhS/3fZzc694QWnVzcVTgRz4IDwz8AtWFgTzVHjnXt4pkRT9Fgkmq2g6GnOe8O5Pr1dr2HHLRbU7sq6a7ps0pjaNcnTFEL9NFtKUUf6rVD7RGC6o0HfeA1GT+lWJUQDJJpCCFEBiaYQQlRAoimEEBWQaAohRAUkmkIIUQGJZlcyP3YKp8W5OxrQz1QIkaN+mq0glKD/kw6jpHP7xGtqwtldRwXRuX2dNZw7aKhzb8bO7RpGKXo4Es1WUCaasHLf7iuYBsJJx3aQaAoh0WwJjURzWUOiKYREsyWYaO5vU8O9HoKXORDNQ5kabrpEU/RYJJqtwERz5X4u67/SMjwJcW/Xa/acWv2mRFP0UCSarcKEsycgwRQ9GImmEEJUQP00hRCiAhJNIYSogERTCCEqINEUQogKSDSFEKICEk0hhKiAuhy1kMxmBkrw5Ru3FtNsureLYn7eybwUKSurIm9nfpe2e1dGozJb2vLZXfHlKNFsBfxQ+/Xr51ZaaSX31ltvueWWW87997//DXHpj5V0q6yyiltxxRXDNmnnzJkT4t6JHzV56N+/v1t++eXD90WLFrn//e9/S8UDZg//Rz7yEffmm/VT1JG/xx57rDS8q7D8bLLJJm6FFVYI93j27Nlu1qxZS0V5geVxs802C/eUPL7wwgvBYGnJZ7fGF2Im65z5Ygw2fvx4/5tdzIABA0J4Me3kyZNjiizzopl5oV0i3dtlnHfq1KkxN1nmhb7TeWH/1NqKM0vTpGn5bI8ZM2ZkW2+9dZvHaoXZ8b1QxjNn2VVXXdXl561i5KNv376Z/2cSc5hlEyZMWKry2N1NdZot5JVXXolbNRYuXBi36jHPEp5//vng3b2TvPTSS3HLuRdffDFudQz/jLqJEye6G264wd10003u5JNPzr0fPv2Pzl1xxRXuN7/5jbvlllvcV77ylTyujEbhKXh+f//7393YsWPD92b26Qz2BgHFe740wO8pvY9z586NW6IVSDRFy/n85z/vPve5z7ldd93VDRo0KIbWQND23HNPt/vuu7shQ4a4LbfcMsY0x7x584JopUJvfPvb33bbbbdd/CZE1yDRXApBWNqyRmmMZsMtzj4BT7BIcZ+iGbadejavvvpq+EzTvfbaa3FrcTykaRoxatQot+aaa7o11lgj5PXYY4+NMTXGjBkTPi1vbVmRsjSptUfZPs1aSll80Rqlg3f6zWVZx//uQj2I6AT2Y8XTsVdEWHXVVcPrWypEpL388svdgQceGL4/99xzbqONNgoNGqSzY332s591++67b4i777773D333OOuvPLKEAcf+9jHgsf2xhtvBO9r/PjxYRve9773uREjRoTqgbvvvtvdeOONIRz233//vJFgypQp7s4773S33nqrGzx4cIh/9NFH3eabb57n2fJD49Vhhx3mhg0bFs5DfngFnzZtWogHvMctttjCHXXUUUHYgMaaH/3oR27llVcOjV4c98QTTwwNYfCHP/whnL9v377uzDPPzMsB7Nz2CaNHj3YTJkyoK6u//vWv7hOf+ETYfuaZZ9wGG2wQ4rlOXv+5HsqRuIceeiiU4/Tp00P64rkADxiPdfvttw+i/sADD7gLL7wwf+X95z//GY4NXBtlDVzD0UcfHa6td+/e4d6PGzcuiNj6668fvO9PfepTYV+O+/DDD7vrrrvO3XXXXWF/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";
+
+var localStyle = document.createElement('style');
+localStyle.innerHTML = HPEStyle;
+document.head.appendChild(localStyle)
+var localIcon = document.createElement('link');
+localIcon.href = "data:image/x-icon;base64,"+HPEicon;
+localIcon.rel="icon";
+localIcon.type="image/x-icon";
+document.head.appendChild(localIcon)
+document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
+
+// Display version history in the user output area
+function versionHistory(){
+	userOutput("Version history:"+
+	"\n2020-02-28 0.51	Manage multiple openshift versions (3.9, 3.11); nudr preview (missing dependencies)"+
+	"\n2020-02-25 0.5	HPE5g automated deployer hosted on github.hpe.com:cms5g/Carrier-Stack; Switch to OpenShift v3.11 with automated git clone"+
+	"\n\t\tHPE5g tester automated deployment; OpenShift internal registry population and projects creation automated."+ 
+	"\n2020-01-28 0.4	Add the NetworkFunctions section to deploy ignite and nudsf-dr, supporting multiple OpenShift projects"+
+	"\n2020-01-10 0.3	Fix the generated ansible inventory by removing labels on non master nodes; Help button beside the Build button delivering the user guide."+
+	"\n2020-01-09 0.2	Cinder and OpenShift volumes management, output in a dedicated section ready for OpenShift template creation"+
+	"\n2020-01-06 0.1	Very first draft"
+	);
+}
+
+function userOutput(aText){
+	document.getElementById("userArea").innerHTML=aText;
+	document.getElementById("endOfUserArea").click();
+}
+
+// Class implementing a unique role
+var uniqueRole = function(aName){
+	this.v = false;
+	this.name = aName;
+}
+uniqueRole.prototype.init = function(){this.v = false;}
+uniqueRole.prototype.v = this.v;
+// Set if y, unless already true; in that case, return a duplication alert for role
+uniqueRole.prototype.setIfNotOrAlert = function(y){
+	if(y){
+		if(this.v)return "\nNodes section: role " + this.name + " is duplicated."
+		this.v = true;
+	}
+	return "";
+}
+
+// Class implementing a file which content is loaded from the user file system (content)
+// to be dropped on the VNF at a specified path (path)
+// Interface:
+// - a constructor 
+// - methods to load, display and clear the content.
+// - public members: content and path
+// Constructor: 
+// - name of the variable instantiated: required to link the user's events to the object's methods
+// - label describing the purpose of this file, displayed besides the 'browse' button
+// - (optional) function to call upon loading, defaults to displaying the loaded content
+var userLoadedFile = function(aVarName, aLabel, anAction){
+	this.label = aLabel;
+	this.var = aVarName;
+	this.inputId = aVarName+"_inputId";
+	this.content = undefined;
+	this.path = undefined;
+	this.action = this.view;
+	if(anAction != undefined)this.action = anAction; 
+}
+// Usage example:
+// - instantiate the object; parameter: the name of the HTML input button Id to allow clearance  
+// 	var uspmAuxDescInput = new userLoadedFile("uspmAuxDescInput", "Import USPM auxiliary descriptor..."); 
+// - pass this variable while constructing a section to get the file controls browse/view/clear
+// new vnfResource("Misc", [...], [uspmAuxDescInput, ...]);
+// - use the content: 
+//	if(aUserFile.isDefined()){result += aUserFile.content;}else{ manage error...} 
+userLoadedFile.prototype.load = function(event){
+	// Gratitude to https://stackoverflow.com/questions/27254735/filereader-onload-with-result-and-parameter
+	var file = event.target.files[0];
+	var reader = new FileReader();
+    reader.onload = ( function(target){ return function(e){
+    	// Store the file content in the original object
+    	target.content = this.result;
+    	// Action 
+    	target.action();
+    	}
+    })(this);
+    reader.readAsText(file);
+}
+userLoadedFile.prototype.clear = function(){
+	this.content=undefined; 
+	userOutput(''); 
+	if(this.inputId != undefined)document.getElementById(this.inputId).value= null;
+}
+userLoadedFile.prototype.view = function(){
+	userOutput(this.content);
+}
+// Ensure that both the content and the path are defined
+userLoadedFile.prototype.isDefined = function(){
+	return this.content != undefined && this.content != '' && this.path != undefined && this.path != '';
+}
+// Ensure that neither the content nor the path are defined
+userLoadedFile.prototype.isUndefined = function(){
+	return (this.content == undefined || this.content == '') && (this.path == undefined || this.path == '');
+}
+// Check that both path and content are either defined or undefined
+userLoadedFile.prototype.isConsistent = function(){
+	return this.isDefined() || this.isUndefined();
+}
+
+// Class implementing a Heat node: a short name, and a flavor, plus a boolean identifying a EMS role receiving OpenShift templates defining the network functions
+// Plus a list of network interfaces identified by the integer behind the 'eth' prefix, -1 for the external network used to connect floating IPs
+// Plus 2 booleans: isVIP if this node is a VIP and hasVIP if this node hosts VIP(s)
+// And a table holding all IP addresses for this node, for infrastructure not allocating dynamically IP addresses (vmware, static)
+var heatPublicInterface = -1;   
+var cloudNode = function(aName, aFQDN){
+	this.flavor = 'flavorSmall';
+	this.name = aName;
+	this.fqdn = aFQDN;
+	this.interfaces = new Array();
+	this.isEms = false;
+	this.isVIP = false;
+	this.hasVIP = false;
+	this.ipAddresses = undefined;
+	this.domain = aFQDN.substr(aFQDN.indexOf('.')+1);
+}
+
+// Class implementing a Heat volume: name, size and description
+var cloudVolume = function(aName, aSize, aDescription){
+	this.name=aName;
+	this.size=aSize;
+	this.description=aDescription;
+}
+
+// Class implementing a openshift volume: name, size, type, access and cinder volume
+var openshiftVolume = function(aName, aSize, aType, anAccess, aReclaim, aCinder){
+	this.name=aName;
+	this.size=aSize;
+	this.type=aType;
+	this.access=anAccess;
+	this.reclaim=aReclaim;
+	this.cinder=aCinder;
+}
+
+// Class implementing a network function: name, image (including the tag), server (hosting the image) 
+var openshiftFunction = function(aType, aName, anImage, aProject, aVolume, aReplicas, aURL){
+	this.type=aType;
+	this.name=aName;
+	this.image=anImage;
+	this.URL=aURL;
+	this.project=aProject;
+	this.volume=aVolume;
+	this.replicas=aReplicas;
+}
+
+// Class implementing a port opened as a value, a protocol and a description
+var vnfPort = function(aPort, aProtocol, aDescription){
+	this.port = aPort;
+	this.protocol = 'UDP';
+	if(aProtocol != "")this.protocol = aProtocol;
+	this.description = aDescription;
+}
+// List of exposed ports in the whole VNF
+var vnfPorts = new Array();
+
+var consistency = new Object;
+
+consistency.initSingle = function (){
+
+}
+consistency.init = function (){
+	consistency.initSingle();
+}
+
+consistency.check = function (){
+	// Cross sections consistency checks, cannot be executed locally to the sections
+	var warnings = "";
+	if(!Networks.search('network','MGMT'))warnings+="\nNetwork section: management interface is mandatory";
+	return warnings;
+}
+
+// Class defining a VNF resource named 'title' as an extensible table with a set of 'columns'
+// Each column needs to define a 
+// - name
+// - type (optional)
+//		. bool to define a check box
+//		. choice to define a drop down menu
+//			for that type, a 'choices' attribute is expected to define the list of choices
+//		. text (default)
+// - value (optional: the default value)
+// Two methods linked to buttons at the bottom of the table are to be provided for each VNF resource:
+// - build: returns the MSE Descriptor section for this resource as a string; if any issue prevents this build, the check variable should return the error messages 
+// - help: provides hints for this resource as a text string
+// Convenient methods are offered for a resource:
+// search(column, value): to search for a text value in a given column
+// display(column, value): set the display style attribute for a given column, where 'value' typically is 'none' to hide a column, and id one by default
+// count(column, value): count the number of occurrences of a specific value in a specific column
+// isEmpty(): check if the table is empty
+// A optional parameter user file list, allowing the resource to load a set of user file, as a list of objects instantiated from userLoadedFile class
+ 
+// Cell width control
+var cellWidth="85px";
+var boolCellWidth="15px";
+var choiceCellWidth="200px";
+
+// Ensure unicity of ids for all the dynamic delete buttons by incrementing an integer at each button creation
+// This value has to be recorded in the DOM so that when starting from an existing document, the new ids will not clash with the existing ones
+// Default to 1 if nothing valid is recorded in the DOM
+var _uniqueInputId=1;
+var _uniqueInputIdDOM=document.getElementById("_uniqueInputId");
+if(_uniqueInputIdDOM != undefined){
+	var candidate = Number(_uniqueInputIdDOM.value);
+	if(!isNaN(candidate))_uniqueInputId=candidate;
+}
+
+// List of VNF resources for applying actions to multiples resources
+vnfResources = new Array();
+
+var vnfResource = function(title, columns, userFiles){
+	this.result = "\nWARNING: " + title + " section is not defined yet: please apply and rebuild\n";
+	var self = this;
+	
+	var table = document.createElement('TABLE');
+	table.border='1';
+	table.id=title;
+	
+	var tableCaption = document.createElement('CAPTION');
+	tableCaption.appendChild(document.createTextNode(title));
+
+	var tableBody = document.createElement('TBODY');
+	table.appendChild(tableBody);
+	
+	var tr = document.createElement('TR');
+	tableBody.appendChild(tr);
+	var td = document.createElement('TH');
+	var addButton = document.createElement('INPUT');
+	addButton.type="button";
+	addButton.value="Add";
+	addButton.setAttribute("onClick", title + ".add();");
+	td.appendChild(addButton);
+	tr.appendChild(td);
+
+	// Create all columns in this table; set a class concatenating the table and column names for further search
+	// Build an array of the names for easy search with name key  when calling the build function
+	// The first cell is used for the delete button, skip it
+	var iName = new Array(columns.length + 1);
+	for (i=0; i<columns.length; i++){
+		var td = document.createElement('TH');
+		td.className = title + columns[i].name;
+		td.appendChild(document.createTextNode(columns[i].name));
+		iName[i+1] = columns[i].name;
+		var localWidth = cellWidth;
+		switch(columns[i].type){
+			case 'bool':
+				localWidth = boolCellWidth;
+				break;
+			case 'choice':
+				localWidth = choiceCellWidth;
+				break;
+		}
+		if(columns[i].width != undefined)localWidth = columns[i].width;
+		td.style.width = localWidth;
+		tr.appendChild(td);
+	}
+
+	// Attach useful variables to this current object for further asynchronous reference
+	self.title = title;
+	self.nameIndexes = iName;
+	self.columns = columns;
+	self.check = "";
+	
+	// For each user file, add a set of buttons to load, view and clear the associated text. 
+	var tableFiles = document.createElement('TABLE');
+	if(userFiles != undefined)userFiles.forEach(function(aFile){
+		var trFile = document.createElement('TR');
+		var tdLabel = document.createElement('TD');
+		tdLabel.setAttribute("valign", "top");
+		tdLabel.appendChild(document.createTextNode(aFile.label));
+		trFile.appendChild(tdLabel);
+		
+		var tdBrowse = document.createElement('TD');
+		tdBrowse.setAttribute("valign", "top");
+		var browseButton = document.createElement('INPUT');
+		browseButton.type="file";
+		browseButton.id=aFile.inputId;
+		browseButton.className="buildButton";
+		//browseButton.value="Import...";
+		browseButton.setAttribute("onchange", aFile.var + ".load(event)");
+		tdBrowse.appendChild(browseButton);
+		trFile.appendChild(tdBrowse);
+		
+		var tdView = document.createElement('TD');
+		tdView.setAttribute("valign", "top");
+		var viewButton = document.createElement('INPUT');
+		viewButton.type="button";
+		viewButton.className="helpButton";
+		viewButton.value="Review";
+		viewButton.setAttribute("onClick", aFile.var + ".view(event)");
+		tdView.appendChild(viewButton);
+		trFile.appendChild(tdView);
+		
+		var tdClear = document.createElement('TD');
+		tdClear.setAttribute("valign", "top");
+		var clearButton = document.createElement('INPUT');
+		clearButton.type="button";
+		clearButton.className="helpButton";
+		clearButton.value="Clear";
+		clearButton.setAttribute("onClick", aFile.var + ".clear(event)");
+		tdClear.appendChild(clearButton);
+		trFile.appendChild(tdClear);
+		
+		tableFiles.appendChild(trFile);
+	});
+	
+	// Add a button to trigger the MSE Descriptor build for this section
+	var buildButton = document.createElement('INPUT');
+	buildButton.type="button";
+	buildButton.value="Apply";
+	buildButton.className="buildButton";
+	buildButton.setAttribute("onClick", "userOutput(" + title + ".build());");
+	
+	// Add a button to show help 
+	var helpButton = document.createElement('INPUT');
+	helpButton.type="button";
+	helpButton.value="Help";
+	helpButton.padding="5px";
+	helpButton.className = "helpButton";
+	helpButton.setAttribute("onClick", "userOutput(" + title + ".help());");
+	
+	// Append the new elements to the DOM behind the insertion point, if they dot not exist already
+	if(document.getElementById(title) == undefined){
+		var myTableDiv = document.getElementById("tableInsertionPoint");
+		// Create an anchor for quick reference to this table
+		var anchorTable = document.createElement('A');
+		anchorTable.setAttribute("name", title);
+		// Add a link to this table just before the user result area: a click on this link displays the related section 
+		var linkToTable = document.createElement('A');
+		linkToTable.setAttribute("href", "#"+title);
+		linkToTable.innerHTML=" / "+title;
+		linkToTable.setAttribute("onClick", this.title + ".display(true);");
+		var userArea = document.getElementById("endOfUserArea");
+		userArea.appendChild(linkToTable);
+		var linkToTableSummary = linkToTable.cloneNode(true);
+		var summary = document.getElementById("summary");
+		summary.appendChild(linkToTableSummary);
+		var headerTable = document.createElement('H2');
+		headerTable.innerHTML=title;
+
+		anchorTable.appendChild(headerTable);
+		// Create a specific div for this section, easing management, hide, show, etc.
+		var thisTableDiv = document.createElement('div');
+		thisTableDiv.id = title+'Section';
+		thisTableDiv.appendChild(anchorTable);
+		thisTableDiv.appendChild(table);
+		thisTableDiv.appendChild(tableFiles);
+		thisTableDiv.appendChild(buildButton);
+		thisTableDiv.appendChild(helpButton);
+		myTableDiv.appendChild(thisTableDiv);
+	}
+	
+	// update the list of VNF resources for actions applying to all elements, like build, import...
+	vnfResources.push(this);
+};
+// Default help 
+vnfResource.prototype.help = function(){
+	return "No help available";
+}
+// Default build
+vnfResource.prototype.build = function(){
+	return "No build instructions defined";
+}
+// Delete the current line in the table
+vnfResource.prototype.delete = function(inputId){
+	var table = document.getElementById(this.title);
+	var theInput = document.getElementById(inputId);
+	var index = theInput.parentNode.parentNode.rowIndex;
+	table.deleteRow(index);	
+}
+// Add a new line in the table
+// Optional values can be provided as a table of dictionaries of column / value like [{column:"columnA", value:"a"}, {column:"columnB", value:"b"}, {column:"columnD", value:"d"}, ...] 
+vnfResource.prototype.add = function(values){
+	var table = document.getElementById(this.title);
+	var columns = this.columns;
+ 
+	var rowCount = table.rows.length;
+	var row = table.insertRow(rowCount);
+	var delButton = document.createElement('INPUT');
+	delButton.type="button";
+	delButton.value="Del";
+	delButton.id="delButton"+(_uniqueInputId++);
+	_uniqueInputIdDOM.setAttribute("value", _uniqueInputId);
+	delButton.setAttribute("onClick", this.title + ".delete('"+delButton.id+"');");
+	var cell = row.insertCell(0);
+	cell.appendChild(delButton);
+	for (i=0; i<columns.length; i++){
+		var cell = row.insertCell(i+1);
+		cell.className = this.title + columns[i].name;
+		// Initial value: first element of values with a matching column name
+		var init=undefined;
+		if(values != undefined){
+			var initValues = values.filter(function(e){return e.column == columns[i].name;});
+			if(initValues.length > 0)init=initValues[0].value;
+		}
+		switch(columns[i].type){
+			case 'bool':
+				var checkCell = document.createElement('INPUT');
+				checkCell.className = this.title + columns[i].name;
+				checkCell.type = "checkbox";
+				cell.style.width = checkCell.style.width = boolCellWidth;
+				if(init)checkCell.setAttribute("checked", "checked");
+				cell.appendChild(checkCell);
+				break;
+			case 'choice':
+				var selectCell = document.createElement('SELECT');
+				selectCell.className = this.title + columns[i].name;
+				var localWidth = choiceCellWidth;
+				if(columns[i].width != undefined)localWidth = columns[i].width;
+				cell.style.width = selectCell.style.width = localWidth;
+				for (j=0; j<columns[i].choices.length; j++){
+					var option = document.createElement('OPTION');
+					option.value = columns[i].choices[j];
+					option.innerHTML = option.value;
+					selectCell.appendChild(option);
+				}
+				// if the default value is not a null string, avoid adding always the same selection:
+				// set a default value according to the row in the table, instead of the first choice
+				if(columns[i].choices[0] != "")selectCell.value = columns[i].choices[rowCount-1];
+				if(init != undefined)selectCell.value = init;
+				cell.appendChild(selectCell);
+				break;
+			default:
+				var inputCell = document.createElement('INPUT');
+				inputCell.className = this.title + columns[i].name;
+				var localWidth = cellWidth;
+				if(columns[i].width != undefined)localWidth = columns[i].width;
+				cell.style.width = inputCell.style.width = localWidth;
+				inputCell.type = "text";
+				if(columns[i].value != undefined)inputCell.value = columns[i].value;
+				if(init != undefined)inputCell.value = init;
+				cell.appendChild(inputCell);
+				break;
+		}
+	}
+	// hide unused columns if the method is available
+	if(this['hideUnused'] != undefined)this.hideUnused();
+}
+
+// Import from a provided document
+// Returns a text string summarizing the import
+vnfResource.prototype.import = function(importedDocument){
+	var summary = "";
+	var table = document.getElementById(this.title);
+	var importedTable = importedDocument.getElementById(this.title);
+	if(importedTable == null)return summary;
+	
+	var rowCount = table.rows.length;
+	var importedRowCount = importedTable.rows.length;
+	var columns = this.columns;
+	
+	for(var i=1; i < importedRowCount; i++, rowCount++){
+		if(summary == "")summary = "\n" + this.title;
+		summary += "\n";
+		
+		// one more line
+		this.add();
+		
+		for (j=0; j<columns.length; j++){
+			// Source: 2 cells expected: one for the td element, the second for the input element
+			var source = Array.prototype.slice.call(importedTable.rows[i].getElementsByClassName(this.title + columns[j].name));
+			// Otherwise, this column is missing in the source document, continue
+			if(source.length < 2)continue;
+			
+			// Destination: j+1 as the first cell is dedicated to the delete button
+			var destination=table.rows[rowCount].cells[j+1].childNodes[0];
+			switch(columns[j].type){
+				case 'bool':
+					destination.removeAttribute("checked");
+					if(source[1].checked){
+						destination.setAttribute("checked", "checked");
+					}
+					break;
+				case 'choice':
+					var selectedOption = source[1].selectedIndex;
+					var selectedValue = source[1].options[selectedOption].value;
+					if(selectedOption != -1){
+						// looping over the destination options to select the selected value
+						for (selectedOption=destination.options.length;selectedOption--;) { 
+						  if(destination.options[selectedOption].value == selectedValue)
+						  	break;
+						}
+						destination.options.selectedIndex=selectedOption;
+						if(selectedOption != -1){
+							destination.options[selectedOption].setAttribute("selected", "selected");
+							if(destination.options[selectedOption].value != "")summary += "\t" + destination.options[selectedOption].value;
+						}
+					}
+					break;
+				default:
+					destination.value = source[1].value;
+					destination.removeAttribute("value");
+					destination.setAttribute("value", source[1].value);
+					if(destination.value != "")summary += "\t" + destination.value;
+					break;
+			}	 
+		}
+	}
+	return summary;
+}
+
+// Search for a specific value in a specific column
+vnfResource.prototype.search = function(column, value){
+	var table = document.getElementById(this.title);
+
+	// Search for the column by class name
+	var cells = Array.prototype.slice.call( table.getElementsByClassName(this.title + column) );
+	return cells.some(function(e,i){
+		var boolValue = "___this_should_never_match___";
+		var textValue = "___this_should_never_match___";
+		if(e.value != undefined)textValue=e.value.valueOf();
+		// check box case
+		if(e.checked != undefined)boolValue=e.checked.toString();
+		var refValue = this.valueOf();
+		return boolValue === refValue || textValue === refValue;
+		}, 
+		value);	// this parameter is passed as this to the function
+}
+
+// Count the number of occurrences of a specific value in a specific column
+//  If the value is undefined or an empty string, return the count of unique values in this column
+vnfResource.prototype.count = function(column, value){
+	var table = document.getElementById(this.title);
+	if(value == undefined)value = new String("");
+
+	// Search for the column by class name
+	var cells = Array.prototype.slice.call( table.getElementsByClassName(this.title + column));
+	// Retain values
+	var values = cells.map(function(e,i){
+		if(e.value != undefined){
+			return String(e.value.valueOf());
+		} else if(e.checked != undefined) {
+			// check box case
+			return String(e.checked.toString());
+		}
+		return String("");
+	});
+	var filtered = values.filter(function(e,i,t){
+		// where e: element in the table, i: index in the table, t: table
+		var b = this.valueOf();
+		if(b == ""){
+			// counting the number of unique occurrences
+			// ignore empty items
+			if(e == "")return false;
+			// Gratitude to https://stackoverflow.com/questions/9229645/remove-duplicates-from-javascript-array
+			var firstOccurence = t.indexOf(e);
+			return  firstOccurence === i;
+		}
+		else
+			return e === b;
+		}, 
+		value);	// this parameter is passed as this to the function
+		
+	return filtered.length;
+}
+// Hide or show a specific column, or the full section if no column specified
+vnfResource.prototype.display = function(column, display){
+	var table = document.getElementById(this.title);
+	var section = document.getElementById(this.title+'Section');
+	if(display == undefined){
+		// The first parameter drives the visibility of the section as a boolean
+		section.style.display = column ? '' : 'none';
+	}else{
+		// Search for the column by class name
+		var cells = Array.prototype.slice.call( table.getElementsByClassName(this.title + column) );
+		cells.forEach(function(e,i){e.style.display = display ? '' : 'none';});
+	}
+}
+
+// Check if the table is empty, ie with no cell
+vnfResource.prototype.isEmpty = function(){
+	var table = document.getElementById(this.title);
+
+	// Search for any cell in the table
+	var cells = Array.prototype.slice.call( table.getElementsByTagName('td') );
+	
+	return cells.length == 0;
+}
+
+// Retrieve from the 'row' the value of an input field named 'column' in the list of columns'names 'nameIndexes' 
+// Set the attribute of this element accordingly so that the DOM contains it for further saving
+vnfResource.prototype.getAndSetValue = function(row, nameIndexes, column, defaultValue, promptText){
+	var elem=row.cells[nameIndexes.indexOf(column)].childNodes[0];
+	var x=elem.value;
+	if(x == "" && defaultValue != undefined && defaultValue != ""){
+		if(promptText == undefined)promptText = this.title + " section: " + column + " cannot be blank.";
+		elem.value = x = prompt(promptText, defaultValue);
+	}
+	elem.removeAttribute("value");
+	elem.setAttribute("value", x);
+	return x;
+}
+vnfResource.prototype.getAndSetChecked = function(row, nameIndexes, column){
+	var elem=row.cells[nameIndexes.indexOf(column)].childNodes[0];
+	var x=elem.checked;
+	elem.removeAttribute("checked");
+	if(x){
+		elem.setAttribute("checked", "checked");
+	}
+	return x;
+}
+vnfResource.prototype.getAndSetSelection = function(row, nameIndexes, column, defaultSelection){
+	var elem=row.cells[nameIndexes.indexOf(column)].childNodes[0];
+	var selectedOption=elem.options.selectedIndex;
+	if(selectedOption == -1 && defaultSelection != undefined){
+		elem.options.selectedIndex=selectedOption=defaultSelection;
+	}
+	// Remove all existing selected attributes
+	for (var i=elem.options.length;i--;) { // looping over the options
+	  elem.options[i].removeAttribute("selected");
+	}
+	var s = elem.options[selectedOption];
+	if(s != undefined)s.setAttribute("selected", "selected");
+	var x=elem.value;
+	return x;
+}
+
+// ==================
+// Network interfaces
+// ==================
+var Networks = new vnfResource("Networks", [
+	{name:'network', type:'choice', width: '80px', choices:['MGMT', 'PUBLIC']}, 
+	{name:'interface', type:'text', width: '50px', value:'eth0'}, 
+	{name:'mask', type:'text', width: '120px', value:'255.255.255.224'}, 
+	{name:'portgroup', type:'text', width: '120px'}]
+	);
+	
+Networks.help = function(){
+	return `Network interfaces names and associated masks and resources 
+network:
+ - MGMT is mandatory: all nodes should be connected to the MGMT interface
+ - PUBLIC: optional external IP address of nodes visible through an address translation (mandatory for OpenStack nodes)
+interface: 
+  name of the network interface on the target
+mask: Netmasks should be consistent across networks
+  The first netmask in the table sets the network width for all networks.
+  This width defines the maximum number of nodes and networks; it should be in the range 0 to 8, ie:
+  - from mask 255.255.255.0: width: 8, 1 network, 256 nodes
+  - to mask 255.255.255.255: width: 1, 256 networks, 1 node
+  - recommended: 255.255.255.224: width: 5, 8 networks, 32 nodes
+portgroup: 
+  VMware specific; unused on OpenStack
+`
+}
+	
+Networks.build = function(target, engine){
+	var nameIndexes = Networks.nameIndexes;
+	var result = '\n';
+	Networks.check = "";
+	var table = document.getElementById('Networks');
+	var rowCount = table.rows.length;
+	Networks.heatNetworks = new Array();
+	Networks.names = new Array();
+	Networks.devices = new Array();
+	Networks.masks = new Array();
+	Networks.portgroups = new Array();
+	Networks.heatMaxNetwork = 0;
+	var networkCount = Number(Networks.count('interface'));
+	if(target == 'Heat')networkCount--; // For Heat target, do not count the public interface in the quota, it is a 'pseudo interface', not actually instantiated
+	Networks.heatWidth = undefined;
+	
+	if(Networks.count('network', 'MGMT') != 1)Networks.check += "\nNetworks: one and only one MGMT is required";
+	Networks.check += checkDependency(target == 'Heat', [Networks.count('network', 'PUBLIC') > 0 ],  "Networks: missing PUBLIC pseudo interface; ", "required for OpenStack Heat target");
+	['APP', 'SIP', 'LBNAT', 'PUBLIC', 'HA', 'DATA', 'M3UA1', 'M3UA2'].forEach(function(name){
+		if(Networks.count('network', name) > 1)Networks.check += "\nNetworks: concurrent definitions of "+name+" detected";
+	});
+
+	result += '\n# ------------------------------- #';
+	result += '\n# Network interfaces definition   #';
+	result += '\n# ------------------------------- #';
+	for(var i=1; i < rowCount; i++){
+		var networkName=Networks.getAndSetSelection(table.rows[i], nameIndexes, 'network');
+		var networkDevice=Networks.getAndSetValue(table.rows[i], nameIndexes, 'interface');
+		var networkMask=Networks.getAndSetValue(table.rows[i], nameIndexes, 'mask');
+		var networkPortgroup=Networks.getAndSetValue(table.rows[i], nameIndexes, 'portgroup', target=='OVFapp' || target=='vmware' ? networkName:'');
+		if(networkName == ""){
+			Networks.check += "\nNetworks: undefined network name for interface " + networkDevice;
+			continue;
+		}
+		// Check netmask consistency but allow the legacy placeholder
+		if(networkMask != "@netmask@")networkMask.split('.').forEach(function(e,i,t){
+			var aByte = Number(e);
+			if(isNaN(aByte) || aByte < 0 || aByte > 255 )Networks.check += "\nNetworks: invalid netmask " + networkMask + " for interface " + networkDevice + "; expecting positive integer <= 255, found "+e;
+		});
+		if(networkDevice != ""){
+			result += '\n#'+networkName+'_DEVICE='+networkDevice;
+			result += '\n#'+networkName+'_NETMASK='+networkMask;
+			Networks.names.push(networkName);
+			Networks.devices.push(networkDevice);
+			Networks.masks.push(networkMask);
+			Networks.portgroups.push(networkPortgroup);
+			
+			if(target == 'azure' && engine == 'ansible' || target == 'Heat' || target == 'kubernetes'){
+				// Heat deployments: all networks have the same width: guess it from the first netmask proposed 
+				if(Networks.heatWidth ==  undefined){
+					// Use the 4th byte of the mask as the source for network width
+					var cidr=Number(networkMask.split('.')[3]);
+					// Use the closest integer
+					Networks.heatWidth = Math.floor(Math.log(256 - cidr)/Math.log(2));
+					Networks.heatMaxInterfaces=Math.pow(2, 8-Networks.heatWidth);
+					Networks.heatCidrLength=Number(32-Networks.heatWidth).toString();
+					Networks.heatMaxNodes=Math.pow(2, Networks.heatWidth);
+					Networks.heatMask="255.255.255."+Number(256-Networks.heatMaxNodes).toString();
+					if(networkCount > Networks.heatMaxInterfaces)Networks.check += "\nNetworks: network count limited by the netmask "+Networks.heatMask+" for "+target+" target to " + Networks.heatMaxInterfaces + ": found " + networkCount;
+				}
+				// Heat networks should be named ethN, N integer
+				var prefix='eth';
+				if(!networkDevice.startsWith(prefix))Networks.check += "\nNetworks: unsupported interface name for "+target+" target " + networkDevice + ": prefix " + prefix +" required";
+				var candidate = networkDevice.substr(prefix.length);
+				var interfaceNumber = Number(candidate);
+				if(isNaN(interfaceNumber)){
+					Networks.check += "\nNetworks: illegal value for interface number "+networkName+" : "+candidate+"; expecting integer";
+					continue;
+				} 
+				Networks.heatNetworks[networkName] = interfaceNumber;
+				Networks.heatMaxNetwork = Math.max(Networks.heatMaxNetwork,interfaceNumber);
+				if(networkMask !== Networks.heatMask)Networks.check += "\nNetworks: netmask for "+target+" target cannot be larger than " + Networks.heatMask + ": found " + networkMask + " on interface " + networkName;
+			}
+		}
+	}
+	
+	Networks.check += checkDependency(target == 'kubernetes' || target == 'azure' || target == 'aws', [Networks.heatMaxNetwork == 0], "Networks: "+target+" infrastructure is limited to one single network; found ", Networks.heatMaxNetwork + 1); 
+
+	// update visible networks in the nodes table
+	Nodes.hideUnused();
+
+	// local check
+	if(Networks.check != "")result = Networks.check;
+	
+	return result;
+}
+
+// Add one network by default, for MGMT typically
+if(Networks.isEmpty()){
+	Networks.add([{column:'network', value:'MGMT'},{column:'interface', value:'eth0'}]);
+	Networks.add([{column:'network', value:'PUBLIC'},{column:'interface', value:''},{column:'mask', value:''}]);
+}
+
+//===========================
+//Miscellaneous settings
+//===========================
+//Files candidate for user import: auxiliary descriptors
+var importedSession = new userLoadedFile("importedSession", "Import an existing session...", importSession);
+
+var Misc = new vnfResource("Misc", [
+	{name:'Property', width:'200px', type:'choice', choices:['tester_nodejs_version', 'tester_git_url']},
+	{name:'Value', type:'text', width:'400px'}
+	],
+	[importedSession]
+	);
+	
+//Default values for misc properties
+var MiscDefault = new Array();
+MiscDefault.tester_nodejs_version='v11.10.1';
+MiscDefault.tester_git_url='https://github.hpe.com/cms5g/E2E-Testing.git';
+//Comments for direct simple misc properties with no default value
+var MiscComment = new Array();
+MiscComment.tester_nodejs_version="Nodejs version used to run the HPE5g tester tool";
+MiscComment.tester_git_url="Git project URL delivering the HPE5g tester tool";
+
+Misc.help = function(){
+	return "Miscellaneous settings" +
+	"\n\ttester_nodejs_version: " +MiscComment.tester_nodejs_version+
+	"\n\ttester_git_url: " +MiscComment.tester_git_url+
+	"\nTo import a previously saved session, use 'Import an existing session...' here below" 
+}
+
+Misc.build = function(target){
+	var nameIndexes = Misc.nameIndexes;
+	var result = "\n";
+	Misc.check = "";
+	Misc.output = new Array();
+	var table = document.getElementById("Misc");
+	var rowCount = table.rows.length;
+	
+	result += "\n# ------------------------------- #";
+	result += "\n# Miscellaneous properties        #";
+	result += "\n# ------------------------------- #";
+	
+	for(var i=1; i < rowCount; i++){
+		var row = table.rows[i];
+		var propertyName=Misc.getAndSetSelection(row, nameIndexes, 'Property');
+		var propertyValue=Misc.getAndSetValue(row, nameIndexes, 'Value', MiscDefault[propertyName], MiscComment[propertyName]);
+		if(propertyName != ""){
+		result += "\n# "+MiscComment[propertyName]+": "+propertyValue;
+		Misc.output.push({name:propertyName, value:propertyValue});
+		}
+	}
+
+	if(Misc.check != "")return Misc.check;
+	return result;
+};
+
+//Add 1 line by default
+if(Misc.isEmpty()){Misc.add();Misc.add();}
+
+// ===========================
+// Nodes resource
+// ===========================
+var sipGrpPrefix='Grp'
+var Nodes= new vnfResource("Nodes", [
+	{name:'MGMT fqdn', type:'text', width: '120px'}, 
+	{name:'MGMT IP addr', type:'text', width: '120px'},
+	{name:'PUBLIC IP addr', type:'text', width: '120px'},  
+	{name:'Master', type:'bool'},
+	{name:'Etcd', type:'bool'},
+	{name:'Worker', type:'bool'},
+	{name:'Tester', type:'bool'}
+	]
+	);
+	
+Nodes.help = function(){
+	return `Nodes and roles definition and assignment
+MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
+MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
+PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
+Master/Etcd/Worker: the role(s) played by this node in the OpenShift cluster
+Tester: node hosting the nodejs application used as HPE network functions tester.
+  If no box is checked, the node is instantiated but not part of the OpenShift cluster, available for any specific usage.
+`;
+}
+
+// Build the Nodes section of the descriptor
+// - target is the optional infrastructure: Heat
+// - engine is the optional underlying engine: ansible
+// If the target is set, the unknown ip addresses defined as question marks are prepared as place holders for replacement at deployment time 
+// The place holder format depends on the type of engine:
+Nodes.build = function(target, engine){
+	var oc_version=document.getElementById("oc_version").value;
+	
+	// Consistency checks reset
+	consistency.initSingle();
+	Nodes.check = "";
+	
+	var nameIndexes = Nodes.nameIndexes;
+	var result = "\n";
+	var table = document.getElementById("Nodes");
+	var rowCount = table.rows.length;
+	
+	var cloudNodes = new Array();
+	var masterNodes = new Array();
+	var workerNodes = new Array();
+	var etcdNodes = new Array();
+	var testerNodes = new Array();
+	
+	result += "\n# ------------------------------- #";
+	result += "\n# Nodes and roles definition      #";
+	result += "\n# ------------------------------- #";
+	for(var i=1; i < rowCount; i++){
+		
+		var row = table.rows[i];
+		
+		// Read the network definitions 'MGMT', 'PUBLIC'
+		var nodeName		=	Nodes.getAndSetValue(row, nameIndexes, 'MGMT fqdn');
+		var nodeIpAddr		=	Nodes.getAndSetValue(row, nameIndexes, 'MGMT IP addr');
+		var nodePubIpAddr	=	Nodes.getAndSetValue(row, nameIndexes, 'PUBLIC IP addr');
+		if(nodeName == "" || nodeIpAddr == ""){
+			Nodes.check += "\nNodes section: MGMT FQDN and IP address are required";
+			break;
+		}
+		
+		// Read the roles definition
+		var isMaster	=	Nodes.getAndSetChecked(row, nameIndexes, 'Master');
+		var isWorker	=	Nodes.getAndSetChecked(row, nameIndexes, 'Worker');
+		var isEtcd		=	Nodes.getAndSetChecked(row, nameIndexes, 'Etcd');
+		var isTester	=	Nodes.getAndSetChecked(row, nameIndexes, 'Tester');
+
+		// co-location checks
+		Nodes.check += checkDependency(isEtcd, [isWorker && isMaster, !isWorker ],  "Nodes: on node "+nodeName,", etcd and worker roles colocation requires a master role as well.");
+		Nodes.check += checkDependency(isMaster, [isWorker && isEtcd, !isWorker ],  "Nodes: on node "+nodeName,", master and worker roles colocation requires an etcd role as well.");
+		// Tester requirements checks
+		Nodes.check += checkDependency(isTester, [Misc.search('Property','tester_nodejs_version') && Misc.search('Property','tester_git_url')], "Nodes vs Misc: on node "+nodeName,", the tester role requires two entries in Misc: tester_nodejs_version and tester_git_url"); 
+		
+		// Collect the short name of this node in the short names array for Heat template build
+		var shortName = nodeName.substr(0, nodeName.indexOf('.'));
+		var theCloudNode = new cloudNode(shortName, nodeName);
+		
+		switch(target){
+		  case 'Heat': case 'vmware':
+			// IP addresses will be known at instantiation time: 
+			// Replace undefined values with place holders resolved later
+			// Push the network interface number in the interfaces list for this node
+			if(nodeIpAddr == "?")		{nodeIpAddr="~"+shortName+		"_mgmt~";	theCloudNode.interfaces.push(Networks.heatNetworks['MGMT']);}
+			if(nodePubIpAddr == "?")	{nodePubIpAddr="~"+shortName+	"_pub~";	theCloudNode.interfaces.push(heatPublicInterface);}
+			break;
+		}
+		
+		var nodeNames		= new Array();
+		var nodeIpAddresses	= new Array();
+		nodeNames['MGMT'] 		=	nodeName;
+		nodeIpAddresses['MGMT']	=	nodeIpAddr;
+		
+		// Push this node as per the defined roles with the most demanding flavor, using the public IP address if defined, or the fqdn otherwise
+		// NOTE: the master is always a worker node but with specific labels
+		// Depending on the OpenShift version, the inventory varies
+		function oc_node(host, ip, type){
+			var result='';
+			switch(oc_version){
+			case '3.11': result=host+" openshift_ip="+ip+" openshift_node_group_name='"+type+"'"; break;
+			case '3.9': 
+				result=host+" openshift_hostname="+ip+" openshift_ip="+ip;
+				if(type.indexOf('node-config-compute') != 0)result+=" openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\"";
+				if(type.indexOf('node-config-infra') != 0)result+=" openshift_schedulable=true";
+			}
+			return result;
+		}
+		var hostEntry=nodePubIpAddr;
+		if(hostEntry == undefined || hostEntry=='')hostEntry=nodeName
+		if(isEtcd){
+			if(!isWorker && !isMaster)workerNodes.push(oc_node(hostEntry, nodeIpAddr, 'node-config-infra'));
+			etcdNodes.push(hostEntry); 
+			theCloudNode.flavor='flavorSmall';
+		}
+		if(isWorker && !isMaster){
+			workerNodes.push(oc_node(hostEntry, nodeIpAddr, 'node-config-compute')); 
+			theCloudNode.flavor='flavorStandard';
+		}
+		if(isMaster){
+			// Take the first master node as the ems
+			if(masterNodes.length == 0)theCloudNode.isEms = true;
+			masterNodes.push(hostEntry); 
+			if(!isEtcd && !isWorker)workerNodes.push(oc_node(hostEntry, nodeIpAddr, 'node-config-master'));
+			if(isEtcd && !isWorker)workerNodes.push(oc_node(hostEntry, nodeIpAddr, 'node-config-master-infra')); 
+			if(isEtcd && isWorker)workerNodes.push(oc_node(hostEntry, nodeIpAddr, 'node-config-all-in-one'));
+			theCloudNode.flavor='flavorPerformance';
+		}
+		theCloudNode.isTester=isTester;
+		
+		// For infrastructure where IP addresses are statically allocated (vmware, static)
+		theCloudNode.ipAddresses = nodeIpAddresses;
+		
+		// co-location and dependency checks
+			
+		cloudNodes.push(theCloudNode); 
+	}
+	// End of for loop on the list of nodes
+	
+	if(masterNodes.length < 1)Nodes.check += "\nNodes section: missing at least one master node";
+	if(workerNodes.length < 1)Nodes.check += "\nNodes section: missing at least one worker node";
+	if(etcdNodes.length < 1)Nodes.check += "\nNodes section: missing at least one etcd node";
+	
+	// Inventory roles sections
+	result += "\n[masters]";
+	result += "\n"+masterNodes.join("\n");
+	result += "\n[nodes]";
+	result +="\n"+workerNodes.join("\n");
+	result += "\n[etcd]";
+	result +="\n"+etcdNodes.join("\n");
+
+	// Ansible variables
+	result += "\n[OSEv3:vars]";
+	result += "\nopenshift_deployment_type=origin";
+	result += "\nopenshift_disable_check=memory_availability,disk_availability,docker_image_availability";
+	result += "\nopenshift_ip="+masterNodes[0];
+	result += "\nansible_service_broker_install=false";
+	result += "\nopenshift_master_cluster_hostname="+masterNodes[0];
+	result += "\nopenshift_master_cluster_public_hostname="+masterNodes[0];
+	result += "\nopenshift_public_hostname="+masterNodes[0];
+	result += "\nopenshift_metrics_hawkular_hostname="+etcdNodes[0];
+	result += "\nopenshift_metrics_install_metrics=true";
+	result += "\nopenshift_metrics_image_version=v"+oc_version;
+	result += "\ntemplate_service_broker_selector={\"region\":\"infra\"}";
+	result += "\n[OSEv3:children]";
+	result += "\nmasters";
+	result += "\nnodes";
+	result += "\netcd";
+
+	// Make the list of nodes for availableHeat template  
+	Nodes.cloudNodes = cloudNodes.slice();
+	
+	// check the network width limitation compared to the number of non VIP heat nodes
+	var nonVipHeatNodes = cloudNodes.length;
+	if(nonVipHeatNodes > Networks.heatMaxNodes)Nodes.check += "\nNodes vs Networks section: too many nodes for Heat deployments: found: "+nonVipHeatNodes+"; with a netmask "+Networks.heatMask+", the limit is : "+Networks.heatMaxNodes;
+	
+	// local check
+	if(Nodes.check != "")result = Nodes.check;
+
+	return result;
+}
+
+// Hides unused networks columns
+Nodes.hideUnused = function(){
+	['PUBLIC'].forEach(function(interface){
+		// Check consistency first: reject hiding Networks interfaces with non empty columns in Nodes
+		var fqdnColName=interface+' fqdn'; var ipAddrColName=interface+' IP addr';
+		var nUsed=Nodes.count(fqdnColName)+Nodes.count(ipAddrColName) ; 
+		var checkInterface = checkDependency(! Networks.search('network', interface), [nUsed== 0], 'Networks vs Nodes: ', 'Missing '+interface+' network interface definition : required '+nUsed+' times in the Nodes table.');
+		if(checkInterface == ""){
+			Nodes.display(fqdnColName, Networks.search('network', interface));
+			Nodes.display(ipAddrColName, Networks.search('network', interface));
+		}else Networks.check+=checkInterface;
+	});
+	
+};
+
+// Add one node by default with the Master role
+if(Nodes.isEmpty())Nodes.add([{column:'MGMT fqdn', value:'master.localdomain'},{column:'MGMT IP addr', value:'?'},{column:'PUBLIC IP addr', value:'?'},{column:'Master', value:'true'},{column:'Etcd', value:'true'},{column:'Worker', value:'true'}]);
+Nodes.hideUnused();
+
+// ===========================
+// Flavors settings
+// ===========================
+var Flavors = new vnfResource("Flavors", [
+	{name:'Infrastructure', width:'100px', type:'choice', choices:['openstack']},
+	{name:'Flavor', width:'120px', type:'choice', choices:['flavorSmall', 'flavorStandard', 'flavorPerformance']},
+	{name:'name', type:'text', width:'80px'}
+	]
+	);
+// OpenStack profiles default values
+Flavors['openstack'] = new Array();
+Flavors['openstack']['flavorStandard'] = {name: 'v2.m8'};
+Flavors['openstack']['flavorSmall'] = {name: 'v2.m2'};
+Flavors['openstack']['flavorPerformance'] = {name: 'v4.m8'};
+
+Flavors.help = function(){var help="Infrastructure flavors:"+
+	"\nFlavor of a node is defined by the roles played on this node:"+
+	"\n\t- Small: Etcd"+
+	"\n\t- Standard: Worker"+
+	"\n\t- Performance: Master"+
+	"\n\tFlavors are identified by name, made available by the infrastructure administrator"+
+	"\nExamples:\n";
+	// Table built with spaces for alignment, thanks to padStart
+	var colLength=20;
+	['Infrastructure', 'Flavor', 'Name'].forEach(function(column){
+		help+=column.padStart(colLength);
+	});
+	['openstack'].forEach(function(infrastructure){
+		['flavorStandard', 'flavorSmall','flavorPerformance'].forEach(function(flavor){
+		help+="\n"+infrastructure.padStart(colLength);
+		help+=flavor.padStart(colLength);
+		help+=Flavors[infrastructure][flavor].name.padStart(colLength);
+		});	
+	});
+	
+	return help;
+}
+
+Flavors.build = function(target){
+	var nameIndexes = Flavors.nameIndexes;
+	var result = "";
+	Flavors.check="";
+	var table = document.getElementById("Flavors");
+	var rowCount = table.rows.length;
+	
+	for(var i=1; i < rowCount; i++){
+		if(result==""){
+			result += "\n"
+			result += "\n# ------------------------------- #";
+			result += "\n# Flavors customization           #";
+			result += "\n# ------------------------------- #";
+			}
+		var row = table.rows[i];
+		var infra=Flavors.getAndSetSelection(row, nameIndexes, 'Infrastructure');
+		var flavor=Flavors.getAndSetSelection(row, nameIndexes, 'Flavor');
+		switch(infra){
+			case 'openstack': 
+				Flavors[infra][flavor].name=Flavors.getAndSetValue(row, nameIndexes, 'name', Flavors[infra][flavor].name, "Flavor name for "+flavor+" on "+infra);
+				result+="\n# "+infra+" "+flavor+": name="+Flavors[infra][flavor].name;
+				break;
+			default:
+				Flavors.check += "\nFlavors section: setting flavors is not supported on infrastructure : "+infra;
+				break;
+		}
+	}
+	
+	if(Flavors.check != "")return Flavors.check;
+	return result;
+};
+
+// ===========================
+// CinderVolumes settings
+// ===========================
+var CinderVolumes = new vnfResource("CinderVolumes", [
+	{name:'Name', type:'text', width:'120px'},
+	{name:'Size', type:'text', width:'80px'},
+	{name:'Description', type:'text', width:'300px'}
+	]
+	);
+
+CinderVolumes.help = function(){var help="Persistent storage:"+
+	"\nList of CinderVolumes allocated for OpenShift persistent storage:"+
+	"\n\t- Name: one word CinderVolume name"+
+	"\n\t- Size: CinderVolume size expressed in Gbytes"+
+	"\n\t- Description: free text CinderVolume description";
+	
+	return help;
+}
+
+CinderVolumes.build = function(target){
+	var nameIndexes = CinderVolumes.nameIndexes;
+	var result = "";
+	CinderVolumes.check="";
+	var table = document.getElementById("CinderVolumes");
+	var rowCount = table.rows.length;
+	
+	var cloudVolumes = new Array();
+
+	
+	for(var i=1; i < rowCount; i++){
+		if(result==""){
+			result += "\n"
+			result += "\n# ------------------------------- #";
+			result += "\n# CinderVolumes definition    #";
+			result += "\n# ------------------------------- #";
+			}
+		var row = table.rows[i];
+		var name=CinderVolumes.getAndSetValue(row, nameIndexes, 'Name', "CinderVolume-"+i);
+		var size=CinderVolumes.getAndSetValue(row, nameIndexes, 'Size', "20");
+		var description=CinderVolumes.getAndSetValue(row, nameIndexes, 'Description');
+		
+		var sizeNumber = Number(size);
+		if(isNaN(sizeNumber)){
+			CinderVolumes.check += "\nCinderVolumes: illegal size value for CinderVolume  "+name+" : "+size+"; expecting integer";
+			continue;
+		} 
+		result+="\n#"+name+" "+size+" Gbytes: "+description;
+		cloudVolumes.push(new cloudVolume(name, size, description));
+	}
+	
+	// Make the list of CinderVolumes for availableHeat template  
+	CinderVolumes.cloudVolumes = cloudVolumes.slice();
+	
+	if(CinderVolumes.check != "")return CinderVolumes.check;
+	return result;
+};
+
+
+// ===========================
+// PersistentVolumes settings
+// ===========================
+var PersistentVolumes = new vnfResource("PersistentVolumes", [
+	{name:'Name', type:'text', width:'120px'},
+	{name:'Size', type:'text', width:'80px'},
+	{name:'Type', type:'choice', width: '80px', choices:['ext3']}, 
+	{name:'Access', type:'choice', width: '120px', choices:['ReadWriteOnce','ReadWriteMany','ReadOnlyMany']}, 
+	{name:'Reclaim', type:'choice', width: '120px', choices:['Delete','Retain','Recycle']}, 
+	{name:'CinderVolume', type:'text', width:'120px'}
+	]
+	);
+
+PersistentVolumes.help = function(){var help="OpenShift Persistent Volumes:"+
+	"\nList of OpenShift Persistent Volumes allocated in OpenStack Cinder volumes:"+
+	"\n\t- Name: one word persistent volume name"+
+	"\n\t- Size: persistent volume size expressed in Gbytes"+
+	"\n\t- Type: file system type"+
+	"\n\t- Access: access mode for this persistent volume"+
+	"\n\t- CinderVolume: name of the CinderVolume hosting this persistent volume"
+	
+	return help;
+}
+
+PersistentVolumes.build = function(target){
+	var nameIndexes = PersistentVolumes.nameIndexes;
+	var result = "";
+	PersistentVolumes.check="";
+	var table = document.getElementById("PersistentVolumes");
+	var rowCount = table.rows.length;
+	
+	var openshiftVolumes = new Array();
+
+	
+	for(var i=1; i < rowCount; i++){
+		if(result==""){
+			result += "\n"
+			result += "\n# --------------------------------";
+			result += "\n# PersistentVolumes definition";
+			result += "\n# -------------------------------- ";
+			}
+		var row = table.rows[i];
+		var name=PersistentVolumes.getAndSetValue(row, nameIndexes, 'Name', "PersistentVolume-"+i);
+		var size=PersistentVolumes.getAndSetValue(row, nameIndexes, 'Size', "5");
+		var type=PersistentVolumes.getAndSetSelection(table.rows[i], nameIndexes, 'Type', 0);
+		var access=PersistentVolumes.getAndSetSelection(table.rows[i], nameIndexes, 'Access', 0);
+		var reclaim=PersistentVolumes.getAndSetSelection(table.rows[i], nameIndexes, 'Reclaim', 0);
+		var cinder=PersistentVolumes.getAndSetValue(row, nameIndexes, 'CinderVolume', "CinderVolume-"+i);
+		if(cinder == undefined || cinder == ''){
+			PersistentVolumes.check += "\nPersistentVolumes "+name+" : CinderVolume is required";
+			continue;
+		}
+		if(!CinderVolumes.search('Name', cinder)){
+			PersistentVolumes.check += "\nPersistentVolume "+name+": "+cinder+" is undefined in the CinderVolumes section";
+			continue;
+		}
+		
+		var sizeNumber = Number(size);
+		if(isNaN(sizeNumber)){
+			PersistentVolumes.check += "\nPersistentVolumes: illegal size value for volume  "+name+" : "+size+"; expecting integer";
+			continue;
+		} 
+		result+="\n#"+name+" "+size+" Gbytes type: "+type+" access: "+access+" reclaim policy: "+reclaim+" on CinderVolume: "+cinder;
+		openshiftVolumes.push(new openshiftVolume(name, size, type, access, reclaim, "~cinderVolumeIdOf"+cinder+"~"));
+	}
+	
+	// Make the list of volumes for availableHeat template  
+	PersistentVolumes.openshiftVolumes = openshiftVolumes.slice();
+	
+	if(PersistentVolumes.check != "")return PersistentVolumes.check;
+	return result;
+};
+
+// ===========================
+// NetworkFunctions
+// ===========================
+// Each network function should provide:
+// - a type: to be listed in the nvfResource type member: nudsf-dr, ignite...
+// - a set of default values defined in NetworkFunctions.defaults[type] for: image, tag, template, and optionally serviceaccount if needed (eg ignite)
+// - a list of dependencies on other functions defined as a table in NetworkFunctions.depends[type], eg nudsf type depends on ignite type
+// The provided templates can use placeholders replaced at instantation time for:
+// - name: ~NAME~
+// - project: ~PROJECT~
+// - image: ~IMAGE~
+// - replicas: ~REPLICAS~
+// - requirement on other function types: ~<type>_NAME~: eg ~ignite_NAME~ will be replaced by the ignite instance name in this project
+var NetworkFunctions = new vnfResource("NetworkFunctions", [
+	{name:'Type', type:'choice', width: '120px', choices:['nudsf-dr','ignite','nudr-dr']}, 
+	{name:'Name', type:'text', width:'120px'},
+	{name:'Project', type:'text', width:'80px'},
+	{name:'URL', type:'text', width:'200px'},
+	{name:'insecure', type:'bool'},
+	{name:'Image', type:'text', width:'120px'},
+	{name:'Tag', type:'text', width:'50px'},
+	{name:'Volume', type:'text', width:'120px'},
+	{name:'Replicas', type:'text', width:'80px'}
+	]
+	);
+
+NetworkFunctions.help = function(){var help="Network functions:"+
+`
+- Type: the type of the function to deploy
+- Name: one word network function name for this instance
+- Project: the OpenShift project hosting this network function instance
+- URL, Image and tag: the docker image to use for this network function
+- insecure: check this box if this URL points to insecure registries
+- Volume: the OpenShift persistent volume used by this network function
+- Replicas: number of replicas deployed for this instance.`;
+	return help;
+}
+		
+// Defaults values (image, tag and OpenShift template) and dependencies per function 
+NetworkFunctions.defaults=new Array();
+NetworkFunctions.depends=new Array();
+['nudsf-dr','nudr-dr','ignite'].forEach(function(f){	
+	NetworkFunctions.defaults[f]=new Array();
+	NetworkFunctions.depends[f]=new Array();
+});
+NetworkFunctions.depends['nudsf-dr']=['ignite'];
+
+NetworkFunctions.defaults['nudsf-dr']['URL']='cmsgvm38.gre.hpecorp.net:18444';
+NetworkFunctions.defaults['nudsf-dr']['image']='hpe-sde-nudsf-dr';
+NetworkFunctions.defaults['nudsf-dr']['tag']='1.5.0';
+NetworkFunctions.defaults['ignite']['URL']='docker.io/apacheignite';
+NetworkFunctions.defaults['ignite']['image']='ignite';
+NetworkFunctions.defaults['ignite']['tag']='2.7.5';
+NetworkFunctions.defaults['nudsf-dr']['template']=
+`
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ClusterRole
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - pods 
+    - endpoints
+    verbs:
+    - get
+    - list
+    - watch
+- kind: ClusterRoleBinding
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  roleRef:
+    kind: ClusterRole
+    name: ~NAME~
+    namespace: ~PROJECT~
+    apiGroup: rbac.authorization.k8s.io
+  subjects:
+  - kind: ServiceAccount
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/~PROJECT~/~IMAGE~
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    template: 
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        containers:
+        - name: ~NAME~
+          env:
+            - name: ROUTER_ENABLE_HTTP2
+              value: 'true'
+          image: docker-registry.default.svc:5000/~PROJECT~/~IMAGE~
+          Requests:
+            cpu:    1000m
+            memory:   2000Mi
+          Limits:
+            cpu:  8000m
+            memory: 4000Mi
+          ports:
+          - containerPort: 8443
+            protocol: TCP
+          volumeMounts:
+            - name: ~NAME~
+              mountPath: /etc/opt/hpe-5g/nudsf-dr/
+            - name: ~NAME~-secrets
+              mountPath: /etc/opt/hpe-5g/nudsf-dr/security
+          livenessProbe:
+            failureThreshold: 3000
+            httpGet:
+              path: /nudsf-dr/v2/probes/healthy
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 15
+          readinessProbe:
+            failureThreshold: 3000
+            httpGet:
+              path: /nudsf-dr/v2/probes/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 15
+        volumes:
+          - name: ~NAME~
+            configMap:
+              name: ~NAME~
+          - name: ~NAME~-secrets
+            secret:
+              secretName: ~NAME~
+    selector:
+      name: ~NAME~
+    replicas: ~REPLICAS~
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+    labels:
+      app: ~NAME~
+      deploymentconfig: ~NAME~
+  spec:
+    type: LoadBalancer
+    ports:
+    - port: 8443
+      protocol: TCP
+      targetPort: 30043
+    selector:
+      app: ~NAME~
+      deploymentconfig: ~NAME~
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tls:
+      termination: passthrough
+    to:
+      kind: Service
+      name: ~NAME~
+      namespace: ~PROJECT~
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  data:
+    nudsf-dr-config.yaml: |
+      #
+      # Sample Network function configuration.
+      #
+      logging:
+        locale: en-US
+        loggers:
+          - name: log4j2
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+      statistics-configuration:
+        id: nudsf-dr-statistics
+        jvm-metrics: false
+        jmx:
+          domain: nudsf-dr
+          enabled: false
+          properties:
+            com.hpe.imsc.statistics.jmx.descriptors: "false"
+            com.hpe.imsc.statistics.jmx.notifications: "false"
+        properties:
+          com.hpe.imsc.statistics.influxdb.notifications: "false"
+          com.hpe.imsc.statistics.influxdb.server.database: nudsf-dr
+          com.hpe.imsc.statistics.influxdb.server.host: influxdb-influxdb
+          com.hpe.imsc.statistics.influxdb.server.port: "8086"
+          com.hpe.imsc.statistics.influxdb.server.protocol: http
+      call-tracing:
+        enabled: false
+        properties:
+          JAEGER_AGENT_HOST: localhost
+          JAEGER_AGENT_PORT: 6831
+          JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
+          JAEGER_REPORTER_FLUSH_INTERVAL: 100
+          JAEGER_REPORTER_LOG_SPANS: true
+          JAEGER_SAMPLER_PARAM: 1
+          JAEGER_SAMPLER_TYPE: probabilistic
+          JAEGER_SERVICE_NAME: nudsf-dr
+      datasources:
+        - id: ignite
+          profile:
+            name: kubernetes
+            properties:
+              masterUrl: https://openshift.default.svc.cluster.local:443
+              namespace: ~PROJECT~
+              serviceName: ~ignite_NAME~
+          properties:
+            enableGridCompute: false
+      model:
+        realms:
+        - id: realm0
+          properties:
+            replicas: 1
+          storages:
+          - id: space0
+            properties:
+              replicas: 1
+    project-nudsf-dr.yml: |+
+      #
+      # Sample Thorntail global configuration.
+      #
+      thorntail:
+        https:
+          only: true
+          port: 8443
+          keystore:
+            embedded: true
+          certificate:
+            generate: true
+            host: localhost
+        undertow:
+          alias: localhost
+          servers:
+            default-server:
+              https-listeners:
+                default-https:
+                  socket-binding: https
+                  enable-http2: true
+                  ssl-context: sslctx
+                  http2-initial-window-size: 32000000
+                  no-request-timeout: 600000            
+        elytron:
+          server-ssl-contexts:
+            sslctx:
+              protocols: TLSv1.2
+              key-manager: km
+          key-managers:
+            km:
+              key-store: ks
+              credential-reference:
+                clear-text: hwroot
+          key-stores:
+            ks:
+              path: /etc/opt/hpe-5g/nudsf-dr/security/keystore.jks
+              credential-reference:
+                clear-text: hwroot
+              type: JKS
+          file-audit-logs:
+            local-audit:
+              path: /var/log/hpe-5g/nudsf-dr/audit.log
+        logging:
+          root-logger:
+            level: INFO
+            handlers:
+            - CONSOLE
+          loggers:
+            "stdout":
+               level: INFO
+               handlers:
+               - STDOUT
+            "com.hpe.cms5g.nudsf":
+               level: INFO
+            "com.hpe.cms.sde.udsf":
+               level: INFO
+            "com.hpe.cms.sde.dao":
+               level: INFO
+            "com.hpe":
+               level: INFO
+            "io.jaegertracing":
+              level: WARN
+            "io.undertow":
+               level: INFO
+            "io.netty":
+               level: INFO
+            "org.jboss.as":
+              level: INFO
+            "org.glassfish.jersey":
+              level: INFO
+          console-handlers:
+            STDOUT:
+              named-formatter: null
+              formatter: "%s%e%n"
+            CONSOLE:
+              named-formatter: null
+              formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  type: Opaque
+  data:
+    keystore.jks: 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
+`;
+
+NetworkFunctions.defaults['nudr-dr']['URL']='cmsgvm38.gre.hpecorp.net:18444';
+NetworkFunctions.defaults['nudr-dr']['image']='hpe-sde-udr-nudr-dr';
+NetworkFunctions.defaults['nudr-dr']['tag']='1.1.0';
+NetworkFunctions.defaults['nudr-dr']['template']=
+`
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ClusterRole
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - pods 
+    - endpoints
+    verbs:
+    - get
+    - list
+    - watch
+- kind: ClusterRoleBinding
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  roleRef:
+    kind: ClusterRole
+    name: ~NAME~
+    namespace: ~PROJECT~
+    apiGroup: rbac.authorization.k8s.io
+  subjects:
+  - kind: ServiceAccount
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/~PROJECT~/~IMAGE~
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    template: 
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        containers:
+        - name: ~NAME~
+          env:
+          - name: JAVA_OPTS
+            value: -Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-dr/nudr-nf-config.yaml
+          - name: SPRING_PROFILES_ACTIVE
+            value: filerepo
+          image: docker-registry.default.svc:5000/~PROJECT~/~IMAGE~
+          Requests:
+            cpu:    1000m
+            memory:   2000Mi
+          Limits:
+            cpu:  8000m
+            memory: 4000Mi
+          ports:
+          - containerPort: 8443
+            protocol: TCP
+          volumeMounts:
+            - name: ~NAME~
+              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/
+            - name: ~NAME~-secrets
+              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/security
+          livenessProbe:
+            failureThreshold: 3000
+            httpGet:
+              path: /nudr-dr/v2/probes/healthy
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 15
+          readinessProbe:
+            failureThreshold: 3000
+            httpGet:
+              path: /nudr-dr/v2/probes/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 15
+        volumes:
+          - name: ~NAME~
+            configMap:
+              name: ~NAME~
+          - name: ~NAME~-secrets
+            secret:
+              secretName: ~NAME~
+    selector:
+      name: ~NAME~
+    replicas: ~REPLICAS~
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+    labels:
+      app: ~NAME~
+      deploymentconfig: ~NAME~
+  spec:
+    type: LoadBalancer
+    ports:
+    - port: 8443
+      protocol: TCP
+      targetPort: 30043
+    selector:
+      app: ~NAME~
+      deploymentconfig: ~NAME~
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tls:
+      termination: passthrough
+    to:
+      kind: Service
+      name: ~NAME~
+      namespace: ~PROJECT~
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  data:
+    nudr-nf-config.yaml: |
+      #
+      # Sample Network function configuration.
+      #
+      logging:
+        locale: en-US
+        loggers:
+          - name: log4j2
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+      statistics-configuration:
+        id: nudr-prov-statistics
+        jvm-metrics: false
+        jmx:
+          domain: nudr-prov
+          enabled: false
+          properties:
+            com.hpe.imsc.statistics.jmx.descriptors: "false"
+            com.hpe.imsc.statistics.jmx.notifications: "false"
+        properties:
+          com.hpe.imsc.statistics.influxdb.notifications: "false"
+          com.hpe.imsc.statistics.influxdb.server.database: nudr-prov
+          com.hpe.imsc.statistics.influxdb.server.host: influxdb-influxdb
+          com.hpe.imsc.statistics.influxdb.server.port: "8086"
+          com.hpe.imsc.statistics.influxdb.server.protocol: http
+      call-tracing:
+        enabled: false
+        properties:
+          JAEGER_AGENT_HOST: localhost
+          JAEGER_AGENT_PORT: 6831
+          JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
+          JAEGER_REPORTER_FLUSH_INTERVAL: 100
+          JAEGER_REPORTER_LOG_SPANS: true
+          JAEGER_SAMPLER_PARAM: 1
+          JAEGER_SAMPLER_TYPE: probabilistic
+          JAEGER_SERVICE_NAME: nudr-prov
+      datasources:
+        - id: ignite
+          profile:
+            name: kubernetes
+            properties:
+              masterUrl: https://openshift.default.svc.cluster.local:443
+              namespace: ~PROJECT~
+              serviceName: ~ignite_NAME~
+          properties:
+            enableGridCompute: false
+      model:
+        realms:
+        - id: realm0
+          properties:
+            replicas: 1
+    project-nudr-dr.yml: |+
+      #
+      # Sample Thorntail global configuration.
+      #
+      thorntail:
+        https:
+          only: true
+          port: 8443
+          keystore:
+            embedded: true
+          certificate:
+            generate: true
+            host: localhost
+        undertow:
+          alias: localhost
+          servers:
+            default-server:
+              https-listeners:
+                default-https:
+                  socket-binding: https
+                  enable-http2: true
+                  ssl-context: sslctx
+                  http2-initial-window-size: 32000000
+                  no-request-timeout: 600000            
+        elytron:
+          server-ssl-contexts:
+            sslctx:
+              protocols: TLSv1.2
+              key-manager: km
+          key-managers:
+            km:
+              key-store: ks
+              credential-reference:
+                clear-text: hwroot
+          key-stores:
+            ks:
+              path: /etc/opt/hpe-5g/sde-udr-nudr-dr/security/keystore.jks
+              credential-reference:
+                clear-text: hwroot
+              type: JKS
+          file-audit-logs:
+            local-audit:
+              path: /var/log/hpe-5g/sde-udr-nudr-dr/audit.log
+        logging:
+          root-logger:
+            level: INFO
+            handlers:
+            - CONSOLE
+          loggers:
+            "stdout":
+               level: INFO
+               handlers:
+               - STDOUT
+            "com.hpe.cms.sde.udr":
+               level: INFO
+            "com.hpe.cms.sde.apis":
+               level: INFO
+            "com.hpe.cms.sde.dao":
+               level: INFO
+            "com.hpe.paas.middleware.sdk.impl.rest.providers":
+               level: INFO
+            "com.hpe":
+               level: INFO
+            "org.apache.ignite":
+              level: WARN
+            "org.apache.kafka":
+               level: INFO
+            "org.glassfish.jersey":
+               level: INFO
+            "io.jaegertracing":
+              level: INFO
+            "io.undertow":
+              level: INFO
+            "io.netty":
+              level: INFO
+            "org.jboss.as":
+              level: INFO
+          console-handlers:
+            STDOUT:
+              named-formatter: null
+              formatter: "%s%e%n"
+            CONSOLE:
+              named-formatter: null
+              formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  type: Opaque
+  data:
+    keystore.jks: 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
+`;
+
+NetworkFunctions.defaults['ignite']['template']=
+`
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ClusterRole
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  rules:
+  - apiGroups:
+    - ""
+    resources: 
+    - pods 
+    verbs: 
+    - get
+    - list
+    - watch
+- kind: ClusterRoleBinding
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  roleRef:
+    kind: ClusterRole
+    name: ~NAME~
+    namespace: ~PROJECT~
+    apiGroup: rbac.authorization.k8s.io
+  subjects:
+  - kind: ServiceAccount
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/~PROJECT~/~IMAGE~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    template: 
+      metadata:
+        labels: 
+          app: ~NAME~
+        name: ~NAME~
+      spec:
+        serviceAccountName: ~NAME~
+        containers:
+        - name: ~NAME~
+          namespace: ~PROJECT~
+          image: docker-registry.default.svc:5000/~PROJECT~/~IMAGE~
+          env:
+          - name: OPTION_LIBS
+            value: ignite-kubernetes,ignite-rest-http
+          - name: CONFIG_URI
+            value: file:/etc/opt/hpe-5g/ignite/igniteConfig.xml
+          ports:
+          # Ports to open.
+          # Might be optional depending on your Kubernetes environment.
+          - containerPort: 11211 # REST port number.
+          - containerPort: 47100 # communication SPI port number.
+          - containerPort: 47500 # discovery SPI port number.
+          - containerPort: 49112 # JMX port number.
+          - containerPort: 10800 # SQL port number.
+          - containerPort: 10900 # Thin clients port number.
+          volumeMounts:
+            - name: ~NAME~
+              namespace: ~PROJECT~
+              mountPath: /etc/opt/hpe-5g/ignite/
+        volumes:
+          - name: ~NAME~
+            namespace: ~PROJECT~
+            configMap:
+              name: ~NAME~
+    replicas: ~REPLICAS~
+- kind: Service
+  apiVersion: v1
+  metadata: 
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    type: LoadBalancer
+    ports:
+      - name: rest
+        port: 8080
+        targetPort: 8080
+      - name: sql
+        port: 10800
+        targetPort: 10800
+      - name: thinclients
+        port: 10900
+        targetPort: 10900
+    # Optional - remove 'sessionAffinity' property if the Ignite cluster
+    # and applications deployed within Kubernetes
+    sessionAffinity: ClientIP   
+    selector:
+      # Must be equal to the label set for Ignite pods.
+      app: ~NAME~
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    to:
+      kind: Service
+      name: ~NAME~
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  data:
+    igniteConfig.xml: |+
+      <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+       <bean id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
+         <property name="discoverySpi">
+            <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+              <property name="ipFinder">
+                 <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder">
+                 <property name="namespace" value="~PROJECT~"/>
+                 <property name="serviceName" value="~NAME~"/>
+                 <property name="masterUrl" value="https://#{systemEnvironment['KUBERNETES_SERVICE_HOST']}:443"/>
+                 </bean>
+              </property>
+            </bean>
+         </property>
+        </bean>
+       </beans>
+`;
+
+NetworkFunctions.build = function(target){
+	var nameIndexes = NetworkFunctions.nameIndexes;
+	var result = "";
+	NetworkFunctions.check="";
+	var table = document.getElementById("NetworkFunctions");
+	var rowCount = table.rows.length;
+	var openshiftFunctions = new Array();
+	var provides = new Array();
+	var insecureRegistries=new Array();
+	
+	for(var i=1; i < rowCount; i++){
+		if(result==""){
+			result += "\n"
+			result += "\n# --------------------------------";
+			result += "\n# NetworkFunctions definition";
+			result += "\n# -------------------------------- ";
+			}
+		var row = table.rows[i];
+		var type=NetworkFunctions.getAndSetSelection(table.rows[i], nameIndexes, 'Type', 0);
+		var name=NetworkFunctions.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
+		var project=NetworkFunctions.getAndSetValue(row, nameIndexes, 'Project','hpe5g');
+		var URL=NetworkFunctions.getAndSetValue(row, nameIndexes, 'URL',NetworkFunctions.defaults[type]['URL']);
+		var insecure=Nodes.getAndSetChecked(row, nameIndexes, 'insecure');
+		var image=NetworkFunctions.getAndSetValue(row, nameIndexes, 'Image',NetworkFunctions.defaults[type]['image']);
+		var tag=NetworkFunctions.getAndSetValue(row, nameIndexes, 'Tag', NetworkFunctions.defaults[type]['tag']);
+		var volume=NetworkFunctions.getAndSetValue(row, nameIndexes, 'Volume');
+		var displayVolume="";
+		var replicas=NetworkFunctions.getAndSetValue(row, nameIndexes, 'Replicas', "1");
+		if(name.search(/[A-Z]/g) >= 0){NetworkFunctions.check += "\nNetworkFunctions "+name+" : upper cases are not supported";}
+		if(project == undefined || project == ''){NetworkFunctions.check += "\nNetworkFunctions "+name+" : project is required";}
+		if(image == undefined || image == ''){NetworkFunctions.check += "\nNetworkFunctions "+name+" : image is required";}
+		if(volume !=''){
+			if(!PersistentVolumes.search('Name', volume))NetworkFunctions.check += "\nNetworkFunctions "+name+": "+volume+" is undefined in the PersistentVolumes section";
+			else displayVolume=" on volume: "+volume;			
+		}
+		
+		var replicasNumber = Number(replicas);
+		if(isNaN(replicasNumber)){
+			NetworkFunctions.check += "\nNetworkFunctions: illegal replicas value for function  "+name+" : "+replicas+"; expecting integer";
+			continue;
+		} 
+		if(provides[type] != undefined && provides[type][project] != undefined){
+			NetworkFunctions.check += "\nNetworkFunctions: type "+type+" is duplicated on project "+project;
+			continue;
+		}
+		if(provides[type] == undefined)provides[type] = new Array();
+		provides[type][project]=name;
+		openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, volume, replicas, URL));
+		
+		if(insecure)insecureRegistries.push(URL);
+		
+		result+="\n#- "+name+": "+replicas+ " replica(s) of type: "+type+" on project: "+project+" running image: "+image+":"+tag+displayVolume;
+	}
+	
+	// Check cross functions dependencies
+	openshiftFunctions.forEach(function(networkFunction){
+		// Check if all dependencies for this network function type are satisfied on this project
+		NetworkFunctions.depends[networkFunction.type].forEach(function(requirement){
+			if(provides[requirement] != undefined && provides[requirement][networkFunction.project] != undefined)return;
+			NetworkFunctions.check += "\nNetworkFunctions: "+networkFunction.name+" missing dependency "+requirement+" on project "+project;
+		});
+    });
+	
+	// Make the list of functions, projects and providers available
+	NetworkFunctions.openshiftFunctions = openshiftFunctions.slice();
+	NetworkFunctions.provides = provides;
+	NetworkFunctions.projects = Array.from(new Set(openshiftFunctions.map(function(e){return e.project;})));
+	NetworkFunctions.insecureRegistries = '"'+insecureRegistries.join('","')+'"'; 
+	
+	if(NetworkFunctions.check != "")return NetworkFunctions.check;
+	return result;
+};
+
+// Display only used sections
+vnfResources.forEach(function(e,i,t){e.display(!e.isEmpty())});
+
+function deploymentHelp(){userOutput(`
+Quick user guide for deploying an OpenShift 3.11 cluster in an OpenStack infrastructure using ansible: 
+
+0. OpenStack tenant
+- Get a tenant on RHOS13 from infra team at https://cmsgvm42.gre.hpecorp.net/hos
+ Typical quota: 25 vCPUs, 50Gb RAM, 100Gb disk
+- Install and configure the infrastructure VPN as per https://github.hpe.com/OTC-Foundation/sandboxes_user_doc/blob/master/docs/vpn.md
+- Connect to your tenant at https://30.118.132.11/dashboard/auth/login
+- in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
+- create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
+- save the private key, eg mykey.pem
+- retrieve the infrastructure certificate: 
+ From https://cmsgvm42.gre.hpecorp.net/hos/ click the info button on your request and download the certificate grenoble-infra-root-ca_gs118.crt
+(this might fail for RHOS13, please contact the infra team to get a copy of this certificate)
+
+1. Ansible controller
+- create a network and a router connected to the external network
+- create an instance connected to this network: Compute/Instances/Launch Instance
+ from image CentOS 7.x, 
+  with 20 Gb disk, 
+   4 vCPUs, 
+   8Gb RAM 
+   embedding this ssh key, 
+   and associated with a floating (public) IP, eg 30.118.0.26
+- connect to this VM as user centos with the saved ssh key eg: ssh -i mykey.pem centos@30.118.0.26
+- install ansible, git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository: 
+ sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y epel-release 
+ sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y ansible httpd-tools java-1.8.0-openjdk-headless git python-pip --enablerepo='epel'
+- install shade, passlib, fix decorator and ansible versions: 
+ sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 pip install shade passlib decorator===4.4.0 ansible===2.7.4
+- clone the HPE5g automated deployer from git: 
+ http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone https://github.com/dometdemont/hpe5g.git
+- move to this directory 
+ cd hpe5g
+- retrieve in this directory from step 0 the infrastructure certificate and the private ssh key file and set ssh compliant access rights eg :
+ chmod 0600 *.pem 
+- update the environment definition file: OKDRHOS13.env with your credentials according to your tenant as per the OpenStack information: project/API access/view credentials
+export OS_IDENTITY_API_VERSION=3
+export OS_AUTH_URL="https://30.118.132.11:13000/v3"
+export OS_PASSWORD="HP1nvent"
+export OS_PROJECT_ID="b5f5a70ae58d4405a780aac02094a264"
+export OS_PROJECT_NAME="d3mRHOS13"
+export OS_USERNAME="d3m"
+export OS_CACERT="grenoble-infra-root-ca_gs118.crt"
+- set the ssh key to use:
+export CLOUD_SSH_KEY_PAIR="mykey"
+export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
+- update the image name as needed:
+export CLOUD_IMAGE="Cent OS 7"
+- retrieve the infrastructure certificate: grenoble-infra-root-ca_gs118.crt 
+
+2. Define the OpenShift cluster topology and build the Heat template
+- retrieve and open in a browser the topology assistant hpe5g.html or start from the example file: five.html
+- define the nodes and roles, then click on the Build button, retrieve the Heat template and name it: five.yaml
+
+3. Deploy OpenShift on OpenStack
+- set the target environment and credentials, then check ssh key and infrastructure certificate
+  source OKDRHOS13.env && ls -l $OS_CACERT $CLOUD_SSH_KEY
+- choose a cluster name and the private network root in the OpenStack infra: 3 unique digits like 192.168.55 and launch the script invoking ansible
+  ./hpe5g.sh --deploy five --network 192.168.55
+
+4. Enjoy OpenShift 
+The first master public IP address is available as $openshift_ip
+ 30.118.0.24
+- Connect to OpenShift GUI on this master node port 8443, eg:
+ Browse https://$openshift_ip:8443
+- accept the security warning and log on with any name and password
+- approve the self signed certificate for the metrics display engine Hawkular by clicking the warning link in another tab
+- connect to the master, connect with the user name used in the GUI
+ ssh -i $CLOUD_SSH_KEY centos@$openshift_ip	
+ oc login -u <user>
+- invoke the deployment script
+ ./hpe5g.sh
+
+5. Delete the cluster
+ - define the target environment and credentials
+  source OKDRHOS13.env
+- choose a cluster name, eg five
+ oc_stack=five
+- undeploy :
+	./hpe5g.sh --remove five 
+ `
+);}
+
+// Shell script dropped on the ems node ready to deploy the volumes, projects, and hpe5g network functions 
+var hpe5gDeploymentScript=`
+#! /bin/bash
+
+# Detailed log file can be passed as parameter
+hpe5g_log_file=$\{1:-hpe5g}.log
+
+# Cosmetic: ellipsize too long strings to keep cute logs: keep _max characters
+_cutTooLong() {
+	local _cut="$*"
+	local _max=150
+	if (( $\{#_cut} > $_max )) ; then
+		_cut=$(echo $* | cut -c1-$_max)
+		_cut+="..."
+	fi
+	echo $_cut
+}
+
+_log_() {
+    echo -e $(date) $(_cutTooLong $*)
+    echo -e $(date) $* &>> $hpe5g_log_file
+    return 0
+}
+
+_fail_() {
+    _log_ "FATAL ERROR: $*. Now exiting..."
+    exit 1
+}
+
+# checking user logged in
+oc_user=$(oc whoami)
+test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user is $\{oc_user:-unknown}: please log as user: oc login -u user"
+_log_ "Deploying hpe5g as user $oc_user"
+_log_ "Checking projects"
+oc_projects="~PROJECTS~"
+for _project in $oc_projects ; do oc project $_project &>> $hpe5g_log_file || oc new-project $_project --display-name="User $oc_user $_project project" --description='~PROJECT_DESCRIPTION~' &>> $hpe5g_log_file || _fail_ "Cannot find or create project $_project missing" ; done
+_log_ "Logging as system:admin"
+oc login -u system:admin &>> $hpe5g_log_file || _fail_ "Cannot log as system:admin"
+_log_ "List of nodes"
+oc get nodes -o wide
+_log_ "List of pods"
+oc get pods -o wide  -n default
+_log_ "Connecting to the internal docker registry as user $oc_user"
+oc login -u $oc_user &>> $hpe5g_log_file && sudo docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry.default.svc:5000 &>> $hpe5g_log_file || _fail_ "Cannot connect to the internal docker registry as user $oc_user"
+_log_ "Populating the docker registry with services images: pull, tag and push"
+oc_image_projects=(~IMAGES_PROJECTS~)
+oc_image_urls=(~IMAGES_URLS~)
+oc_images=(~IMAGES~)
+  for _iImage in $\{!oc_images[@]} ; do
+    sudo docker pull $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot pull $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]}"
+    sudo docker tag $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]} docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot tag $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]}"
+	sudo docker push docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot push docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]}"
+  done
+_log_ "Relax security policy to match network functions requirements, approve pending certificates"
+oc login -u system:admin &>> $hpe5g_log_file &&
+oc adm policy add-scc-to-user anyuid system:serviceaccount  &>> $hpe5g_log_file &&
+oc adm policy add-scc-to-user privileged system:serviceaccount  &>> $hpe5g_log_file &&
+oc adm policy add-scc-to-group anyuid system:authenticated  &>> $hpe5g_log_file &&
+oc adm policy add-role-to-group view system:serviceaccounts &>> $hpe5g_log_file &&
+oc policy add-role-to-user view system:serviceaccount &>> $hpe5g_log_file || _fail_ "Cannot relax security settings"
+if test -n "$(oc get csr -o name)" ; then 
+  oc get csr -o name | xargs oc adm certificate approve &>> $hpe5g_log_file || _fail_ "Cannot relax security settings and approve pending certificates"
+fi
+_log_ "Create the persistent volumes"
+oc new-app -f openshift_volumes.yaml  &>> $hpe5g_log_file && oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes"
+_log_ "Create the network functions"
+for _project in $oc_projects; do oc project $_project && oc new-app -f openshift_project_$_project.yaml ; done
+oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
+`;
+
+// ===========================
+// OpenShift ansible inventory build
+// ===========================
+// If no target is specified, publish the inventory in the user output area (or errors)
+// Otherwise, just return the same to the caller
+function buildInventory(target, engine){
+	var quickDescription = document.getElementById("quickDescription");
+	quickDescription.setAttribute("value", quickDescription.value);
+	document.title = "HPE5g "+ quickDescription.value;
+	
+	consistency.init();
+	var warnings = "";
+	vnfPorts = new Array();
+	
+	var openshift = "# -------------------------------------------------------------";
+	openshift += "\n# "+quickDescription.value;
+	openshift += "\n# CMS HPE 5g openshift inventory generated by the builder "+document.getElementById("vnfDescriptorWizardVersion").innerHTML;
+	openshift += "\n# Build date: "+Date();
+	openshift += "\n# -------------------------------------------------------------";
+	openshift += "\n";
+	openshift += "\nansible_become=yes";
+	// Immutable part from the environment
+	if(target == 'Heat'){
+	openshift += "\n# Openstack";
+	openshift += "\nopenshift_cloudprovider_kind=openstack";
+	openshift += "\nopenshift_cloudprovider_openstack_auth_url=\"{{ lookup('env','OS_AUTH_URL') }}\"";
+	openshift += "\nopenshift_cloudprovider_openstack_username=\"{{ lookup('env','OS_USERNAME') }}\"";
+	openshift += "\nopenshift_cloudprovider_openstack_password=\"{{ lookup('env','OS_PASSWORD') }}\"";
+	openshift += "\nopenshift_cloudprovider_openstack_tenant_id=\"{{ lookup('env','OS_PROJECT_ID') }}\"";
+	openshift += "\nopenshift_cloudprovider_openstack_tenant_name=\"{{ lookup('env','OS_PROJECT_NAME') }}\"";
+	openshift += "\n# Global Proxy Configuration";
+	openshift += "\n# These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment";
+	openshift += "\n# variables for docker and master services.";
+	openshift += "\nopenshift_http_proxy=\"{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}\"";
+	openshift += "\nopenshift_https_proxy=\"{{ lookup('env','OPENSHIFT_HTTPS_PROXY') }}\"";
+	openshift += "\nopenshift_no_proxy='.localdomain'";
+	openshift += "\n# Most environments do not require a proxy between OpenShift masters, nodes, and";
+	openshift += "\n# etcd hosts. So automatically add those host names to the openshift_no_proxy list.";
+	openshift += "\n# If all of your hosts share a common domain you may wish to disable this and";
+	openshift += "\n# specify that domain above.";
+	openshift += "\nopenshift_generate_no_proxy_hosts=True";
+	openshift += "\nansible_ssh_user=\"{{ lookup('env','CLOUD_DEFAULT_USER') }}\"";
+	}
+
+	vnfResources.forEach(function(e,i,t){
+		openshift += e.build(target, engine);
+		warnings += e.check;
+	});
+	
+	warnings += consistency.check();
+	openshift += "\n"
+	if(warnings != ""){
+		userOutput(warnings);
+		return "";
+	}
+
+	if(target == undefined){
+		userOutput(openshift);	
+		
+		var blobDesc = new Blob([openshift], {type: "text/plain;charset=utf-8"});
+		var a = document.createElement('a');
+		a.href = window.URL.createObjectURL(blobDesc);
+	    a.download = "hpe5g.properties";
+	    document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
+	return openshift;
+}
+
+function saveSession(){
+	var blobPage = new Blob([document.documentElement.innerHTML], {type: "text/plain;charset=utf-8"});
+	var a = document.createElement('a');
+	a.href = window.URL.createObjectURL(blobPage);
+    a.download = "hpe5g.saved.html";
+    document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+}
+
+function importSession(){
+	var importedWindow = window.open('', "importedDocument");
+	try{
+	importedWindow.document.write(importedSession.content);
+	var summary = "Import summary";
+	var importedQuickDescription = importedWindow.document.getElementById("quickDescription").value;
+	if(importedQuickDescription != ""){
+		summary += "\nVNF description: " + importedQuickDescription;
+		var quickDescription = document.getElementById("quickDescription");
+		quickDescription.value += importedQuickDescription;
+		quickDescription.setAttribute("value", quickDescription);
+	}
+	vnfResources.forEach(function(e,i,t){summary += e.import(importedWindow.document);});
+	userOutput(summary);
+	// Display populated sections
+	vnfResources.forEach(function(e,i,t){e.display(!e.isEmpty())});
+	} catch(e){
+		alert("Write to document failed, please try another browser\n" + e.message);
+	}
+}
+
+// =============================
+// OpenShift Heat template build
+// =============================
+function buildHeatTemplate(){
+	var useHeatVolumes = 'none';
+	var oc_version=document.getElementById("oc_version").value;
+	
+	// Build the inventory for Heat (or get the errors) and do not publish
+	// Required soon enough to get Heat specific variables properly setup
+    var openshift = buildInventory('Heat');
+	if(openshift.length == 0)return;
+    
+	var n0="\n";
+	var quickDescription = document.getElementById("quickDescription");
+	var heat="heat_template_version: 2013-05-23"
+	heat+=n0+"description: '"+quickDescription.value+"'";
+	heat+=n0+"parameters:";
+	heat+=n0+"  NetworkRoot:";
+    heat+=n0+"    type: string";
+    heat+=n0+"    label: Private network";
+    heat+=n0+"    description: 3 dot separated bytes defining the 24 first bits of the internal networks, e.g. 192.168.100";
+    heat+=n0+"    default: 192.168.100";
+	heat+=n0+"  Image:";
+    heat+=n0+"    type: string";
+    switch(useHeatVolumes){
+    	case 'none':    	heat+=n0+"    description: The name of the image used to instantiate storage on MSE nodes"; break;
+    	case 'from image':	heat+=n0+"    description: The name of the image used to instantiate MSE volumes"; break;
+    	case 'from master':	heat+=n0+"    description: The id of the master volume used to instantiate MSE volumes"; break;
+    }
+    heat+=n0+"    default: 'Centos 7.6'";
+	heat+=n0+"  ExternalNetwork:";
+    heat+=n0+"    type: string";
+    heat+=n0+"    description: The name of the external public network used to connect floating IPs";
+    heat+=n0+"    default: ext-net";
+    heat+=n0+"  AvailabilityZone:";
+    heat+=n0+"    type: string";
+    heat+=n0+"    label: Availability zone";
+    heat+=n0+"    description: The name of the zone hosting the MSE nodes";
+    heat+=n0+"    default: nova";
+	heat+=n0+"  flavorStandard:";
+    heat+=n0+"    type: string";
+    heat+=n0+"    description: The name of the openstack flavor used to build the worker nodes";
+    heat+=n0+"    default: "+Flavors['openstack']['flavorStandard'].name;
+	heat+=n0+"  flavorPerformance:";
+    heat+=n0+"    type: string";
+    heat+=n0+"    description: The name of the openstack flavor used to build the master nodes";
+    heat+=n0+"    default: "+Flavors['openstack']['flavorPerformance'].name;
+	heat+=n0+"  flavorSmall:";
+    heat+=n0+"    type: string";
+    heat+=n0+"    description: The name of the openstack flavor used to build the etcd nodes";
+    heat+=n0+"    default: "+Flavors['openstack']['flavorSmall'].name;
+	heat+=n0+"  key_name:";
+    heat+=n0+"    type: string";
+    heat+=n0+"    description: the ssh key injected in the instances for remote access";
+    heat+=n0+"    default: ''";
+    if(useHeatVolumes != 'none'){
+	heat+=n0+"  VolumeSize:";
+    heat+=n0+"    type: number";
+    heat+=n0+"    description: The size in Gb of the volumes attached to the nodes.";
+    heat+=n0+"    default: 20";
+	}
+	heat+=n0;
+	heat+=n0+"resources:";
+	
+	// Create networks from Networks.heatNetworks array: 
+	// The networks are to be created in the interface number order to ensure that ethX is actually connected to interface X
+	// One common router
+	heat+=n0+"  Router:";
+    heat+=n0+"    type: OS::Neutron::Router";
+    heat+=n0+"    properties:";
+    heat+=n0+"      admin_state_up: True";
+    heat+=n0+"      name: { get_param : 'OS::stack_name' }";
+	heat+=n0+"  Gateway:";
+    heat+=n0+"    type: OS::Neutron::RouterGateway";
+    heat+=n0+"    properties:";
+    heat+=n0+"      network: { get_param: ExternalNetwork }";
+    heat+=n0+"      router_id: { get_resource: Router }";
+
+	var networkPrefix = 'Eth';
+	var mgmtName = networkPrefix + Networks.heatNetworks['MGMT']; 
+    
+    for(var i = 0; i <= Networks.heatMaxNetwork; i++){
+	var interfaceName = networkPrefix+i;	// network name, Networks.heatMaxNodes addresses large
+	var cidr = Networks.heatMaxNodes*i;		// first address in this network
+	var gateway = cidr + 1;	// gateway IP for this network
+	heat+=n0+"  "+interfaceName+":";
+    heat+=n0+"    type: OS::Neutron::Net";
+    heat+=n0+"    properties:";
+	heat+=n0+"      name: {list_join: [ '-', ['"+interfaceName+"', { get_param : 'OS::stack_name' }]]}";
+	heat+=n0+"  "+interfaceName+"-subnet:";
+    heat+=n0+"    type: OS::Neutron::Subnet";
+    heat+=n0+"    properties:";
+    heat+=n0+"      name: {list_join: [ '-', ['"+interfaceName+"', { get_param : 'OS::stack_name' }]]}";
+    heat+=n0+"      enable_dhcp: True";
+    heat+=n0+"      network: { get_resource: "+interfaceName+" }";
+    heat+=n0+"      cidr: { list_join: [ '.', [{ get_param : NetworkRoot}, '"+cidr+"/"+Networks.heatCidrLength+"']]}";
+    heat+=n0+"      gateway_ip: { list_join: [ '.', [{ get_param : NetworkRoot}, '"+gateway+"']]}";
+    }
+
+	// Connect the management network to the router for floating IPs  
+	heat+=n0+"  Router-gw-int:";
+    heat+=n0+"    type: OS::Neutron::RouterInterface";
+    heat+=n0+"    properties:";
+    heat+=n0+"      router_id: { get_resource: Router }";
+    heat+=n0+"      subnet_id: { get_resource: "+mgmtName+"-subnet }";
+    
+    // addr will resolve all ip addresses parameters as a reference to their relative port
+    var addr=""; 
+    
+    var nodesNames = Nodes.cloudNodes.map(function(e){return e.name;});
+    
+    // For each node: create the ports and optional associated floating IP on all networks, the volume and the instance
+    nodesNames.forEach(function(name, indexNode){
+    	// Create one port on every network to ensure proper interface numbering, but connect only used interfaces
+    	// Prepare the ports declared in the instance as yaml instructions in this variable: port
+    	var port=""
+    	for(var iNetwork = 0; iNetwork <= Networks.heatMaxNetwork; iNetwork++){
+			// VIP processing in Heat/OpenStack: 
+			// - a VIP is instantiated as a port
+			// - a VIP is declared as allowed_address_pairs on the load balancer nodes
+	    	
+	    	var interfaceName = networkPrefix+iNetwork;	// network name, Networks.heatMaxNodes addresses large
+	    	var interfaceUp = "True";
+	    	if(Nodes.cloudNodes[indexNode].interfaces.indexOf(iNetwork) == -1)interfaceUp = "False";
+	    	heat+=n0+"  "+name+"-"+interfaceName+"-port:";
+	    	heat+=n0+"    type: OS::Neutron::Port";
+	    	heat+=n0+"    properties:";
+	      	heat+=n0+"      admin_state_up : "+ interfaceUp;
+	      	heat+=n0+"      network: { get_resource: "+interfaceName+" }";
+	      	
+	      	// if this node has VIPs, add allowed_address_pairs accordingly
+	      	if(Nodes.cloudNodes[indexNode].hasVIP){
+	      		var allowed_address_pairs_header=n0+"      allowed_address_pairs:";
+	      		// Search for VIPs on this interface on all nodes
+	      		nodesNames.forEach(function(nameVIP, indexVIP){
+	      			// if this node is a VIP
+	      			if(Nodes.cloudNodes[indexVIP].isVIP){
+	      				// This node is a VIP: add an allowed address for all concerned interfaces
+	      				for(var iVIP = 0; iVIP <= Networks.heatMaxNetwork; iVIP++){
+	      					// if this VIP is not defined on this interface or disconnected, continue
+	      					if(iNetwork != iVIP || interfaceUp != "True")continue;
+	      					// Enable this address in the firewall
+	      					heat+=allowed_address_pairs_header;
+	      					allowed_address_pairs_header=""; 
+	      					heat+=n0+"        - ip_address: {get_attr: ["+nameVIP+"-"+networkPrefix+iVIP+"-port, fixed_ips, 0, ip_address]}";
+	      				} // add an allowed address for all concerned interfaces
+	      			} // if this node is a VIP
+	      		}); // Search for VIPs on this interface
+	      	}// if this node has VIPs
+	      	
+	      	port+=n0+"        -";
+	      	port+=n0+"          port: { get_resource: "+name+"-"+interfaceName+"-port}";
+	      	
+	      	// Resolve ip address for this port on this node
+	      	if(Networks.heatNetworks['MGMT'] == iNetwork)	addr+=n0+"~"+name+"_mgmt~: {get_attr: ["+name+"-"+interfaceName+"-port, fixed_ips, 0, ip_address]}";
+      	}
+      	if(Nodes.cloudNodes[indexNode].interfaces.indexOf(heatPublicInterface) != -1){
+	   		heat+=n0+"  "+name+"-"+mgmtName+"-floatingIP:";
+	    	heat+=n0+"    type: OS::Neutron::FloatingIP";
+	    	heat+=n0+"    properties:";
+	      	heat+=n0+"      floating_network: { get_param: ExternalNetwork }";
+	      	heat+=n0+"  "+name+"-"+mgmtName+"-floatingIPassociation:";
+	    	heat+=n0+"    type: OS::Neutron::FloatingIPAssociation";
+	    	heat+=n0+"    properties:";
+	      	heat+=n0+"      port_id: { get_resource: "+name+"-"+mgmtName+"-port }";
+	      	heat+=n0+"      floatingip_id: { get_resource: "+name+"-"+mgmtName+"-floatingIP }";
+	      	// Resolve public ip addresses for this node
+	      	addr+=n0+"~"+name+"_pub~: {get_attr: ["+name+"-"+mgmtName+"-floatingIP, floating_ip_address]}";
+      	}
+      	
+      	// if this node is a VIP, neither volume nor instance are needed
+      	if(!Nodes.cloudNodes[indexNode].isVIP){
+      	heat+=n0+"  "+name+":";
+    	heat+=n0+"    type: OS::Nova::Server";
+    	heat+=n0+"    properties:";
+      	heat+=n0+"      name: "+name;
+      	if(useHeatVolumes != 'none'){
+      	heat+=n0+"      block_device_mapping: [{ device_name: 'vda', volume_id : { get_resource: "+name+"-Volume } }]";
+      	}else{
+      	heat+=n0+"      image: { get_param: Image }"; 
+      	}
+      	heat+=n0+"      flavor: { get_param: "+Nodes.cloudNodes[indexNode].flavor+" }";
+      	heat+=n0+"      availability_zone: { get_param: AvailabilityZone }";
+      	heat+=n0+"      key_name: { get_param: key_name }";
+      	heat+=n0+"      networks:";
+      	heat+=port;
+    	}  	// if this node is a VIP, neither volume nor instance are needed
+    	
+     	// On the ems (first master), push the openshift templates as yaml files
+     	if(Nodes.cloudNodes[indexNode].isEms){
+      	heat+=n0+"      config_drive: True";
+      	heat+=n0+"      user_data_format: 'RAW'";
+		heat+=n0+"      user_data:";
+		heat+=n0+"        str_replace:";
+	  	heat+=n0+"          template: |";
+	  	heat+=n0+"            #!/bin/bash";
+	  	
+	  	// OpenShift system level functions: volumes
+	  	heat+=n0+"            cat > /home/centos/openshift_volumes.yaml << 'EOFILE'";
+		heat+=n0+'            apiVersion: v1';
+	    heat+=n0+'            kind: Template';
+	    heat+=n0+'            metadata:';
+	    heat+=n0+'              name: system';
+	    heat+=n0+'              annotations:';
+	    heat+=n0+'                description: persistent volumes for '+document.getElementById("quickDescription").value;
+	    heat+=n0+'            objects:';
+	
+		//  list of PersistentVolumes for openshift persistent storage as an OpenShift template ready to create
+	    PersistentVolumes.openshiftVolumes.forEach(function(volume, i){
+	    heat+=n0+'            - kind: "PersistentVolume"';
+	    heat+=n0+'              apiVersion: "v1"';
+	    heat+=n0+'              metadata:';
+	    heat+=n0+'                name: "'+volume.name+'"';
+	    heat+=n0+'              spec:';
+	    heat+=n0+'                capacity:';
+	    heat+=n0+'                  storage: "'+volume.size+'Gi"';
+	    heat+=n0+'                accessModes:';
+	    heat+=n0+'                  - "'+volume.access+'"';
+		heat+=n0+'                persistentVolumeReclaimPolicy: '+volume.reclaim;
+	    heat+=n0+'                cinder:';
+	    heat+=n0+'                  fsType: "'+volume.type+'"';
+	    heat+=n0+'                  volumeID: "'+volume.cinder+'"';
+	    });
+	    heat+=n0+"            EOFILE";
+
+		// OpenShift network functions template, per project
+		NetworkFunctions.projects.forEach(function(project){
+		heat+=n0+"            cat > /home/centos/openshift_project_"+project+".yaml << 'EOFILE'";
+		heat+=n0+'            apiVersion: v1';
+	    heat+=n0+'            kind: Template';
+	    heat+=n0+'            metadata:';
+	    heat+=n0+'              name: '+project;
+	    heat+=n0+'              annotations:';
+	    heat+=n0+'                description: network functions for project '+project;
+	    heat+=n0+'            objects:';
+		
+		// List of NetworkFunctions deployed on openshift 
+		// Replace in the provided template:
+		// - name, image, project, volume and replicas with the actual values for this function
+		// - dependencies names with the actual name, defined in the template as ~<requirement>_NAME~
+	    NetworkFunctions.openshiftFunctions.forEach(function(networkFunction){
+	    if(networkFunction.project != project)return;
+	    var deployment=NetworkFunctions.defaults[networkFunction.type]['template']
+		.replace(/~NAME~/g,networkFunction.name)
+		.replace(/~PROJECT~/g,networkFunction.project)
+		.replace(/~IMAGE~/g,networkFunction.image)
+		.replace(/~VOLUME~/g,networkFunction.volume)
+		.replace(/~REPLICAS~/g,networkFunction.replicas);
+	    NetworkFunctions.depends[networkFunction.type].forEach(function(requirement){
+	    	var ereg=new RegExp("~"+requirement+"_NAME~","g");
+	    	deployment=deployment.replace(ereg, NetworkFunctions.provides[requirement][networkFunction.project]);
+		});
+	    heat+=deployment.replace(/\n/g, "\n"+  
+			     '              ');	// fix the descriptor indentation as expected by Heat
+	    });
+	    heat+=n0+"            EOFILE";
+		});
+		
+		// Shell script dropped on the ems node ready to deploy the volumes, projects, and hpe5g network functions 
+		heat+=n0+"            cat > /home/centos/hpe5g.sh << 'EOFILE'";
+		heat+=hpe5gDeploymentScript
+		.replace(/~PROJECT_DESCRIPTION~/g,document.getElementById("quickDescription").value+". Built from HPE5g assistant on: "+Date())
+		.replace(/~PROJECTS~/g,NetworkFunctions.projects.join(' '))	// Resolve the list of projects
+		.replace(/~IMAGES_PROJECTS~/g,NetworkFunctions.openshiftFunctions.map(function(e){return e.project;}).join(' '))	// Resolve the list of projects per image
+		.replace(/~IMAGES_URLS~/g,NetworkFunctions.openshiftFunctions.map(function(e){return e.URL;}).join(' '))	// Resolve the list of URLs per image
+		.replace(/~IMAGES~/g,NetworkFunctions.openshiftFunctions.map(function(e){return e.image;}).join(' '))	// Resolve the list of images
+		.replace(/\n/g, "\n"+  
+	             '            ');	// fix the descriptor indentation as expected by Heat
+		heat+=n0+"            EOFILE";
+		heat+=n0+"            chown centos:centos /home/centos/hpe5g.sh && chmod a+rx /home/centos/hpe5g.sh";
+		// Resolve ip addresses parameters 
+	    heat+=n0+"          params:"+addr.replace(/\n/g, "\n"+  
+			     "            ");	// fix the descriptor indentation as expected by Heat;
+		
+		// Resolve cinder volumes Ids
+		CinderVolumes.cloudVolumes.forEach(function(volume, i){
+	    heat+=n0+"            ~cinderVolumeIdOf"+volume.name+"~: {get_resource: "+volume.name+"}";
+		});
+	  } // if this node is the ems
+    }); // For each node: create the resources
+	
+	// For each CinderVolume
+	CinderVolumes.cloudVolumes.forEach(function(volume){
+	heat+=n0+"  "+volume.name+":";
+    heat+=n0+"    type: OS::Cinder::Volume";
+    heat+=n0+"    properties: ";
+    heat+=n0+"      name: "+volume.name;
+    heat+=n0+"      size: "+volume.size;
+    heat+=n0+"      description: "+volume.description;
+	}); 
+	
+    // Add outputs:
+    heat+=n0+"outputs:";
+	
+    heat+=n0+"  openshift_inventory:";
+    heat+=n0+"    description: the ansible inventory deploying the openshift cluster";
+    heat+=n0+"    value:";
+    heat+=n0+"      str_replace:";
+    heat+=n0+"        template: |";
+	heat+=n0+"            "+openshift.replace(/\n/g, "\n"+  
+		            "            ");	// fix the descriptor indentation as expected by tosca
+	// Resolve ip addresses parameters 
+    heat+=n0+"        params:"+addr.replace(/\n/g, "\n"+  
+		     "          ");	// fix the descriptor indentation as expected by Heat;;
+    //  list of public nodes
+    heat+=n0+"  public_nodes:";
+    heat+=n0+"    description: List of hosts as a name, fqdn, public ip address and groups membership";
+    heat+=n0+"    value:";
+    // For each non VIP node having a public IP address, required for Ansible client access: publish the name, fqdn, public IP address and group 'base' plus 'ems' for the last node
+    nodesNames.forEach(function(name, indexNode){ if(Nodes.cloudNodes[indexNode].isVIP || Nodes.cloudNodes[indexNode].interfaces.indexOf(heatPublicInterface) == -1)return;
+    heat+=n0+"      -";
+    heat+=n0+"        name: "+name;
+    heat+=n0+"        fqdn: "+Nodes.cloudNodes[indexNode].fqdn;
+    heat+=n0+"        ipaddress: {get_attr: ["+name+"-"+mgmtName+"-floatingIP, floating_ip_address]}";
+    heat+=n0+"        groups: base";
+    if(Nodes.cloudNodes[indexNode].isTester){heat+=",tester";}
+    });
+    // Misc section values
+    heat+=n0+"  misc:";
+    heat+=n0+"    description: set of miscellaneous properties used by the ansible deployment";
+    heat+=n0+"    value:";
+    heat+=n0+"      insecure_registries: '"+NetworkFunctions.insecureRegistries+"'";
+    heat+=n0+"      oc_version: "+oc_version;
+    Misc.output.forEach(function(item, index){
+    heat+=n0+"      "+item.name+": "+item.value;   	
+    });
+    
+    // Show to the user and save to hpe5g.yaml
+    userOutput(heat);
+	
+	var blobHeat = new Blob([heat], {type: "text/plain;charset=utf-8"});
+	var a = document.createElement('a');
+	a.href = window.URL.createObjectURL(blobHeat);
+    a.download = "hpe5g.yaml";
+    document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+}
+
+
+window.onbeforeunload = function() {
+  return "Unsaved session data will be lost if you leave the page, are you sure?";
+};
+
+// if a is true, check that at least one element of x is true
+// Otherwise, return a dependency message for roles
+function checkDependency(a, x, roles, message){
+	if(message == undefined)message = " are required on the same node";
+	if( a && ! x.some(function(e, i, t){return e;} ))
+		return "\n" + roles + message;
+	return "";
+}
+
+// Check if only one element of x is true
+// Otherwise, return a mutual exclusive message for roles
+function checkUnicity(x, roles, message){
+	var xTrue = x.filter(
+		function(e, i, t){return e;}
+	);
+	if(message == undefined)message = " are mutually exclusive";
+	if(xTrue.length > 1)return "\n" + roles + message;
+	return "";
+}
+
+// Check if all or none element(s) of x is true
+// Otherwise, return a group inconsistency message for roles
+function checkGroupConsistency(x, roles, message){
+	var xConsistent = ! x.some(
+		function(e, i, t){return e;}
+	) || x.every(
+		function(e, i, t){return e;}
+	);
+	if(xConsistent)	return "";
+	if(message == undefined)message = " group is not consistent (none or all should be true)";
+	return "\n" + roles + message;
+}
+
+// Build a triple NAME/IP_ADDR/IP_NAT_ADDR of definitions for the role and device, using name and ip addr
+// if name or ip addr are undefined, return an empty string
+// if they are arrays with non empty elements, output a bash vector, ie space separated list enclosed in parenthesis
+function getNameIpAddr(role, device, name, ipAddr, ipNatAddr){
+	var result = "";
+	var prefix = "";
+	var suffix = "";
+	var theName = name;
+	if(name instanceof Array){
+		if(name.join("").trim() != ""){
+			theName = name.join(" ");
+			prefix = "( ";
+			suffix = " )";
+		}else{
+			theName = "";
+		}
+	}
+	if(theName != undefined && theName != "")result += "\n" + role + "_NAME" + device + "=" + prefix+theName+suffix;
+	prefix = suffix = "";
+	var theIpAddr = ipAddr;
+	if(ipAddr instanceof Array){
+		if(ipAddr.join("").trim() != ""){
+			theIpAddr = ipAddr.join(" ");
+			prefix = "( ";
+			suffix = " )";
+		}else{
+			theIpAddr = "";
+		}
+	}
+	if(theIpAddr != undefined && theIpAddr != "")result += "\n" + role + "_IP_ADDR" + device + "=" + prefix+theIpAddr+suffix;
+	prefix = suffix = "";
+	var theIpNatAddr = ipNatAddr;
+	if(ipNatAddr instanceof Array){
+		if(ipNatAddr.join("").trim() != ""){
+			theIpNatAddr = ipNatAddr.join(" ");
+			prefix = "( ";
+			suffix = " )";
+		}else{
+			theIpNatAddr = "";
+		}
+	}
+	if(theIpNatAddr != undefined && theIpNatAddr != "")result += "\n" + role + "_IP_NAT_ADDR" + device + "=" + prefix+theIpNatAddr+suffix;
+	return result;
+}
+
+// Useful 'contains' method for String is not available everywhere
+if(!('contains' in String.prototype)){
+	String.prototype.contains = function(str, startIndex){
+		return -1 !== this.indexOf(str, startIndex);
+	}
+}
+
+// Useful 'startsWith' method for String is not available everywhere
+if (!String.prototype.startsWith) {
+  String.prototype.startsWith = function(searchString, position) {
+    position = position || 0;
+    return this.indexOf(searchString, position) === position;
+  };
+}
+if (!String.prototype.endsWith) {
+	String.prototype.endsWith = function(pattern) {
+	  var d = this.length - pattern.length;
+	  return d >= 0 && this.lastIndexOf(pattern) === d;
+	};
+}
+// In a list of arrays 'a', for all empty elements from index 0 to the last existing array, create an array and insert a 'defaultString'
+function fillArrays(a, defaultString){
+	if(a == undefined)return;
+	if(defaultString == undefined)defaultString=new String('""');
+	var fillArray = false;
+	for(var i = a.length - 1; i>=0; i--){
+		if(a[i] == undefined){
+			if(fillArray){
+				a[i] = new Array();
+				a[i].push(defaultString);
+			}
+			else {
+				a.pop();	// remove the useless undefined last element
+			}
+		}
+		else{
+			fillArray = true;
+		}
+	}
+}
+
+</script>
+</body>
 </html>
