@@ -1,14 +1,17 @@
 {
-  "name": "nodejs-helloworld",
-  "version": "1.0.0",
-  "description": "Hello World!",
-  "main": "app.js",
+  "name": "hpe5g",
+  "version": "0.65.0",
+  "description": "HPE5G resources automated deployer, headless mode",
+  "main": "hpe5g.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node hpe5g.js"
   },
-  "author": "Red Hat Training",
+  "author": "HPE Dominique Domet de Mont",
   "license": "ASL",
   "dependencies": {
-    "express" "4.14.x"
+    "express": "latest",
+    "body-parser": "latest",
+    "jsdom": "latest",
+    "child-process": "latest"
   }
 }
