@@ -75,7 +75,7 @@ app.put('/:session/:target', function (req, res, next) {
 });
 
 app.all('/*', function (req, res, next) {
-	fs.readFile("readme.md", "utf8", function(err, data){
+	fs.readFile("README.md", "utf8", function(err, data){
     if(err) next(err);
     res.send(data);
 	});
