@@ -142,9 +142,11 @@ function versionHistory(){
 	);
 }
 
+var rawUserOutput;
 function userOutput(aText){
 	document.getElementById("userArea").innerHTML=aText;
 	document.getElementById("endOfUserArea").click();
+	rawUserOutput=aText;
 }
 
 // Class implementing a unique role

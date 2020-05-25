@@ -17,9 +17,9 @@ app.get('/:session', function (req, res, next) {
 	  var mywin=dom.window;
 	  mywin.headless=true;
 	  if(mywin.jsonSession())
-		res.send(mydom.getElementById("userArea").innerHTML);
+		res.send(mywin.rawUserOutput);
 	  else
-		next(mydom.getElementById("userArea").innerHTML);
+		next(mywin.rawUserOutput);
 	}).catch((err) => {
   next(err);
 });
@@ -39,7 +39,7 @@ app.put('/:session/:target', function (req, res, next) {
 			   case 'deploy': 
 				if(!mywin.buildNetworkFunctions()) break;
 				success=undefined;
-				exec(mydom.getElementById("userArea").innerHTML, function(error, stdout, stderr){
+				exec(mywin.rawUserOutput, function(error, stdout, stderr){
 					if(error)next('Deployment error '+error+"\nstdout:\n"+stdout+"\nstderr:\n"+stderr); 
 					else res.send(stdout);
 				});
@@ -51,8 +51,8 @@ app.put('/:session/:target', function (req, res, next) {
 			}
 		 }
 		 switch(success){
-			case true: res.send(mydom.getElementById("userArea").innerHTML); break;
-			case false: next(mydom.getElementById("userArea").innerHTML); break;
+			case true: res.send(mywin.rawUserOutput); break;
+			case false: next(mywin.rawUserOutput); break;
 			default: /* let nodejs wait for the asynchronous final status */ break;
 		 }
 	  };
@@ -64,7 +64,7 @@ app.put('/:session/:target', function (req, res, next) {
 			if(mywin.importCatalog(data, true))
 				deploy();
 			else 
-				next(mydom.getElementById("userArea").innerHTML);
+				next(mywin.rawUserOutput);
 		}
 	    });
 	  }else
