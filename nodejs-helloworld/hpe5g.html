@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-05-07 Version 0.65</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-05-26 Version 0.66</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
@@ -114,6 +114,8 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 // Display version history in the user output area
 function versionHistory(){
 	userOutput("Version history:"+
+	"\n2020-05-26 0.66	headless mode for non interactive use including json dump and import ; file type: init properly during import"+
+	"\n\t\tMisc section: headless and default project variables, with override capability from a headless invocation; "+
 	"\n2020-05-07 0.65	Disable shell parameters expansion in templates deployed over REST API to support pods configuration files using shell parameters"+
 	"\n2020-05-06 0.64	Full stack deployment: update the ansible controller setup procedure to CenOS8/Python3"+
 	"\n\t\tNew section 'Clusters' defining on which OpenShift clusters the resources are to be deployed over REST API"+
@@ -142,6 +144,9 @@ function versionHistory(){
 	);
 }
 
+// Display information to the user in the userArea frame
+// Keep a copy of the last displayed data in a global variable, accessible to an headless application, free of any HTML rendering
+// (typically special characters escaping)
 var rawUserOutput;
 function userOutput(aText){
 	document.getElementById("userArea").innerHTML=aText;
@@ -1055,8 +1060,8 @@ Nodes.build = function(target, engine){
 		var isTester	=	Nodes.getAndSetChecked(row, nameIndexes, 'Tester');
 
 		// co-location checks
-		Nodes.check += checkDependency(isEtcd, [true, isWorker && isMaster, !isWorker ],  "Nodes: on node "+nodeName,", etcd and worker roles colocation requires a master role as well.");
-		Nodes.check += checkDependency(isMaster, [true, isWorker && isEtcd, !isWorker ],  "Nodes: on node "+nodeName,", master and worker roles colocation requires an etcd role as well.");
+		Nodes.check += checkDependency(isEtcd, [isWorker && isMaster, !isWorker ],  "Nodes: on node "+nodeName,", etcd and worker roles colocation requires a master role as well.");
+		Nodes.check += checkDependency(isMaster, [isWorker && isEtcd, !isWorker ],  "Nodes: on node "+nodeName,", master and worker roles colocation requires an etcd role as well.");
 		// Tester requirements checks
 		Nodes.check += checkDependency(isTester, [Misc.search('Property','tester_nodejs_version') && Misc.search('Property','tester_git_url')], "Nodes vs Misc: on node "+nodeName,", the tester role requires two entries in Misc: tester_nodejs_version and tester_git_url"); 
 		
@@ -2206,6 +2211,7 @@ function jsonSession(payload){
 		try {
 			var sections = payload;
 			if(typeof(payload) != 'object')sections=JSON.parse(payload); 
+			if(!sections)return true;	// nothing to do 
 			sections.forEach(function(section) {
 				section.value.forEach(function(row){
 					var line = new Array();
