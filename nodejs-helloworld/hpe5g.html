@@ -2211,7 +2211,7 @@ function jsonSession(payload){
 		try {
 			var sections = payload;
 			if(typeof(payload) != 'object')sections=JSON.parse(payload); 
-			if(!sections)return true;	// nothing to do 
+			if(!sections || !sections.length)return true;	// nothing to do 
 			sections.forEach(function(section) {
 				section.value.forEach(function(row){
 					var line = new Array();
