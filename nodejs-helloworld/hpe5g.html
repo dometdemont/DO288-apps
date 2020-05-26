@@ -2717,7 +2717,7 @@ function buildNetworkFunctions(){
 	var openshift = NetworkFunctions.build()+DirectServices.build()+IndirectServices.build()+Operators.build()+HelmCharts.build()+Clusters.build();
 	var check = NetworkFunctions.check+DirectServices.check+IndirectServices.check+Operators.check+HelmCharts.check+hpe5gResources.compile();
 	if(check.length != 0){userOutput(check); return false;}
-	if(openshift.length == 0){userOutput('Nothing to do'); return false;}
+	if(openshift.length == 0){userOutput('Nothing to do'); return true;}
 	
 	var shell='';
 	
