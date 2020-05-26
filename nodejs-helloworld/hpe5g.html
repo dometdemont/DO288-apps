@@ -2193,8 +2193,7 @@ function importSession(){
 		}
 		break;
 	case 'json':
-		jsonSession(importedSession.content);
-		userOutput(importedSession.content);
+		if(jsonSession(importedSession.content))userOutput(importedSession.content);
 		break;
 	default:
 		userOutput("Unsupported content type: "+importedSession.contentType+" ; expected html or json");
@@ -2204,6 +2203,7 @@ function importSession(){
 	vnfResources.forEach(function(e,i,t){e.display(!e.isEmpty())});
 }
 
+// Import/export the current session as Json payload or import as a JS object
 function jsonSession(payload){
 	if(payload){
 		// Populate the session with provided payload
@@ -2211,11 +2211,17 @@ function jsonSession(payload){
 		try {
 			var sections = payload;
 			if(typeof(payload) != 'object')sections=JSON.parse(payload); 
-			if(!sections || !sections.length)return true;	// nothing to do 
+			if(!sections || !sections.length){userOutput("Nothing to do"); return false;}	
 			sections.forEach(function(section) {
+				if(!section.section || !section.value){throw("Invalid section: both section and value are required: "+objToString(section, 0));}
+				if(!window[section.section]){throw("Unexpected section: "+section.section+"\nExpecting one of "+vnfResources.map(function(e){return e.title;}).join());}
 				section.value.forEach(function(row){
 					var line = new Array();
 					row.forEach(function(column){
+						if(!column.column || !column.value){
+							throw("Unexpected resource: both column and value are required: "+objToString(column, 0)
+									+ "in line:"+objToString(row, 0));
+						}
 						line.push({column:column.column, value:column.value});
 					});
 					window[section.section].add(line);
@@ -2717,7 +2723,7 @@ function buildNetworkFunctions(){
 	var openshift = NetworkFunctions.build()+DirectServices.build()+IndirectServices.build()+Operators.build()+HelmCharts.build()+Clusters.build();
 	var check = NetworkFunctions.check+DirectServices.check+IndirectServices.check+Operators.check+HelmCharts.check+hpe5gResources.compile();
 	if(check.length != 0){userOutput(check); return false;}
-	if(openshift.length == 0){userOutput('Nothing to do'); return true;}
+	if(openshift.length == 0){userOutput('Nothing to do'); return false;}
 	
 	var shell='';
 	
