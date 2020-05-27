@@ -3,7 +3,9 @@ const
 	express = require('express'),
     app = express(),
 	exec = require('child_process').exec,
-	bodyParser = require('body-parser');
+	bodyParser = require('body-parser'),
+	showdown  = require('showdown'),
+	converter = new showdown.Converter({disableForced4SpacesIndentedSublists: 'true'});
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
@@ -77,7 +79,7 @@ app.put('/:session/:target', function (req, res, next) {
 app.all('/*', function (req, res, next) {
 	fs.readFile("README.md", "utf8", function(err, data){
     if(err) next(err);
-    res.send(data);
+    res.send(converter.makeHtml(data));
 	});
 });
 
