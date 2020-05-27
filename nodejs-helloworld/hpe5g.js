@@ -21,9 +21,9 @@ app.get('/:session', function (req, res, next) {
 	  if(mywin.jsonSession())
 		res.send(mywin.rawUserOutput);
 	  else
-		next(mywin.rawUserOutput);
+		res.status(400).send(mywin.rawUserOutput);
 	}).catch((err) => {
-  next(err);
+  res.status(400).send(err);
 });
 });
 
@@ -42,43 +42,43 @@ app.put('/:session/:target', function (req, res, next) {
 				if(!mywin.buildNetworkFunctions()) break;
 				success=undefined;
 				exec(mywin.rawUserOutput, function(error, stdout, stderr){
-					if(error)next('Deployment error '+error+"\nstdout:\n"+stdout+"\nstderr:\n"+stderr); 
+					if(error)res.status(400).send('Deployment error '+error+"\nstdout:\n"+stdout+"\nstderr:\n"+stderr); 
 					else res.send(stdout);
 				});
 				break;
 			   case 'hpe5g.sh': success=mywin.buildNetworkFunctions(); break;
 			   case 'hpe5g.yml': 
 			   case 'hpe5g.yaml': success=mywin.buildHeatTemplate(); break;
-			   default: next('Unknown target '+req.params.target+'; expected: hpe5g.sh or hpe5g.y(a)ml'); break;
+			   default: res.status(400).send('Unknown target '+req.params.target+'; expected: hpe5g.sh or hpe5g.y(a)ml'); break;
 			}
 		 }
 		 switch(success){
 			case true: res.send(mywin.rawUserOutput); break;
-			case false: next(mywin.rawUserOutput); break;
+			case false: res.status(400).send(mywin.rawUserOutput); break;
 			default: /* let nodejs wait for the asynchronous final status */ break;
 		 }
 	  };
 	  
 	  if(req.query.catalog){
 		fs.readFile(req.query.catalog, "utf8", function(err, data){
-		if(err) next(err);
+		if(err) res.status(400).send(err);
 		else {
 			if(mywin.importCatalog(data, true))
 				deploy();
 			else 
-				next(mywin.rawUserOutput);
+				res.status(400).send(mywin.rawUserOutput);
 		}
 	    });
 	  }else
 		deploy();
 	}).catch((err) => {
-	  next(err);
+	  res.status(400).send(err);
 	});
 });
 
 app.all('/*', function (req, res, next) {
 	fs.readFile("README.md", "utf8", function(err, data){
-    if(err) next(err);
+    if(err) res.status(400).send(err);
     res.send(converter.makeHtml(data));
 	});
 });
