@@ -1,5 +1,5 @@
 # CMS5G Core Stack automated deployer
-1. [Concepts](#Concepts)
+1. [Concepts and data model](#Concepts)
 2. [Deployment](#Deployment)
 3. [Operations](#Operations)
 4. [Examples](#Examples)
@@ -8,11 +8,11 @@ This tool builds and run an installer deploying user defined HPE5G resources on 
 It can also build a Heat stack template deploying on OpenStack an OpenShift cluster including HPE5G resources.  
 It operates in two modes: interactive or headless.
 
-For the interactive mode, open the hpe5g.html file in a browser and click the Help buttons for more information.
+For the interactive mode, open the [hpe5g.html](hpe5g.html) file in a browser and click the Help buttons for more information.
 
-The headless mode is implemented as a nodejs application ; the tool is then accessible through a RESTful interface exposing two verbs: PUT and GET.  
+The headless mode is implemented as a [nodejs application](hpe5g.js) ; the tool is then accessible through a RESTful interface exposing two verbs: PUT and GET.  
 
-## Concepts <a name="Concepts"></a>
+## Concepts and data model<a name="Concepts"></a>
 ### Types and attributes
 A type defines the nature of a resource candidate for deployment. It is defined by a name and a set of attributes. This set of attributes is common
 to all types belonging to the same section.  
