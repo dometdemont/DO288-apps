@@ -503,10 +503,20 @@ vnfResource.prototype.delete = function(inputId){
 	table.deleteRow(index);	
 }
 // Add a new line in the table
-// Optional values can be provided as a table of dictionaries of column / value like [{column:"columnA", value:"a"}, {column:"columnB", value:"b"}, {column:"columnD", value:"d"}, ...] 
+// Optional values can be provided as a table of dictionaries of column / value like [{column:"columnA", value:"a"}, {column:"columnB", value:"b"}, {column:"columnD", value:"d"}, ...]
+// For 'choice' types, the init value is checked against the valide set: if not valid, an error message is returned.
+// Otherwise, undefined is returned
 vnfResource.prototype.add = function(values){
 	var table = document.getElementById(this.title);
 	var columns = this.columns;
+	var result="";
+	
+	if(values){
+		// Check for unknown columns
+		var section=this.title;
+		var validColumns=columns.map(function(c){return c.name;})
+		values.forEach(function(v){if(validColumns.indexOf(v.column) < 0)result+="Unknown attribute "+v.column+" in section "+section+" ignored.\n\tExpecting one of: "+validColumns.join()+"\n"});
+	}
  
 	var rowCount = table.rows.length;
 	var row = table.insertRow(rowCount);
@@ -524,7 +534,7 @@ vnfResource.prototype.add = function(values){
 		cell.className = this.title + columns[i].name;
 		// Initial value: first element of values with a matching column name
 		var init=undefined;
-		if(values != undefined){
+		if(values){
 			var initValues = values.filter(function(e){return e.column == columns[i].name;});
 			if(initValues.length > 0)init=initValues[0].value;
 		}
@@ -555,7 +565,11 @@ vnfResource.prototype.add = function(values){
 				// if the default value is not a null string, avoid adding always the same selection:
 				// set a default value according to the row in the table, instead of the first choice
 				if(_choices()[0] != "")selectCell.value = _choices()[rowCount-1];
-				if(init != undefined)selectCell.value = init;
+				if(init != undefined){
+					// Make sure the init value is a valid choice
+					if(_choices().indexOf(init) < 0)result+="Unknown selection "+init+" for attribute "+columns[i].name+" in section "+this.title+"\n\tExpecting one of: "+_choices().join()+"\n";
+					selectCell.value = init;
+				}
 				cell.appendChild(selectCell);
 				break;
 			case 'file':
@@ -584,6 +598,7 @@ vnfResource.prototype.add = function(values){
 	}
 	// hide unused columns if the method is available
 	if(this['hideUnused'] != undefined)this.hideUnused();
+	return result;
 }
 
 // Import from a provided document
@@ -688,7 +703,7 @@ vnfResource.prototype.dump = function(){
 					val = source[1].value;
 					break;
 			}
-			if(val)line.push({column:columns[j].name, value:val});
+			if(val)line.push({[columns[j].name]:val});
 		}
 		result.push(line);
 	}
@@ -2207,6 +2222,7 @@ function importSession(){
 function jsonSession(payload){
 	if(payload){
 		// Populate the session with provided payload
+		var error="";
 		// if the payload type is not an object, assume a json string and parse
 		try {
 			var sections = payload;
@@ -2217,16 +2233,16 @@ function jsonSession(payload){
 				if(!window[section.section]){throw("Unexpected section: "+section.section+"\nExpecting one of "+vnfResources.map(function(e){return e.title;}).join());}
 				section.value.forEach(function(row){
 					var line = new Array();
-					row.forEach(function(column){
-						if(!column.column || !column.value){
-							throw("Unexpected resource: both column and value are required: "+objToString(column, 0)
-									+ "in line:"+objToString(row, 0));
-						}
-						line.push({column:column.column, value:column.value});
-					});
-					window[section.section].add(line);
+					Object.keys(row).forEach(function(attribute) {
+						var x=Object.keys(row[attribute]);
+						var y=Object.values(row[attribute]);
+						line.push({column:x[0], value:y[0]});
+						});
+					var check=window[section.section].add(line);
+					if(check)error+=check;
 				});
 			});
+			if(error)throw error;
 		  } catch (ex) {
 			userOutput("JSON parser exception received:\n"+ex);
 			return false;
