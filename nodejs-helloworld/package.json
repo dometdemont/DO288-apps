@@ -1,12 +1,12 @@
 {
   "name": "hpe5g",
   "version": "0.66.0",
-  "description": "HPE5G resources automated deployer, headless mode",
+  "description": "CMS5G Core Stack automated deployer",
   "main": "hpe5g.js",
   "scripts": {
     "start": "node hpe5g.js"
   },
-  "author": "HPE Dominique Domet de Mont",
+  "author": "Hewlett Packard Enterprise",
   "license": "ASL",
   "dependencies": {
     "express": "latest",

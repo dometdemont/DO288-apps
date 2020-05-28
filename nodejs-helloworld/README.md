@@ -28,15 +28,15 @@ Example: memorydb is a resource of type ignite in the DirectServices section, us
 ### Catalog
 The catalog is an internal object listing all known types, their cross dependencies, and default values for all attributes.  
 Some kind of types deployable through OpenShift templates must have a 'template' attribute in the catalog.  
-The default catalog can be exported using the GUI, or imported in order to expand, restrict or change the default catalog. This materializes as a Json payload.  
+The default catalog can be exported using the GUI, or imported in order to expand, restrict or change the default catalog. This materializes as a json payload.  
 ### Session
-A session is a snapshot of a specific deployment, ie a list of resources. It can be saved from the GUI as an HTML or Json file. An HTML session
-can be used as a starting point for a deployment; typically, a set of backing services can be saved as a session and used later to resolve dependencies required by some network functions deployment.
+A session is a snapshot of a specific deployment, ie a list of resources. It can be saved from the GUI as an HTML or json file. An HTML session
+can be used as a starting point for a deployment; typically, a set of backing services can be saved as a session and used later to resolve dependencies required by network functions deployment.
 ## Deployment <a name="Deployment"></a>
-The automated deployer is a nodejs application deployed as per the [package.json](package.json) specification from [hpe5g.js](hpe5g.js) file.   
+The headless automated deployer is a nodejs application deployed as per the [package.json](package.json) specification from [hpe5g.js](hpe5g.js) file.   
 It can be deployed on any nodejs server:  
 ```
-clone https://github.hpe.com/CMS-5GCS/automated-deployer
+git clone https://github.hpe.com/CMS-5GCS/automated-deployer
 cd automated-deployer
 node hpe5g.js
 ```  
@@ -72,17 +72,17 @@ Where:
 - resources is the json payload depicting the resources to deploy as:
     - a table of sections: each entry must provide two attributes: section (DirectServices, IndirectServices, Operators...) and value
     - each section's value being a table of lines
-    - each line being a table of {attribute, value}
+    - each line being a table of {attribute: value}
 
 The section, attributes and values supported are those defined in the interactive version of the automated deployer.  
-This json file can be built from the interactive mode by dumping the session once populated interactively.
+This resources json file can be built from the interactive mode by dumping the session once populated interactively.
 ## Examples <a name="Examples"></a>
 ### List the services defined in the backing services set bs-set.html  
 ```
 curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html
 [{"section":"DirectServices":[[{"Type":"ignite"},{"Name":"gridgain"},{"URL":"docker.io/gridgain"},{"Image":"community"},{"Tag":"8.7.14"},{"Storage":"250Mi"},{"Replicas":"1"}],[{"Type":"fluentd"},{"Name":"myfluent"},{"URL":"gcr.io/google-containers"},{"Image":"fluentd-elasticsearch"},{"Tag":"v2.4.0"},{"Replicas":"1"}],[{"Type":"influxdb"},{"Name":"udsf-flux"},{"URL":"docker.io/bitnami"},{"Image":"influxdb"},{"Tag":"1.7.10"},{"Storage":"1Gi"},{"Replicas":"1"}],[{"Type":"redis"},{"Name":"myredis"},{"URL":"docker.io/bitnami"},{"Image":"redis"},{"Tag":"latest"},{"Storage":"100Mi"},{"Replicas":"1"}]]},{"section":"IndirectServices":[[{"Type":"jenkins"},{"Name":"myjenkins"},{"URL":"quay.io/openshift"},{"Image":"origin-jenkins"},{"Tag":"latest"},{"Replicas":"1"}],[{"Type":"elasticsearch"},{"Name":"myelastic"},{"URL":"docker.elastic.co/elasticsearch"},{"Image":"elasticsearch-oss"},{"Tag":"6.7.0"},{"Storage":"4Gi"},{"Replicas":"1"}],[{"Type":"prometheus-alertmanager"},{"Name":"myalert"},{"URL":"docker.io/prom"},{"Image":"alertmanager"},{"Tag":"v0.20.0"},{"Storage":"8Gi"},{"Replicas":"1"}],[{"Type":"prometheus"},{"Name":"myprom"},{"URL":"docker.io/prom"},{"Image":"prometheus"},{"Tag":"v2.16.0"},{"Storage":"200Mi"},{"Replicas":"1"}],[{"Type":"pushgateway"},{"Name":"mygateway"},{"URL":"docker.io/prom"},{"Image":"pushgateway"},{"Tag":"v1.0.1"},{"Replicas":"1"}]]},{"section":"Operators":[[{"Type":"jaeger"},{"Name":"mike"},{"Pipeline GIT":"https://github.hpe.com/CMS-5GCS/automated-deployer"},{"directory":"pipelines/manual_approval"},{"branch":"master"}],[{"Type":"svc-mesh-ctlplane"},{"Name":"myplane"}],[{"Type":"kafka"},{"Name":"kaaaaa"}]]}]
 ```
-### Deploy the backing services set bs-set.html on the cluster ocp1 in the namespace bs-set
+### Deploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data '[{"section":"Clusters":[[{"Name":"ocp1"},{"Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"HFo4rcRPyVdwqbq4X8VPN1j1em_ORXBwCxpnMdNakVE"},{"Targeted":true}]]}]'
 ```
