@@ -51,17 +51,17 @@ oc expose svc/automated-deployer
 ## Operations <a name="Operations"></a>
 ### GET
 #### List the resources defined in an existing session
-`curl  -X GET  http://<host:port>/<session>`
+`curl  -X GET  http://<host:port>/<session>`   
 Where:
 - session is the HTML session file on the application server
 #### List the catalog content
-`curl  -X GET  http://<host:port>/<session>/catalog[?catalog=<catalog>]`
+`curl  -X GET  http://<host:port>/<session>/catalog[?catalog=<catalog>]`   
 Where:
 - session is the HTML session file on the application server, typically hpe5g.html delivered as an empty session by the github project.
 - Optional parameter: catalog is the catalog json file on the application server. Default: list the default catalog content. 
 
 ### PUT
-To build and retrieve or run an installer or a Heat template from an HTML session available on the application server:
+Build and retrieve or run an installer or a Heat template from an HTML session available on the application server:
 
 `curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
 
@@ -162,6 +162,14 @@ Where udsf_bs.json defines one udsf network function with its backing services:
 Deploy an ignite service with the image docker.io/apacheignite/ignite:2.7.5 in the default project hpe5g on the cluster named ocp1 with the end point api.openshift1.ocp0.gre.hpecorp.net:6443 and a security token
 ```
 curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data '[{"Clusters":[[{"Name":"ocp1"},{"Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"HFo4rcRPyVdwqbq4X8VPN1j1em_ORXBwCxpnMdNakVE"},{"Targeted":true}]]},{"DirectServices":[[{"Type":"ignite"},{"Name":"memorydb"},{"Project":"d3m"},{"URL":"docker.io/apacheignite"},{"Image":"ignite"},{"Tag":"2.7.5"},{"Replicas":"1"}]]}]'
+```
+### Deploy udm from an Helm chart
+```
+curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.sh --data "@helm.json"
+```
+Where helm.json starts with:
+```
+[{"HelmCharts":[[{"Type":"nudm"},{"Name":"myudm"},{"Chart":"hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz"},{"Values":"<Helm values>"}]]}]
 ```
 ### Deploy an invalid set of resources
 Attempt to deploy resources using an unknown type or unknown attributes: wrong.json defines one unknown network function and backing services with unknown attributes:
