@@ -1,3 +1,4 @@
+// Refer to README.md for instructions and features
 const
 	fs = require('fs'),
 	express = require('express'),
@@ -13,9 +14,36 @@ app.use(bodyParser.json());
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
+// Get the default catalog, or the one passed as parameter catalog
+app.get('/:session/catalog', function (req, res, next) {
+	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
+	  var mywin=dom.window;
+	  mywin.headless=true;
+	  
+	  function catalog(){
+		  if(mywin.exportCatalog())
+			res.send(mywin.rawUserOutput);
+		  else
+			res.status(400).send(mywin.rawUserOutput);
+	  }
+	  if(req.query.catalog){
+			fs.readFile(req.query.catalog, "utf8", function(err, data){
+			if(err) res.status(400).send(err);
+			else {
+				if(mywin.importCatalog(data, true))catalog();
+				else res.status(400).send(mywin.rawUserOutput);
+			}
+		    });
+		  }else
+			  catalog();
+	}).catch((err) => {
+  res.status(400).send(err);
+});
+});
+
+// Get the session content
 app.get('/:session', function (req, res, next) {
 	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
-	  var mydom=dom.window.document;
 	  var mywin=dom.window;
 	  mywin.headless=true;
 	  if(mywin.jsonSession())
@@ -27,6 +55,7 @@ app.get('/:session', function (req, res, next) {
 });
 });
 
+// Deploy on various targets
 app.put('/:session/:target', function (req, res, next) {
 	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
 	  var mywin=dom.window;
@@ -76,6 +105,7 @@ app.put('/:session/:target', function (req, res, next) {
 	});
 });
 
+// Default: get README.md
 app.all('/*', function (req, res, next) {
 	fs.readFile("README.md", "utf8", function(err, data){
     if(err) res.status(400).send(err);

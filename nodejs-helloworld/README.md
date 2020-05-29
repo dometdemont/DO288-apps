@@ -50,9 +50,16 @@ oc expose svc/automated-deployer
 
 ## Operations <a name="Operations"></a>
 ### GET
-To list the resources defined in an existing session:
-
+#### List the resources defined in an existing session
 `curl  -X GET  http://<host:port>/<session>`
+Where:
+- session is the HTML session file on the application server
+#### List the catalog content
+`curl  -X GET  http://<host:port>/<session>/catalog[?catalog=<catalog>]`
+Where:
+- session is the HTML session file on the application server, typically hpe5g.html delivered as an empty session by the github project.
+- Optional parameter: catalog is the catalog json file on the application server. Default: list the default catalog content. 
+
 ### PUT
 To build and retrieve or run an installer or a Heat template from an HTML session available on the application server:
 
@@ -70,7 +77,7 @@ Where:
     - project is the default OpenShift project (namespace) in which resources not specifically attatched to a project are to be deployed; default: hpe5g
     - catalog is the catalog to use as a json file available on the application server. For the catalog specification, refer to the online help in the interactive tool, field set 'catalog'.
 - resources is the json payload depicting the resources to deploy as:
-    - a table of sections: each entry must provide two attributes: section (DirectServices, IndirectServices, Operators...) and value
+    - a table of sections: DirectServices, IndirectServices, Operators...
     - each section's value being a table of lines
     - each line being a table of {attribute: value}
 
@@ -80,18 +87,22 @@ This resources json file can be built from the interactive mode by dumping the s
 ### List the services defined in the backing services set bs-set.html  
 ```
 curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html
-[{"section":"DirectServices","value":[[{"Type":"ignite"},{"Name":"gridgain"},{"URL":"docker.io/gridgain"},{"Image":"community"},{"Tag":"8.7.14"},{"Storage":"250Mi"},{"Replicas":"1"}],[{"Type":"fluentd"},{"Name":"myfluent"},{"URL":"gcr.io/google-containers"},{"Image":"fluentd-elasticsearch"},{"Tag":"v2.4.0"},{"Replicas":"1"}],[{"Type":"influxdb"},{"Name":"udsf-flux"},{"URL":"docker.io/bitnami"},{"Image":"influxdb"},{"Tag":"1.7.10"},{"Storage":"1Gi"},{"Replicas":"1"}],[{"Type":"redis"},{"Name":"myredis"},{"URL":"docker.io/bitnami"},{"Image":"redis"},{"Tag":"latest"},{"Storage":"100Mi"},{"Replicas":"1"}]]},{"section":"IndirectServices","value":[[{"Type":"jenkins"},{"Name":"myjenkins"},{"URL":"quay.io/openshift"},{"Image":"origin-jenkins"},{"Tag":"latest"},{"Replicas":"1"}],[{"Type":"elasticsearch"},{"Name":"myelastic"},{"URL":"docker.elastic.co/elasticsearch"},{"Image":"elasticsearch-oss"},{"Tag":"6.7.0"},{"Storage":"4Gi"},{"Replicas":"1"}],[{"Type":"prometheus-alertmanager"},{"Name":"myalert"},{"URL":"docker.io/prom"},{"Image":"alertmanager"},{"Tag":"v0.20.0"},{"Storage":"8Gi"},{"Replicas":"1"}],[{"Type":"prometheus"},{"Name":"myprom"},{"URL":"docker.io/prom"},{"Image":"prometheus"},{"Tag":"v2.16.0"},{"Storage":"200Mi"},{"Replicas":"1"}],[{"Type":"pushgateway"},{"Name":"mygateway"},{"URL":"docker.io/prom"},{"Image":"pushgateway"},{"Tag":"v1.0.1"},{"Replicas":"1"}]]},{"section":"Operators","value":[[{"Type":"jaeger"},{"Name":"mike"},{"Pipeline GIT":"https://github.hpe.com/CMS-5GCS/automated-deployer"},{"directory":"pipelines/manual_approval"},{"branch":"master"}],[{"Type":"svc-mesh-ctlplane"},{"Name":"myplane"}],[{"Type":"kafka"},{"Name":"kaaaaa"}]]}]
+[{"DirectServices":[[{"Type":"ignite"},{"Name":"gridgain"},{"URL":"docker.io/gridgain"},{"Image":"community"},{"Tag":"8.7.14"},{"Storage":"250Mi"},{"Replicas":"1"}],[{"Type":"fluentd"},{"Name":"myfluent"},{"URL":"gcr.io/google-containers"},{"Image":"fluentd-elasticsearch"},{"Tag":"v2.4.0"},{"Replicas":"1"}],[{"Type":"influxdb"},{"Name":"udsf-flux"},{"URL":"docker.io/bitnami"},{"Image":"influxdb"},{"Tag":"1.7.10"},{"Storage":"1Gi"},{"Replicas":"1"}],[{"Type":"redis"},{"Name":"myredis"},{"URL":"docker.io/bitnami"},{"Image":"redis"},{"Tag":"latest"},{"Storage":"100Mi"},{"Replicas":"1"}]]},{"IndirectServices":[[{"Type":"jenkins"},{"Name":"myjenkins"},{"URL":"quay.io/openshift"},{"Image":"origin-jenkins"},{"Tag":"latest"},{"Replicas":"1"}],[{"Type":"elasticsearch"},{"Name":"myelastic"},{"URL":"docker.elastic.co/elasticsearch"},{"Image":"elasticsearch-oss"},{"Tag":"6.7.0"},{"Storage":"4Gi"},{"Replicas":"1"}],[{"Type":"prometheus-alertmanager"},{"Name":"myalert"},{"URL":"docker.io/prom"},{"Image":"alertmanager"},{"Tag":"v0.20.0"},{"Storage":"8Gi"},{"Replicas":"1"}],[{"Type":"prometheus"},{"Name":"myprom"},{"URL":"docker.io/prom"},{"Image":"prometheus"},{"Tag":"v2.16.0"},{"Storage":"200Mi"},{"Replicas":"1"}],[{"Type":"pushgateway"},{"Name":"mygateway"},{"URL":"docker.io/prom"},{"Image":"pushgateway"},{"Tag":"v1.0.1"},{"Replicas":"1"}]]},{"Operators":[[{"Type":"jaeger"},{"Name":"mike"},{"Pipeline GIT":"https://github.hpe.com/CMS-5GCS/automated-deployer"},{"directory":"pipelines/manual_approval"},{"branch":"master"}],[{"Type":"svc-mesh-ctlplane"},{"Name":"myplane"}],[{"Type":"kafka"},{"Name":"kaaaaa"}]]}]
+```
+### List a specific catalog  
+```
+curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/catalog?catalog=bs-only.catalog.json 
 ```
 ### Deploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data '[{"section":"Clusters","value":[[{"Name":"ocp1"},{"Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"HFo4rcRPyVdwqbq4X8VPN1j1em_ORXBwCxpnMdNakVE"},{"Targeted":true}]]}]'
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data '[{"Clusters": [[{"Name": "ocp1"},{"Endpoint": "api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"HFo4rcRPyVdwqbq4X8VPN1j1em_ORXBwCxpnMdNakVE"},{"Targeted": true}]]}]'
 ```
 
 ### Build an installer deploying an udsf function on top of the backing services set defined in bs-set.html  
 ```
 curl.exe -X PUT -H "Content-Type: application/json" http://localhost:8080/bs-set.html/hpe5g.sh --data "@udsf.json"
 Where udsf.json contains:
-[{"section": "NetworkFunctions","value": [[{"Type": "nudsf-dr"}]]}]
+[{"NetworkFunctions": [[{"Type": "nudsf-dr"}]]}]
 ```
 ### Build an installer deploying an ignite service named memorydb in the project 'myproject' using the default values
 ```
@@ -101,8 +112,8 @@ Where ignite.json defines one ignite backing service named memorydb; all other v
 ```
 [
   {
-    "section": "DirectServices",
-    "value": [
+    "DirectServices": 
+    [
       [
         {"Type": "ignite"},
         {"Name": "memorydb"}
@@ -120,8 +131,8 @@ Where udsf_bs.json defines one udsf network function with its backing services:
 ```
 [
   {
-    "section": "NetworkFunctions",
-    "value": [
+    "NetworkFunctions":
+    [
       [
         {"Type": "nudsf-dr"},
         {"Name": "myudsf"}
@@ -129,8 +140,8 @@ Where udsf_bs.json defines one udsf network function with its backing services:
     ]
   },
   {
-    "section": "DirectServices",
-    "value": [
+    "DirectServices":
+    [
       [
         {"Type": "ignite"},
         {"Name": "memorydb"},
@@ -150,15 +161,15 @@ Where udsf_bs.json defines one udsf network function with its backing services:
 ### Deploy one single service with a specific image on one single cluster
 Deploy an ignite service with the image docker.io/apacheignite/ignite:2.7.5 in the default project hpe5g on the cluster named ocp1 with the end point api.openshift1.ocp0.gre.hpecorp.net:6443 and a security token
 ```
-curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data '[{"section":"Clusters","value":[[{"Name":"ocp1"},{"Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"HFo4rcRPyVdwqbq4X8VPN1j1em_ORXBwCxpnMdNakVE"},{"Targeted":true}]]},{"section":"DirectServices","value":[[{"Type":"ignite"},{"Name":"memorydb"},{"Project":"d3m"},{"URL":"docker.io/apacheignite"},{"Image":"ignite"},{"Tag":"2.7.5"},{"Replicas":"1"}]]}]'
+curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data '[{"Clusters":[[{"Name":"ocp1"},{"Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"HFo4rcRPyVdwqbq4X8VPN1j1em_ORXBwCxpnMdNakVE"},{"Targeted":true}]]},{"DirectServices":[[{"Type":"ignite"},{"Name":"memorydb"},{"Project":"d3m"},{"URL":"docker.io/apacheignite"},{"Image":"ignite"},{"Tag":"2.7.5"},{"Replicas":"1"}]]}]'
 ```
 ### Deploy an invalid set of resources
 Attempt to deploy resources using an unknown type or unknown attributes: wrong.json defines one unknown network function and backing services with unknown attributes:
 ```
 [
   {
-    "section": "NetworkFunctions",
-    "value": [
+    "NetworkFunctions":
+    [
       [
         {"Type": "wild-network-function"},
         {"Name": "wild"}
@@ -166,8 +177,8 @@ Attempt to deploy resources using an unknown type or unknown attributes: wrong.j
     ]
   },
   {
-    "section": "DirectServices",
-    "value": [
+    "DirectServices":
+    [
       [
         {"Type": "ignite"},
         {"Name": "memorydb"},

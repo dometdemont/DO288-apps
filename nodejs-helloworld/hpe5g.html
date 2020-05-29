@@ -669,7 +669,7 @@ vnfResource.prototype.import = function(importedDocument){
 	return summary;
 }
 
-// Returns the current object as a table of rows, each row being a table of column/value pairs
+// Returns the current object as a table of rows, each row being a table of attribute:value
 vnfResource.prototype.dump = function(){
 	var result = new Array();
 	var table = document.getElementById(this.title);
@@ -1416,6 +1416,7 @@ var Clusters = new vnfResource("Clusters", [
 	);
 
 Clusters.help = function(){return `Clusters definition:
+OpenShift clusters candidate for deployment:
 	Name: nickname of this cluster
 	Endpoint: OpenShift API endpoint for this cluster. 
 		Typically retrieved from a session with: oc config current-context | cut -d/ -f2 | tr - .
@@ -2228,17 +2229,20 @@ function jsonSession(payload){
 			var sections = payload;
 			if(typeof(payload) != 'object')sections=JSON.parse(payload); 
 			if(!sections || !sections.length){return true;}	
-			sections.forEach(function(section) {
-				if(!section.section || !section.value){throw("Invalid section: both section and value are required: "+objToString(section, 0));}
-				if(!window[section.section]){throw("Unexpected section: "+section.section+"\nExpecting one of "+vnfResources.map(function(e){return e.title;}).join());}
-				section.value.forEach(function(row){
+			Object.keys(sections).forEach(function(s) {
+				var section=Object.keys(sections[s])[0];
+				if(!window[section]){
+					error+="Unexpected section: "+section+"\n\tExpecting one of "+vnfResources.map(function(e){return e.title;}).join()+"\n";
+					return;
+				}
+				Object.values(sections[s])[0].forEach(function(row){
 					var line = new Array();
 					Object.keys(row).forEach(function(attribute) {
 						var x=Object.keys(row[attribute]);
 						var y=Object.values(row[attribute]);
 						line.push({column:x[0], value:y[0]});
 						});
-					var check=window[section.section].add(line);
+					var check=window[section].add(line);
 					if(check)error+=check;
 				});
 			});
@@ -2250,7 +2254,7 @@ function jsonSession(payload){
 		return true;
 	}
 	var result = new Array;
-	vnfResources.forEach(function(e){var v=e.dump(); if(v.length)result.push({section:e.title,value:v});});
+	vnfResources.forEach(function(e){var v=e.dump(); if(v.length)result.push({[e.title]:v});});
 	var jsonPayload=JSON.stringify(result);
 	userOutput(jsonPayload);
 	// Stop there if headless, ie no user interface
@@ -2635,6 +2639,8 @@ if(!catalogImport.isDefined())document.getElementById("catalogArea").appendChild
 function exportCatalog(){
 	var catalog=JSON.stringify({types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults});
 	userOutput(catalog);
+	// Stop there if headless, ie no user interface
+	if(Misc.getValue('headless'))return true;
 	
 	var blobCatalog = new Blob([catalog], {type: "text/plain;charset=utf-8"});
 	var a = document.createElement('a');
@@ -2643,6 +2649,7 @@ function exportCatalog(){
     document.body.appendChild(a);
 	a.click();
 	document.body.removeChild(a);
+	return true;
 }
 function importCatalog(jsonCatalog = catalogImport.content, silent = false){
   var result=false;
