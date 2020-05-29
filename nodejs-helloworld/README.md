@@ -165,7 +165,7 @@ curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assis
 ```
 ### Deploy udm from an Helm chart
 ```
-curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.sh --data "@helm.json"
+curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json"
 ```
 Where helm.json starts with:
 ```
