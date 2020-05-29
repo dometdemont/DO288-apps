@@ -1952,13 +1952,19 @@ _log_() {
     return 0
 }
 
+_warn_() {
+	local RED='\\033[0;31m'
+	local NC='\\033[0m' # No Color
+	_log_ "$\{RED}WARNING$\{NC}: $*"
+}
+
 _fail_() {
     _log_ "FATAL ERROR: $*.  Now exiting... Check $hpe5g_log_file"
     exit 1
 }`;
 return result;};
 
-function hpe5gDeploymentScript(){
+function hpe5gDeploymentScript(warningMessage){
 var _shellTemplate=`
 # checking user logged in
 oc_user=$(oc whoami)
@@ -1967,13 +1973,20 @@ _log_ "Deploying CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="~PROJECTS~"
 for _project in $oc_projects ; do oc project $_project &>> $hpe5g_log_file || oc new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $hpe5g_log_file || _fail_ "Cannot find or create project $_project missing" ; done
-if oc login -u system:admin &>> $hpe5g_log_file ; then
+if echo guess | oc login -u system:admin &>> $hpe5g_log_file ; then
 _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &>> $hpe5g_log_file
 oc login -u $oc_user &>> $hpe5g_log_file
+`;
+if(warningMessage){
+	_shellTemplate+="else";
+	warningMessage.split("\n").forEach(function(line){_shellTemplate+='\n _warn_ "'+line+'"';});
+}
+_shellTemplate+=
+`
+fi
 _log_ "Listing pods as $oc_user"
 oc get pods -o wide  -n default  &>> $hpe5g_log_file
-fi
 _log_ "Populating the docker registry with services images: pull, tag and push"
 oc_image_projects=(~IMAGES_INSECURE_PROJECTS~)
 oc_image_urls=(~IMAGES_INSECURE_URLS~)
@@ -1984,8 +1997,8 @@ oc_images=(~IMAGES_INSECURE~)
     sudo docker tag $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]} docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot tag $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]}"
 	sudo docker push docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot push docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]}"
   done
+if echo guess | oc login -u system:admin &>> $hpe5g_log_file ; then
 _log_ "Relaxing security policy to match network functions requirements, approving pending certificates"
-oc login -u system:admin &>> $hpe5g_log_file &&
 oc adm policy add-scc-to-user anyuid system:serviceaccount  &>> $hpe5g_log_file &&
 oc adm policy add-scc-to-user privileged system:serviceaccount  &>> $hpe5g_log_file &&
 oc adm policy add-scc-to-group anyuid system:authenticated  &>> $hpe5g_log_file &&
@@ -1993,6 +2006,8 @@ oc adm policy add-role-to-group view system:serviceaccounts &>> $hpe5g_log_file 
 oc policy add-role-to-user view system:serviceaccount &>> $hpe5g_log_file || _fail_ "Cannot relax security settings"
 if test -n "$(oc get csr -o name)" ; then oc get csr -o name | xargs oc adm certificate approve &>> $hpe5g_log_file || _fail_ "Cannot approve pending certificates" ; fi
 if test -f openshift_volumes.yaml ; then _log_ "Creating the persistent volumes with idempotence" && oc process -f openshift_volumes.yaml | oc apply -f - &>> $hpe5g_log_file && oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes" ; fi
+oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
+fi
 _log_ "Creating the network functions and Helm instances with idempotence"
 for _project in $oc_projects; do 
 	oc project $_project &>> $hpe5g_log_file || _fail_ "Cannot switch to project $_project"
@@ -2002,7 +2017,6 @@ for _project in $oc_projects; do
 	for _helmValues in $(ls openshift_helm_$\{_project}*.yaml 2> /dev/null) ; do _log_ "Deploying $_helmValues on project $_project" && $(ls $_helmValues | awk -F'~' '{print "helm upgrade --install " $2,$3 " --values " $N}') &>> $hpe5g_log_file || _fail_ "Cannot deploy Helm instance on project $_project" ; done
 	oc get all --namespace $_project &>> $hpe5g_log_file 
 done
-oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
 _log_ "Deployment completed: check $hpe5g_log_file"
 `;
 return _shellTemplate
@@ -2600,16 +2614,18 @@ function buildHeatTemplate(){
 //=================================
 function catalogHelp(){userOutput(
 `The catalog is an internal object defining the types and attributes of the CMS5G Core Stack resources deployable from the assistant on an OpenShift cluster.
-It consists in three sections:
+It consists in four sections:
   - types
   - dependencies
   - values
-Types:
+  - admin
+
+1.types:
   Define the name of each type of resource managed by the assistant.
   Each name must fall in one of those categories: `+hpe5gResources.names.join()+`
-Dependencies:
+2. dependencies:
   Define for each type the list of required resources by their type names.
-Values:
+3. values:
   Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
     - IndirectServices,NetworkFunctions,DirectServices: URL, image, tag, template
     - Operators: template
@@ -2626,7 +2642,10 @@ Values:
     	~PERSISTENCE_START~<conditional sequence>~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
     		the conditional sequence is removed when no persistent storage is defined by the user for this resource
   Those placeholders are processed at build time with the actual values defined by the user in the assistant.
-
+4. admin:
+  Define for each type if it requires special privileges for deployment (optional, default to false)
+  If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.
+  
 Display:
   Output a human readable view of the current catalog. The depth and length of the view can be tuned with the 'depth' and 'ellipsis' drop down boxes.
 Export:
@@ -2637,7 +2656,7 @@ Import:
 var catalogImport = new userLoadedFile("catalogImport", "Import Json...", importCatalog);
 if(!catalogImport.isDefined())document.getElementById("catalogArea").appendChild(catalogImport.getDomElement());
 function exportCatalog(){
-	var catalog=JSON.stringify({types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults});
+	var catalog=JSON.stringify({types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults, admin: hpe5gResources.admin});
 	userOutput(catalog);
 	// Stop there if headless, ie no user interface
 	if(Misc.getValue('headless'))return true;
@@ -2666,7 +2685,7 @@ function importCatalog(jsonCatalog = catalogImport.content, silent = false){
         		importedTypes = importedTypes.concat(catalog[key][type]);
     		});
     		break;
-    	case 'dependencies': case 'values':
+    	case 'dependencies': case 'values': case 'admin':
     		if(importedTypes.length==0){check+="\nLevel 1: missing types section in first position"; break;}
     		Object.keys(catalog[key]).forEach(function(type) {
     			if(importedTypes.indexOf(type)<0){check+="\nLevel 2: "+key+": unknown type "+type+"; expected: "+importedTypes.join(); return;}
@@ -2675,13 +2694,13 @@ function importCatalog(jsonCatalog = catalogImport.content, silent = false){
     		});
     		break;
     	default: 
-    		check+="\nLevel 1: invalid key "+key+"; expected: types,dependencies,values";
+    		check+="\nLevel 1: invalid key "+key+"; expected: types,dependencies,values,admin";
     		break;
     	}
 	});
     if(check.length>0)userOutput("Inconsistent imported catalog:"+check);
     else if (silent || confirm("You are about to override the current catalog")) {
-  	  hpe5gResources.resources=catalog.types; hpe5gResources.depends=catalog.dependencies; hpe5gResources.defaults=catalog.values;
+  	  hpe5gResources.resources=catalog.types; hpe5gResources.depends=catalog.dependencies; hpe5gResources.defaults=catalog.values; hpe5gResources.admin=catalog.admin;
   	  if(!silent)userOutput(objToString(catalog));
 	  result=true;
   	} else {
@@ -2729,7 +2748,7 @@ function displayCatalog(){
 		if(!isNaN(candidate))catalog_display_ellipse=candidate;
 	}
 
-	var catalog={types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults};
+	var catalog={types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults, admin: hpe5gResources.admin};
 	userOutput("Catalog:\n"+objToString(catalog));
 }
 //=================================
@@ -2749,7 +2768,13 @@ function buildNetworkFunctions(){
 	if(openshift.length == 0){userOutput('Nothing to do'); return false;}
 	
 	var shell='';
+	var warningMessage='';
 	
+	if(hpe5gResources.adminList.length > 0){
+		warningMessage='Resource(s) requiring special privileges might jeopardize the deployment:'+hpe5gResources.adminList;
+		if(!Misc.getValue('headless') && !confirm(warningMessage)){userOutput(warningMessage); return false;}
+	}
+
 	if(Clusters.targeted == undefined || Clusters.targeted.length == 0){
     	// File naming convention for Network functions: openshift_project_<project>.yaml
     	// File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
@@ -2760,13 +2785,12 @@ function buildNetworkFunctions(){
     	shell=shellHeader('oc');
     	shell+=hpe5gNetworkFunctions(catHeader, catFooter);
     	shell+=hpe5gHelmValues(catHelmValuesHeader, catFooter);
-    	shell+=hpe5gDeploymentScript();
+    	shell+=hpe5gDeploymentScript(warningMessage);
 	}else{
 		var quickDescription=document.getElementById("quickDescription").value+". Built from HPE5g assistant on: "+Date();
 		shell=shellHeader('curl');
 		
 		if(hpe5gHelmValues().length > 0){userOutput('Helm based deployments not supported on REST API'); return false;}
-		if(hpe5gResources.adminList.length > 0){userOutput('Resource(s) requiring special privileges and preventing the deployment over OpenShift REST API:'+hpe5gResources.adminList); return false;}
 
 		Clusters.targeted.forEach(function(cluster){
 			hpe5gResources.projects.forEach(function(project){
@@ -3078,6 +3102,11 @@ var defaultCatalog=`
     "nudm": [],
     "nudr": [],
     "generic": []
+  },
+  "admin": {
+	    "fluentd": true,
+	    "grafana": true,
+	    "kube-state-metrics": true
   },
   "values": {
     "jenkins": {
@@ -7982,7 +8011,6 @@ hpe5gResources.defaults['prometheus']['template']=
       {}
 `;
 //================================================
-hpe5gResources.admin['kube-state-metrics']=true;
 hpe5gResources.defaults['kube-state-metrics']['template']=
 //================================================
 `
@@ -8516,7 +8544,6 @@ hpe5gResources.defaults['fluentd']['template']=
       </system>
 `;
 //================================================
-hpe5gResources.admin['grafana']=true;
 hpe5gResources.defaults['grafana']['template']=
 //================================================
 `
