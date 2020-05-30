@@ -14,19 +14,26 @@ app.use(bodyParser.json());
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
-// Get the default catalog, or the one passed as parameter catalog
-app.get('/:session/catalog', function (req, res, next) {
+// Get the default catalog, or the one passed as parameter or the session dump or the session HTML document
+app.get(['/:session', '/:session/:target'], function (req, res, next) {
 	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
 	  var mywin=dom.window;
 	  mywin.headless=true;
-	  
-	  function catalog(){
+	  switch(req.params.target){
+		case 'dump':
+		  if(mywin.jsonSession())
+			res.send(mywin.rawUserOutput);
+		  else
+			res.status(400).send(mywin.rawUserOutput);
+		  break;
+		case 'catalog':
+		  function catalog(){
 		  if(mywin.exportCatalog())
 			res.send(mywin.rawUserOutput);
 		  else
 			res.status(400).send(mywin.rawUserOutput);
-	  }
-	  if(req.query.catalog){
+		  }
+		  if(req.query.catalog){
 			fs.readFile(req.query.catalog, "utf8", function(err, data){
 			if(err) res.status(400).send(err);
 			else {
@@ -36,20 +43,11 @@ app.get('/:session/catalog', function (req, res, next) {
 		    });
 		  }else
 			  catalog();
-	}).catch((err) => {
-  res.status(400).send(err);
-});
-});
-
-// Get the session content
-app.get('/:session', function (req, res, next) {
-	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
-	  var mywin=dom.window;
-	  mywin.headless=true;
-	  if(mywin.jsonSession())
-		res.send(mywin.rawUserOutput);
-	  else
-		res.status(400).send(mywin.rawUserOutput);
+		  break;
+		default:
+		  res.send(mywin.document.documentElement.outerHTML);
+		  break;
+	  }
 	}).catch((err) => {
   res.status(400).send(err);
 });

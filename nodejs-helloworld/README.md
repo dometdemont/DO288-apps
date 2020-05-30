@@ -50,8 +50,12 @@ oc expose svc/automated-deployer
 
 ## Operations <a name="Operations"></a>
 ### GET
-#### List the resources defined in an existing session
+#### View an existing session GUI
 `curl  -X GET  http://<host:port>/<session>`   
+Where:
+- session is the HTML session file on the application server
+#### List the resources defined in an existing session
+`curl  -X GET  http://<host:port>/<session>/dump`   
 Where:
 - session is the HTML session file on the application server
 #### List the catalog content
