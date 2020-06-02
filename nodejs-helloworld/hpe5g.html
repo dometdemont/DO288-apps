@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-05-26 Version 0.66</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-05-29 Version 0.66</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
@@ -114,8 +114,9 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 // Display version history in the user output area
 function versionHistory(){
 	userOutput("Version history:"+
-	"\n2020-05-26 0.66	headless mode for non interactive use including json dump and import ; file type: init properly during import"+
-	"\n\t\tMisc section: headless and default project variables, with override capability from a headless invocation; "+
+	"\n2020-05-29 0.66	headless mode for RESTful invocation, including json dump and import; file type: init properly during import"+
+	"\n\t\tMisc section: headless and default project variables, with override capability from a headless invocation"+
+	"\n\t\tManage admin privileges requirement for some types by warning the user at build and deployment time; make this information part of the catalog"+
 	"\n2020-05-07 0.65	Disable shell parameters expansion in templates deployed over REST API to support pods configuration files using shell parameters"+
 	"\n2020-05-06 0.64	Full stack deployment: update the ansible controller setup procedure to CenOS8/Python3"+
 	"\n\t\tNew section 'Clusters' defining on which OpenShift clusters the resources are to be deployed over REST API"+
