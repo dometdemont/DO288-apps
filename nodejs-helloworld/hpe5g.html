@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-05-29 Version 0.66</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-04 Version 0.68</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
@@ -114,9 +114,11 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 // Display version history in the user output area
 function versionHistory(){
 	userOutput("Version history:"+
-	"\n2020-05-29 0.66	headless mode for RESTful invocation, including json dump and import; file type: init properly during import"+
+	"\n2020-06-04 0.68	Remove admin privilege requirements when possible (nudsf-dr sde-udr-nudr-dr sde-udr-nudr-prov hpe-nnrf-reg-agent udm prometheus influxdb ignite)"+
+	"\n2020-06-02 0.67	headless mode for RESTful invocation, including json dump and import; file type: init properly during import"+
 	"\n\t\tMisc section: headless and default project variables, with override capability from a headless invocation"+
 	"\n\t\tManage admin privileges requirement for some types by warning the user at build and deployment time; make this information part of the catalog"+
+	"\n\t\tIn the built installer: cleanup tempoary files if successful, and skip security relaxation if system:admin is not loggable"+
 	"\n2020-05-07 0.65	Disable shell parameters expansion in templates deployed over REST API to support pods configuration files using shell parameters"+
 	"\n2020-05-06 0.64	Full stack deployment: update the ansible controller setup procedure to CenOS8/Python3"+
 	"\n\t\tNew section 'Clusters' defining on which OpenShift clusters the resources are to be deployed over REST API"+
@@ -2007,17 +2009,17 @@ oc adm policy add-role-to-group view system:serviceaccounts &>> $hpe5g_log_file 
 oc policy add-role-to-user view system:serviceaccount &>> $hpe5g_log_file || _fail_ "Cannot relax security settings"
 if test -n "$(oc get csr -o name)" ; then oc get csr -o name | xargs oc adm certificate approve &>> $hpe5g_log_file || _fail_ "Cannot approve pending certificates" ; fi
 if test -f openshift_volumes.yaml ; then _log_ "Creating the persistent volumes with idempotence" && oc process -f openshift_volumes.yaml | oc apply -f - &>> $hpe5g_log_file && oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes" ; fi
-oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
 fi
 _log_ "Creating the network functions and Helm instances with idempotence"
 for _project in $oc_projects; do 
 	oc project $_project &>> $hpe5g_log_file || _fail_ "Cannot switch to project $_project"
 	# File naming convention for Network functions: openshift_project_<project>.yaml
 	# File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
-	if test -f openshift_project_$_project.yaml ; then _log_ "Deploying openshift_project_$_project.yaml on project $_project" && oc process -f openshift_project_$_project.yaml | oc apply -f - &>> $hpe5g_log_file || _fail_ "Cannot deploy openshift_project_$_project.yaml "; fi
-	for _helmValues in $(ls openshift_helm_$\{_project}*.yaml 2> /dev/null) ; do _log_ "Deploying $_helmValues on project $_project" && $(ls $_helmValues | awk -F'~' '{print "helm upgrade --install " $2,$3 " --values " $N}') &>> $hpe5g_log_file || _fail_ "Cannot deploy Helm instance on project $_project" ; done
+	if test -f openshift_project_$_project.yaml ; then _log_ "Deploying openshift_project_$_project.yaml on project $_project" && oc process -f openshift_project_$_project.yaml | oc apply -f - &>> $hpe5g_log_file && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "Cannot deploy openshift_project_$_project.yaml "; fi
+	for _helmValues in $(ls openshift_helm_$\{_project}*.yaml 2> /dev/null) ; do _log_ "Deploying $_helmValues on project $_project" && $(ls $_helmValues | awk -F'~' '{print "helm upgrade --install " $2,$3 " --values " $N}') &>> $hpe5g_log_file && rm -f $_helmValues &>> $hpe5g_log_file || _fail_ "Cannot deploy Helm instance on project $_project" ; done
 	oc get all --namespace $_project &>> $hpe5g_log_file 
 done
+oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
 _log_ "Deployment completed: check $hpe5g_log_file"
 `;
 return _shellTemplate
@@ -3538,9 +3540,6 @@ hpe5gResources.defaults['nudsf-dr']['template']=
               credential-reference:
                 clear-text: hwroot
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/log/hpe-5g/nudsf-dr/audit.log
         logging:
           root-logger:
             level: INFO
@@ -3816,9 +3815,6 @@ hpe5gResources.defaults['nudr-dr']['template']=
               credential-reference:
                 clear-text: hwroot
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/log/hpe-5g/sde-udr-nudr-dr/audit.log
         logging:
           root-logger:
             level: INFO
@@ -4089,9 +4085,6 @@ hpe5gResources.defaults['nudr-prov']['template']=
               credential-reference:
                 clear-text: hwroot
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/log/hpe-5g/sde-udr-nudr-prov/audit.log
         logging:
           root-logger:
             level: INFO
@@ -4416,9 +4409,6 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
               credential-reference:
                 clear-text: hwroot
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/log/hpe-5g/hpe-nnrf-reg-agent/audit.log
         logging:
           root-logger:
             level: INFO
@@ -4674,9 +4664,6 @@ hpe5gResources.defaults['nrf-reg-agent']['template']=
               credential-reference:
                 clear-text: password
               type: PKCS12
-          file-audit-logs:
-            local-audit:
-              path: /var/log/hpe-5g/hpe-nnrf-reg-agent/audit.log
         logging:
           root-logger:
             level: INFO
@@ -5007,9 +4994,6 @@ hpe5gResources.defaults['nudm-ee']['template']=
               credential-reference:
                 clear-text: password
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/opt/hpe/nf/udm/ee/logs/audit.log
         logging:
           root-logger:
             level: INFO
@@ -5403,9 +5387,6 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
               credential-reference:
                 clear-text: password
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/opt/hpe/nf/udm/li-poi/logs/audit.log
         logging:
           root-logger:
             level: INFO
@@ -6010,9 +5991,6 @@ hpe5gResources.defaults['nudm-sdm']['template']=
               credential-reference:
                 clear-text: password
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/opt/hpe/nf/udm/sdm/logs/audit.log
         logging:
           root-logger:
             level: INFO
@@ -6510,9 +6488,6 @@ hpe5gResources.defaults['nudm-notify']['template']=
               credential-reference:
                 clear-text: password
               type: JKS
-          file-audit-logs:
-            local-audit:
-              path: /var/opt/hpe/nf/udm/notify/logs/audit.log
         logging:
           root-logger:
             level: INFO
@@ -6781,8 +6756,6 @@ hpe5gResources.defaults['ignite']['template']=
               name: ~NAME~-wal
             - mountPath: /gridgain/walarchive
               name: ~NAME~-walarchive
-        securityContext:
-          fsGroup: 2000
 ~PERSISTENCE_END~
         volumes:
           - name: ~NAME~
@@ -7089,14 +7062,10 @@ hpe5gResources.defaults['influxdb']['template']=
         labels:
           name: ~NAME~
       spec:
-        securityContext:
-            fsGroup: 1001
         containers:
           - name: ~NAME~
             image: ~IMAGE_STREAM~
             imagePullPolicy: IfNotPresent
-            securityContext:
-              runAsUser: 1001
             env:
               - name: BITNAMI_DEBUG
                 value: "false"
@@ -7650,13 +7619,6 @@ hpe5gResources.defaults['prometheus']['template']=
         name: ~NAME~
       spec:
         serviceAccountName: ~NAME~
-        initContainers:
-          - name: ~NAME~-data-permission-fix
-            image: busybox
-            command: ["/bin/chmod","-R","777", "/data"]
-            volumeMounts:
-            - name: storage-volume
-              mountPath: /data
         containers:
         - name: ~NAME~
           namespace: ~PROJECT~
