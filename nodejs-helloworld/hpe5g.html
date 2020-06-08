@@ -954,7 +954,8 @@ var MiscItems = [
 	{name: 'tester_nodejs_version', value: 'v11.10.1', comment: "Nodejs version used to run the CMS5G Core Stack tester tool"},
 	{name: 'tester_git_url', value: 'https://github.hpe.com/cms5g/E2E-Testing.git', comment: "Git project URL delivering the CMS5G Core Stack tester tool"},
 	{name: 'headless', value: '', comment: "if not empty: do not assume a user for answering prompts and downloading files: use default values without prompting and do not save any file."},
-	{name: 'default_project', value: 'hpe5g', comment: "The default OpenShift project/namespace for deploying resources"}
+	{name: 'default_project', value: 'hpe5g', comment: "The default OpenShift project/namespace for deploying resources"},
+	{name: 'default_action', value: 'deploy', comment: "The default installer action: deploy or undeploy"}
 	];
 
 var Misc = new vnfResource("Misc", [
@@ -1930,13 +1931,16 @@ default: result+= 'unsupported'; break;
 result+=`
 # Usage: 
 # - make this file executable: chmod a+x hpe5g.sh 
-# - ./hpe5g.sh [log_file]
+# - ./hpe5g.sh --deploy --log hpe5g.log
 # Outcome:
 # - stdout
 # - logs in log_file (default hpe5g.log)
 
-# Detailed log file can be passed as parameter
-hpe5g_log_file=$\{1:-hpe5g.log}
+_usage() {
+	echo "This client helps you deploy and undeploy HPE 5g resources on OpenShift clusters" 
+	echo "Usage: $0 [-d|--deploy|-c|--create | -u|--undeploy|-r|--remove] [-l|--log logfile]"
+	echo "Default options: --deploy --log hpe5g.log"
+}
 
 # Cosmetic: ellipsize too long strings to keep cute logs: keep _max characters
 _cutTooLong() {
@@ -1964,15 +1968,37 @@ _warn_() {
 _fail_() {
     _log_ "FATAL ERROR: $*.  Now exiting... Check $hpe5g_log_file"
     exit 1
-}`;
+}
+
+# Default parameters values
+hpe5g_log_file="hpe5g.log"
+_deploy=$([[ "`+Misc.getValue('default_action')+`" != "undeploy" ]] && echo true || echo false);
+_displayedAction=$($_deploy && echo Deploying || echo Undeploying)
+
+while [[ "$#" -gt 0 ]]; do case $1 in
+  -d|--deploy|-c|--create) _deploy=true ; _displayedAction="Deploying";;
+  -u|--undeploy|-r|--remove) _deploy=false ; _displayedAction="Undeploying";;
+  -l|--log) hpe5g_log_file="$2"; shift;;
+  -h|--help) _usage ; exit 0;;
+  *) echo "Unsupported parameter: $1 ; try $0 --help"; exit 1;;
+esac; shift; done
+`;
 return result;};
 
 function hpe5gDeploymentScript(warningMessage){
 var _shellTemplate=`
+if $_deploy ; then 
+	_ocAction="apply"
+	_helmAction="'{print \\"helm upgrade --install \\" \\$2,\\$3 \\" --values \\" \\$N}'"
+else
+	_helmAction="'{print \\"helm delete \\" \\$2}'"
+	_ocAction="delete"
+fi
+
 # checking user logged in
 oc_user=$(oc whoami)
 test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user is $\{oc_user:-unknown}: please log as user: oc login -u user"
-_log_ "Deploying CMS5G Core Stack as user $oc_user"
+_log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="~PROJECTS~"
 for _project in $oc_projects ; do oc project $_project &>> $hpe5g_log_file || oc new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $hpe5g_log_file || _fail_ "Cannot find or create project $_project missing" ; done
@@ -1990,10 +2016,10 @@ _shellTemplate+=
 fi
 _log_ "Listing pods as $oc_user"
 oc get pods -o wide  -n default  &>> $hpe5g_log_file
-_log_ "Populating the docker registry with services images: pull, tag and push"
 oc_image_projects=(~IMAGES_INSECURE_PROJECTS~)
 oc_image_urls=(~IMAGES_INSECURE_URLS~)
 oc_images=(~IMAGES_INSECURE~)
+[[ $\{#oc_images[@]} != 0 ]] && _log_ "Populating the docker registry with services images: pull, tag and push"
   for _iImage in $\{!oc_images[@]} ; do
     sudo docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry.default.svc:5000 &>> $hpe5g_log_file || _fail_ "Cannot connect to the internal docker registry as user $oc_user"
     sudo docker pull $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot pull $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]}"
@@ -2008,19 +2034,22 @@ oc adm policy add-scc-to-group anyuid system:authenticated  &>> $hpe5g_log_file 
 oc adm policy add-role-to-group view system:serviceaccounts &>> $hpe5g_log_file &&
 oc policy add-role-to-user view system:serviceaccount &>> $hpe5g_log_file || _fail_ "Cannot relax security settings"
 if test -n "$(oc get csr -o name)" ; then oc get csr -o name | xargs oc adm certificate approve &>> $hpe5g_log_file || _fail_ "Cannot approve pending certificates" ; fi
-if test -f openshift_volumes.yaml ; then _log_ "Creating the persistent volumes with idempotence" && oc process -f openshift_volumes.yaml | oc apply -f - &>> $hpe5g_log_file && oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes" ; fi
+if test -f openshift_volumes.yaml ; then _log_ "$_displayedAction the persistent volumes with idempotence" && oc process -f openshift_volumes.yaml | oc $_ocAction -f - &>> $hpe5g_log_file && oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes" ; fi
 fi
-_log_ "Creating the network functions and Helm instances with idempotence"
+_log_ "$_displayedAction the network functions and Helm instances"
 for _project in $oc_projects; do 
 	oc project $_project &>> $hpe5g_log_file || _fail_ "Cannot switch to project $_project"
 	# File naming convention for Network functions: openshift_project_<project>.yaml
 	# File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
-	if test -f openshift_project_$_project.yaml ; then _log_ "Deploying openshift_project_$_project.yaml on project $_project" && oc process -f openshift_project_$_project.yaml | oc apply -f - &>> $hpe5g_log_file && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "Cannot deploy openshift_project_$_project.yaml "; fi
-	for _helmValues in $(ls openshift_helm_$\{_project}*.yaml 2> /dev/null) ; do _log_ "Deploying $_helmValues on project $_project" && $(ls $_helmValues | awk -F'~' '{print "helm upgrade --install " $2,$3 " --values " $N}') &>> $hpe5g_log_file && rm -f $_helmValues &>> $hpe5g_log_file || _fail_ "Cannot deploy Helm instance on project $_project" ; done
-	oc get all --namespace $_project &>> $hpe5g_log_file 
+	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && oc process -f openshift_project_$_project.yaml | oc $_ocAction -f - &>> $hpe5g_log_file && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
+	for _helmValues in $(ls openshift_helm_$\{_project}*.yaml 2> /dev/null) ; do _log_ "$_displayedAction $_helmValues on project $_project" && $(ls $_helmValues | eval awk -F'~' $_helmAction) &>> $hpe5g_log_file && rm -f $_helmValues &>> $hpe5g_log_file || _fail_ "$_displayedAction Helm instance on project $_project" ; done
+	# Undeployment: wait for pods termination  
+	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $hpe5g_log_file ; do : ; done
+	# Indulge 5 seconds to stabilize, then delete the project if no pods, otherwise log a status
+	sleep 5s && test -n "$(oc get pods --namespace $_project 2>&1 >/dev/null)" && _log_ "No remaining pods in project $_project: deleting" && oc delete project $_project &>> $hpe5g_log_file || oc get all --namespace $_project &>> $hpe5g_log_file 
 done
 oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
-_log_ "Deployment completed: check $hpe5g_log_file"
+_log_ "$_displayedAction completed: check $hpe5g_log_file"
 `;
 return _shellTemplate
 	.replace(/~PROJECT_DESCRIPTION~/g,document.getElementById("quickDescription").value+". Built from HPE5g assistant on: "+Date())
@@ -2797,9 +2826,10 @@ function buildNetworkFunctions(){
 
 		Clusters.targeted.forEach(function(cluster){
 			hpe5gResources.projects.forEach(function(project){
-				// Create the project if it does not exist
+				// Create the project if it does not exist or fail in case of deletion
 				shell+='\n_log_ "Checking project '+project+' on cluster '+cluster.name+'"';
 				shell+='\nuntil curl -f -k -X GET -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projects/'+project+'  &>> $hpe5g_log_file ; do ';
+				shell+='\n$_deploy || _fail_ "Missing project '+project+' on cluster '+cluster.name+'"';
 				shell+='\n_log_ "Creating project '+project+' on cluster '+cluster.name+'" && curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projectrequests  &>> $hpe5g_log_file <<HPE_EOF';
 				shell+=`
 {
@@ -2835,8 +2865,9 @@ HPE_EOF`;
                 shell+='\nif [ $? != 0 ] ; then _fail_ "Cannot create secret '+secretName+' for project '+project+' on cluster '+cluster.name+'" ; fi';
                 shell+='\nsleep 2 ; done';
                 
-                // Instantiate the template
-                shell+='\n_log_ "Instantiating resources for project '+project+' on cluster '+cluster.name+'" && curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances &>> $hpe5g_log_file <<'HPE_EOF'";
+                // Deploy/undeploy the template instance
+                shell+='\n_log_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'"';
+                shell+='\nif $_deploy ; then curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances &>> $hpe5g_log_file <<'HPE_EOF'";
                 shell+=`
 {
   "kind": "TemplateInstance",
@@ -2852,8 +2883,10 @@ HPE_EOF`;
   }
 }
 HPE_EOF`;
-				shell+='\n_log_ "Resources for project '+project+' successfully deployed on cluster '+cluster.name+'"';
-				shell+='\nif [ $? != 0 ] ; then _fail_ "Cannot instantiate resources for project '+project+' on cluster '+cluster.name+'" ; fi';
+				shell+='\nelse curl -f -k -X DELETE -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+'/templateinstances/'+project+' &>> $hpe5g_log_file';
+				shell+='\nfi';
+				shell+='\nif [ $? != 0 ] ; then _fail_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'" ; fi';
+				shell+='\n_log_ "$_displayedAction resources for project '+project+' successfully completed on cluster '+cluster.name+'"';
 
 			});
 		});
@@ -3351,6 +3384,11 @@ hpe5gResources.defaults['nudsf-dr']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
@@ -3369,6 +3407,7 @@ hpe5gResources.defaults['nudsf-dr']['template']=
             - name: ROUTER_ENABLE_HTTP2
               value: 'true'
           image: ~IMAGE_STREAM~
+          imagePullPolicy: IfNotPresent
           Requests:
             cpu:    1000m
             memory:   2000Mi
@@ -3616,6 +3655,11 @@ hpe5gResources.defaults['nudr-dr']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
@@ -3636,6 +3680,7 @@ hpe5gResources.defaults['nudr-dr']['template']=
           - name: SPRING_PROFILES_ACTIVE
             value: ignite
           image: ~IMAGE_STREAM~
+          imagePullPolicy: IfNotPresent
           Requests:
             cpu:    2000m
             memory:   2000Mi
@@ -3898,6 +3943,11 @@ hpe5gResources.defaults['nudr-prov']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
@@ -3918,6 +3968,7 @@ hpe5gResources.defaults['nudr-prov']['template']=
           - name: SPRING_PROFILES_ACTIVE
             value: ignite
           image: ~IMAGE_STREAM~
+          imagePullPolicy: IfNotPresent
           Requests:
             cpu:    2000m
             memory:   2000Mi
@@ -4168,6 +4219,11 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
@@ -4523,6 +4579,11 @@ hpe5gResources.defaults['sf-cmod']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
@@ -4830,6 +4891,11 @@ hpe5gResources.defaults['nrf-reg-agent']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: ServiceAccount
   apiVersion: v1
   metadata:
@@ -5233,6 +5299,11 @@ hpe5gResources.defaults['nudm-ee']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: ServiceAccount
   apiVersion: v1
   metadata:
@@ -5273,6 +5344,7 @@ hpe5gResources.defaults['nudm-ee']['template']=
         containers:
           - name: ~NAME~
             image: ~IMAGE_STREAM~
+            imagePullPolicy: IfNotPresent
             volumeMounts:
             - name: ~NAME~-config-volume
               mountPath: /etc/opt/hpe/nf/udm/ee
@@ -5541,6 +5613,11 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
       from:
         kind: DockerImage
         name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
 - kind: ServiceAccount
   apiVersion: v1
   metadata:
@@ -5577,6 +5654,7 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
         containers:
           - name: ~NAME~
             image: ~IMAGE_STREAM~
+            imagePullPolicy: IfNotPresent
             volumeMounts:
             - name:  ~NAME~-config-volume
               mountPath: /etc/opt/hpe/nf/udm/li-poi

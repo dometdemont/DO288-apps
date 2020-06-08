@@ -53,30 +53,37 @@ app.get(['/:session', '/:session/:target'], function (req, res, next) {
 });
 });
 
-// Deploy on various targets
-app.put('/:session/:target', function (req, res, next) {
+// Deploy/undeploy on various targets
+app.use('/:session/:target', function (req, res, next) {
 	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
 	  var mywin=dom.window;
 	  var mydom=mywin.document;
 	  mywin.headless=true;
+	  var direct;
 	  if(req.query.project)mywin.default_project=req.query.project;
+	  switch(req.method){
+	  	case 'PUT': case 'POST': direct='deploy'; break;
+	  	case 'DELETE': direct='undeploy'; break;
+	  	default: res.status(400).send('Unknown verb '+req.method+'; expected: PUT POST DELETE'); break;
+	  }
+	  mywin.default_action=direct; 
 	  
 	  function deploy(){
 		var success=false;
 	    if(mywin.jsonSession(req.body)){
 			switch(req.params.target){
-			   case 'deploy': 
+			   case direct: 
 				if(!mywin.buildNetworkFunctions()) break;
 				success=undefined;
 				exec(mywin.rawUserOutput, function(error, stdout, stderr){
-					if(error)res.status(400).send('Deployment error '+error+"\nstdout:\n"+stdout+"\nstderr:\n"+stderr); 
+					if(error)res.status(400).send(direct+' error '+error+"\nstdout:\n"+stdout+"\nstderr:\n"+stderr); 
 					else res.send(stdout);
 				});
 				break;
 			   case 'hpe5g.sh': success=mywin.buildNetworkFunctions(); break;
 			   case 'hpe5g.yml': 
 			   case 'hpe5g.yaml': success=mywin.buildHeatTemplate(); break;
-			   default: res.status(400).send('Unknown target '+req.params.target+'; expected: hpe5g.sh or hpe5g.y(a)ml'); break;
+			   default: res.status(400).send('Unknown target '+req.params.target+'; expected: '+direct+', hpe5g.sh or hpe5g.y(a)ml'); break;
 			}
 		 }
 		 switch(success){

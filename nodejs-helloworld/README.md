@@ -10,7 +10,7 @@ It operates in two modes: interactive or headless.
 
 For the interactive mode, open the [hpe5g.html](hpe5g.html) file in a browser and click the Help buttons for more information.
 
-The headless mode is implemented as a [nodejs application](hpe5g.js) ; the tool is then accessible through a RESTful interface exposing two verbs: PUT and GET.  
+The headless mode is implemented as a [nodejs application](hpe5g.js) ; the tool is then accessible through a RESTful interface exposing three verbs: [GET](#GET), [PUT](#PUT) and [DELETE](#DELETE).  
 
 ## Concepts and data model<a name="Concepts"></a>
 ### Types and attributes
@@ -50,7 +50,7 @@ oc expose svc/automated-deployer
 ```
 
 ## Operations <a name="Operations"></a>
-### GET
+### GET<a name="GET"></a>
 #### View an existing session GUI
 `curl  -X GET  http://<host:port>/<session>`   
 Where:
@@ -65,7 +65,7 @@ Where:
 - session is the HTML session file on the application server, typically hpe5g.html delivered as an empty session by the github project.
 - Optional parameter: catalog is the catalog json file on the application server. Default: list the default catalog content. 
 
-### PUT
+### PUT<a name="PUT"></a>
 Build and retrieve or run an installer or a Heat template from an HTML session available on the application server:
 
 `curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
@@ -73,7 +73,8 @@ Build and retrieve or run an installer or a Heat template from an HTML session a
 Where:
 - session is the HTML session file to start from on the application server, typically hpe5g.html delivered as an empty session by the github project. This session can be user defined in interactive mode and dropped on the application server for the headless mode, for instance to start from a known set of backing services.
 - target is either:
-    - deploy: to deploy resources on existing OpenShift clusters from the application server. Prerequisites: 
+    - deploy: to deploy resources on existing OpenShift clusters from the application server. Prerequisites:
+      - bash is the default shell interpreter 
       - curl or oc (OpenShift command line) available on the application server, 
       - network connectivity on the application server to reach the target clusters
     - hpe5g.sh: to build an installer deploying resources on existing OpenShift clusters
@@ -88,6 +89,12 @@ Where:
 
 The section, attributes and values supported are those defined in the interactive version of the automated deployer.  
 This resources json file can be built from the interactive mode by dumping the session once populated interactively.
+### DELETE<a name="DELETE"></a>
+Build and retrieve or run an undeployer from an HTML session available on the application server:   
+`curl -X DELETE -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
+
+Where all PUT parameters apply, except the target 'deploy' changed to 'undeploy'.
+ 
 ## Examples <a name="Examples"></a>
 ### Dump the services defined in the backing services set bs-set.html  
 ```
@@ -102,7 +109,10 @@ curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hp
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data '[{"Clusters": [[{"Name": "ocp1"},{"Endpoint": "api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"4pLEVTRLBGifHSEA93Cqa3BWhuujq-5FDD04WpfcOHY"},{"Targeted": true}]]}]'
 ```
-
+### Undeploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
+```
+curl -X DELETE -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data '[{"Clusters": [[{"Name": "ocp1"},{"Endpoint": "api.openshift1.ocp0.gre.hpecorp.net:6443"},{"Token":"4pLEVTRLBGifHSEA93Cqa3BWhuujq-5FDD04WpfcOHY"},{"Targeted": true}]]}]'
+```
 ### Build an installer deploying an ignite service named memorydb in the project 'myproject' using the default values
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh?project=myproject --data "@ignite.json"
@@ -124,7 +134,7 @@ Where ignite.json defines one ignite backing service named memorydb; all other v
 ### Deploy a network function and services with specific image 
 Build an installer deploying an udsf function and related services ignite, influxdb in the default project using default values from the default catalog except for ignite deployed with a specific image and influxdb with a specific storage size:
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@udsf_bs.json"
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data "@udsf_bs.json"
 ```
 Where udsf_bs.json defines one udsf network function with its backing services:
 ```
@@ -218,10 +228,10 @@ Unknown attribute Wild attribute in section DirectServices ignored.
 Unknown attribute EphemeralStorage in section DirectServices ignored.
         Expecting one of: Type,Name,Project,URL,insecure,Image,Tag,Storage,Volume,Replicas,Pipeline GIT,directory,branch
 ```
-#### Deploy an incompatible udsf function on top of the backing services set defined in bs-set.html  
-The ignite version configured in the bs-set session is not compatible with the udsf deployed version, thus preventing udsf to start.   
+#### Deploy a network function missing dependencies
+Attempt to deploy a udsf function from an empty session not providing the ignite and influxdb required services.   
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy --data "@udsf.json"
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data "@udsf.json"
 ```
 Where udsf.json contains:
 ```
@@ -246,5 +256,13 @@ Where udsf.json contains:
     ]
   }
 ]
+
+NetworkFunctions: myudsf missing dependency ignite on project hpe5g
+NetworkFunctions: myudsf missing dependency influxdb on project hpe5g
+```
+#### Deploy an incompatible udsf function on top of the backing services set defined in bs-set.html  
+The ignite version configured in the bs-set session is not compatible with the udsf deployed version, thus preventing udsf to start.   
+```
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy --data "@udsf.json"
 ```
 The installer is not able to detect this incompatibility. The client has to check the application status from the standard OpenShift API/CLI.   
