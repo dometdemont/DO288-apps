@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-09 Version 0.69</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-12 Version 0.71</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
@@ -32,6 +32,7 @@
     <legend>Build</legend>
 <table>
 <tr><td valign="top">Get help on the environment setup and topology definition</td><td valign="top"><input class="helpButton" type="button" value="Help" onclick="deploymentHelp()"></td>
+<tr><td valign="top">Build the markdown documentation</td><td valign="top"><input class="helpButton" type="button" value="Doc" onclick="deploymentDoc()"></td>
 </tr></tr>
 <tr><td valign="top">Build the installer deploying HPE5G resources on OpenShift clusters</td><td valign="top"><input class="buildButton" type="button" value="Resources" onclick="buildNetworkFunctions()"></td></tr>
 <td valign="top">Build the OpenStack Heat template deploying OpenShift version<select id="oc_version">
@@ -113,6 +114,10 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-06-12 0.71	Json session format: move to a list of attribute:value {a:x, b:y, ...} instead of a table of the same [{a:x},{b:y},...]
+    Add a Build Doc button compiling the Help text of a selection of sections in a markdown document 
+2020-06-11 0.70	Allow multiple instances of the same type in one project: add a new optional attribute in resources, Dependencies, to resolve ambiguity in dependencies
+    More nudm stuff in the default catalog: nudm-li-tf, nudm-ueau, nudm-uecm
 2020-06-09 0.69	Undeploy feature for interactive and headless modes; improve idempotence for udsf, udr, udm
 2020-06-04 0.68	Remove admin privilege requirements when possible (nudsf-dr sde-udr-nudr-dr sde-udr-nudr-prov hpe-nnrf-reg-agent udm prometheus influxdb ignite)
 2020-06-02 0.67	headless mode for RESTful invocation, including json dump and import; file type: init properly during import
@@ -682,7 +687,7 @@ vnfResource.prototype.dump = function(){
 	
 	for(var i=1; i < rowCount; i++){
 		// one more line
-		var line = new Array();
+		var line = new Object;
 		
 		for (j=0; j<columns.length; j++){
 			var val;
@@ -706,7 +711,7 @@ vnfResource.prototype.dump = function(){
 					val = source[1].value;
 					break;
 			}
-			if(val)line.push({[columns[j].name]:val});
+			if(val)line[columns[j].name]=val;
 		}
 		result.push(line);
 	}
@@ -1419,14 +1424,13 @@ var Clusters = new vnfResource("Clusters", [
 	]
 	);
 
-Clusters.help = function(){return `Clusters definition:
-OpenShift clusters candidate for deployment:
-	Name: nickname of this cluster
-	Endpoint: OpenShift API endpoint for this cluster. 
-		Typically retrieved from a session with: oc config current-context | cut -d/ -f2 | tr - .
-	Token: security token for this cluster identifying an authorized user
-		Typically retrieved from a session with: oc whoami -t
-	Targeted: check this box to deploy the defined resources to this cluster
+Clusters.help = function(){return `OpenShift clusters candidate for deployment:
+- Name: nickname of this cluster
+- Endpoint: OpenShift API endpoint for this cluster. 
+  Typically retrieved from a session with: oc config current-context | cut -d/ -f2 | tr - .
+- Token: security token for this cluster identifying an authorized user
+  Typically retrieved from a session with: oc whoami -t
+- Targeted: check this box to deploy the defined resources to this cluster
 `
 }
 
@@ -1489,8 +1493,7 @@ hpe5gResource.prototype = vnfResource.prototype;
 hpe5gResource.prototype.constructor = hpe5gResource;
 
 
-hpe5gResource.prototype.help = function(){var help=this.title+
-`
+hpe5gResource.prototype.help = function(){return `Attributes:
 - Type: the type of the resource to deploy
 - Name: one word resource name for this instance
 - Project: the OpenShift project hosting this resource instance
@@ -1501,6 +1504,8 @@ hpe5gResource.prototype.help = function(){var help=this.title+
   otherwise, images are directly pulled by the OpenShift image stream from their original URL
 - Storage, Volume: the storage size with its unit (like 1Gi) and the OpenShift persistent volume used by this resource
 - Replicas: number of replicas deployed for this instance.
+- Dependencies: comma separated list of resources names resolving this function dependencies within this project
+  If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile 
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
 	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
@@ -1510,7 +1515,6 @@ hpe5gResource.prototype.help = function(){var help=this.title+
 	branch: (optional) git branch to use, eg: master
 	
 `;
-	return help;
 }
 
 hpe5gResource.prototype.build = function(target){
@@ -1546,6 +1550,9 @@ hpe5gResource.prototype.build = function(target){
 		this.check += checkDependency(this.title=='HelmCharts', [values!=undefined && values.content!=undefined && chart.length>0], this.title+" "+name,", Helm chart and values are required");
 		var displayVolume="";
 		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas', "1");
+		var dependenciesList=this.getAndSetValue(row, nameIndexes, 'Dependencies');
+		var dependencies=undefined;
+		if(dependenciesList)dependencies=dependenciesList.split(',');
 		if(name.search(/[A-Z]/g) >= 0){this.check += "\n"+this.title+" "+name+" : upper cases are not supported";}
 		if(project == undefined || project == ''){this.check += "\n"+this.title+" "+name+" : project is required";}
 		var displayImage="";
@@ -1574,16 +1581,12 @@ hpe5gResource.prototype.build = function(target){
 		var displayReplicas="";
 		if(replicas.length>0)displayReplicas=replicas+ " replica(s) of type: ";
 		
-		var currentProvider=undefined;
-		if(hpe5gResources.provides[type] != undefined)currentProvider=hpe5gResources.provides[type][project];
-		if(currentProvider != undefined && name.localeCompare(currentProvider) != 0){
-			 var currentProviderCount=NetworkFunctions.count('Name', currentProvider) + DirectServices.count('Name', currentProvider) + IndirectServices.count('Name', currentProvider) + Operators.count('Name', currentProvider);
-			 // The current provider may have been deleted since the last refresh: the user may have deleted the row, etc.
-			 if(currentProviderCount > 0)this.check += "\n"+this.title+": multiple providers of type "+type+" on project "+project+": "+name+", "+hpe5gResources.provides[type][project];
-		}
-		if(hpe5gResources.provides[type] == undefined)hpe5gResources.provides[type] = new Array();
-		hpe5gResources.provides[type][project]=name;
-		hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, URL, chart, values, hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)));
+		// Record this provider to resolve dependencies later per type and per project
+		if(!hpe5gResources.provides[type])hpe5gResources.provides[type] = new Array();
+		if(!hpe5gResources.provides[type][project])hpe5gResources.provides[type][project]=new Array();
+		hpe5gResources.provides[type][project].push(name);
+		
+		hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)));
 		
 		if(insecure && hpe5gResources.insecureRegistries.indexOf(URL) < 0)hpe5gResources.insecureRegistries.push(URL);
 		
@@ -1597,7 +1600,7 @@ hpe5gResource.prototype.build = function(target){
 };
 
 //Class implementing a network function: name, image (including the tag), URL (hosting the image), pipeline, Helm chart 
-var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVolume, aReplicas, aURL, anHelmChart, anHelmChartValues, aPipeline){
+var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVolume, aReplicas, aDependency, aURL, anHelmChart, anHelmChartValues, aPipeline){
 	this.type=aType;
 	this.name=aName;
 	this.image=anImage;
@@ -1607,6 +1610,7 @@ var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVol
 	this.volume="";
 	if(aVolume != undefined && aVolume.length > 0)this.volume="volumeName: "+aVolume;
 	this.replicas=aReplicas;
+	this.dependency=aDependency;
 	this.helmChart=anHelmChart; this.helmChartValues=anHelmChartValues;
 	this.pipeline=aPipeline;
 	// Insecure registries are managed by docker; secured registries are pulled directly from the URL
@@ -1616,6 +1620,16 @@ var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVol
 		if(this.insecureURL())_imageStream='docker-registry.default.svc:5000/'+this.project+'/'+this.image;
 		return _imageStream;
 	}
+}
+
+//Resolve dependency of a given resource on a specific type: accept multiple candidates silentlty, just take the first one
+openshiftFunction.prototype.resolve = function(type){
+	var candidates, result;
+	if(hpe5gResources.provides[type])candidates=hpe5gResources.provides[type][this.project];
+	if(candidates)
+		if(this.dependency)result=candidates.filter(value => -1 !== this.dependency.indexOf(value))[0];
+		else result=candidates[0];
+	return result
 }
 
 //==========================
@@ -1645,8 +1659,9 @@ hpe5gResources.compile = function(){
 	hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
 		// Check if all dependencies for this network function type are satisfied on this project
 		hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
-			if(hpe5gResources.provides[requirement] != undefined && hpe5gResources.provides[requirement][networkFunction.project] != undefined)return;
+			if(networkFunction.resolve(requirement))return;
 			check += "\nNetworkFunctions: "+networkFunction.name+" missing dependency "+requirement+" on project "+networkFunction.project;
+			if(networkFunction.dependency)check+=" in the provided list: "+networkFunction.dependency;
 		});
     });
 	return check;
@@ -1666,6 +1681,7 @@ var NetworkFunctions = new hpe5gResource("NetworkFunctions", [
 	{name:'Storage', type:'text', width:'60px'},
 	{name:'Volume', type:'text', width:'60px'},
 	{name:'Replicas', type:'text', width:'40px'},
+	{name:'Dependencies', type:'text', width:'100px'},
 	{name:'Pipeline GIT', type:'text', width:'200px'},
 	{name:'directory', type:'text', width:'120px'},
 	{name:'branch', type:'text', width:'120px'}
@@ -1685,22 +1701,23 @@ var DirectServices = new hpe5gResource("DirectServices", [
 	{name:'Storage', type:'text', width:'60px'},
 	{name:'Volume', type:'text', width:'60px'},
 	{name:'Replicas', type:'text', width:'40px'},
+	{name:'Dependencies', type:'text', width:'100px'},
 	{name:'Pipeline GIT', type:'text', width:'200px'},
 	{name:'directory', type:'text', width:'120px'},
 	{name:'branch', type:'text', width:'120px'}
 	]
 	);
-DirectServices.help = function(){return NetworkFunctions.help()+
-	`NOTES: 
-	- ignite on persistent storage deploys three volumes:
-      . <name>-work
-      . <name>-wal
-      . <name>-walarchive
-	  As a consequence, the total claimed storage size is 3x the user defined size.
-	- ignite recommended values for udsf legacy versions are: 
-	  . URL: docker.io/apacheignite
-	  . Image: ignite
-	  . tag: 2.7.5
+DirectServices.help = function(){return hpe5gResource.prototype.help()+
+`NOTES: 
+- ignite on persistent storage deploys three volumes:
+  - <name>-work
+  - <name>-wal
+  - <name>-walarchive   
+As a consequence, the total claimed storage size is 3x the user defined size.
+- ignite recommended values for udsf legacy versions are: 
+  - URL: docker.io/apacheignite
+  - Image: ignite
+  - tag: 2.7.5
 `;}
 //===========================
 //IndirectServices
@@ -1716,12 +1733,13 @@ var IndirectServices = new hpe5gResource("IndirectServices", [
 	{name:'Storage', type:'text', width:'60px'},
 	{name:'Volume', type:'text', width:'60px'},
 	{name:'Replicas', type:'text', width:'40px'},
+	{name:'Dependencies', type:'text', width:'100px'},
 	{name:'Pipeline GIT', type:'text', width:'200px'},
 	{name:'directory', type:'text', width:'120px'},
 	{name:'branch', type:'text', width:'120px'}
 	]
 	);
-IndirectServices.help = function(){return NetworkFunctions.help()+
+IndirectServices.help = function(){return hpe5gResource.prototype.help()+
 `NOTES: 
 - jenkins recommended values for RedHat OpenShift 3 are : 
   . URL: docker.io/openshift
@@ -1743,8 +1761,7 @@ var Operators = new hpe5gResource("Operators", [
 	{name:'branch', type:'text', width:'120px'}
 	]
 );
-Operators.help = function(){var help=this.title+
-`
+Operators.help = function(){return `Operator instantiation:
 PREREQUISITE: the operators are installed on the target OpenShift infrastructure.
 - Type: the type of the operator to instantiate
 - Name: one word resource name for this operator instance
@@ -1758,7 +1775,6 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 	branch: (optional) git branch to use, eg: master
 	
 `;
-return help;
 }
 
 //===========================
@@ -1911,6 +1927,19 @@ The first master public IP address is available as $openshift_ip
 	./hpe5g.sh --remove five
  `
 );}
+
+// Compile the Help text of a selection of sections in a markdown document 
+function deploymentDoc(){
+	var result=`
+## Sections detailed specifications
+This chapter is a compilation of the detailed sections specifications.
+`;
+	['Clusters','NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
+		result+="\n### "+section+"\n"+window[section].help();
+		if(hpe5gResources.resources[section])result+="\n"+section+" supported types: "+hpe5gResources.resources[section]+"\n";
+	});
+	userOutput(result);
+}
 
 // Shell script dropped on the ems node ready to deploy the volumes, projects, and hpe5g network functions 
 // Prerequisites depend on the target: oc/curl
@@ -2117,7 +2146,7 @@ objects:
 		
 		hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
 			var ereg=new RegExp("~"+requirement+"_NAME~","g");
-			deployment=deployment.replace(ereg, hpe5gResources.provides[requirement][networkFunction.project]);
+			deployment=deployment.replace(ereg, networkFunction.resolve(requirement));
 			});
 		result+=deployment;
 		});
@@ -2276,21 +2305,19 @@ function jsonSession(payload){
 			if(typeof(payload) != 'object')sections=JSON.parse(payload); 
 			if(!sections || !sections.length){return true;}	
 			Object.keys(sections).forEach(function(s) {
-				var section=Object.keys(sections[s])[0];
+				var section=Object.keys(sections[s]);
 				if(!window[section]){
 					error+="Unexpected section: "+section+"\n\tExpecting one of "+vnfResources.map(function(e){return e.title;}).join()+"\n";
 					return;
 				}
-				Object.values(sections[s])[0].forEach(function(row){
-					var line = new Array();
-					Object.keys(row).forEach(function(attribute) {
-						var x=Object.keys(row[attribute]);
-						var y=Object.values(row[attribute]);
-						line.push({column:x[0], value:y[0]});
-						});
-					var check=window[section].add(line);
+				Object.values(sections[s]).forEach(function(source){
+				  source.forEach(function(row){
+					var dest = new Array();
+					for(key in row){dest.push({column:key, value:row[key]});}
+					var check=window[section].add(dest);
 					if(check)error+=check;
 				});
+			  });
 			});
 			if(error)throw error;
 		  } catch (ex) {
@@ -3050,6 +3077,9 @@ var defaultCatalog=`
       "nudr-reg-agent",
       "nudm-ee",
       "nudm-li-poi",
+      "nudm-li-tf",
+      "nudm-ueau",
+      "nudm-uecm",
       "nudm-sdm",
       "nudm-notify",
       "sf-cmod",
@@ -3105,15 +3135,22 @@ var defaultCatalog=`
       "influxdb"
     ],
     "nudr-reg-agent": [
-      "influxdb"
+    	"redis","influxdb"
     ],
     "nudm-ee": [
       "influxdb", "nudr-dr"
     ],
     "nudm-li-poi": [
-      "redis",
-      "kafka",
-      "influxdb"
+      "redis","kafka","influxdb"
+    ],
+    "nudm-li-tf": [
+        "redis","influxdb"
+    ],
+    "nudm-ueau": [
+        "influxdb", "nudr-dr"
+    ],
+    "nudm-uecm": [
+        "influxdb", "nudr-dr"
     ],
     "nudm-sdm": [
       "influxdb", "nudr-dr"
@@ -3186,51 +3223,67 @@ var defaultCatalog=`
     "nudsf-dr": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-sde-nudsf-dr",
-      "tag": "1.5.0-000839.93c5dde"
+      "tag": "1.5.0"
     },
     "nudr-dr": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-sde-udr-nudr-dr",
-      "tag": "1.1.0-004030.a9f0aa7"
+      "tag": "1.1.0"
     },
     "nudr-prov": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-sde-udr-nudr-prov",
-      "tag": "1.1.0-004030.a9f0aa7"
+      "tag": "1.1.0"
     },
     "nudr-reg-agent": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-nnrf-reg-agent",
-      "tag": "0.9.0-001258.0f33fe8"
+      "tag": "0.9.0"
     },
     "nudm-ee": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-nf-udm-ee",
-      "tag": "0.9.0-004907.63aa203"
+      "tag": "0.9.0"
     },
     "nudm-li-poi": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-nf-udm-li-poi",
-      "tag": "0.9.0-004907.63aa203"
+      "tag": "0.9.0"
+    },
+    "nudm-li-tf": {
+        "URL": "cmsgvm38.gre.hpecorp.net:18444",
+        "image": "hpe-nf-udm-li-tf",
+        "tag": "0.9.0"
+    },
+    "nudm-ueau": {
+        "URL": "cmsgvm38.gre.hpecorp.net:18444",
+        "image": "hpe-nf-udm-ueau",
+        "tag": "0.9.0"
+    },
+    "nudm-uecm": {
+        "URL": "cmsgvm38.gre.hpecorp.net:18444",
+        "image": "hpe-nf-udm-uecm",
+        "tag": "0.9.0"
     },
     "nudm-sdm": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-nf-udm-sdm",
-      "tag": "0.9.0-004907.63aa203"
+      "tag": "0.9.0"
     },
     "nudm-notify": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-nf-udm-notify",
-      "tag": "0.9.0-004907.63aa203"
-    },"sf-cmod": {
+      "tag": "0.9.0"
+    },
+    "sf-cmod": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-sf-cmod",
-      "tag": "0.8.0-000305.016b9f3"
+      "tag": "0.8.0"
     },
     "nrf-reg-agent": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
       "image": "hpe-nf-nrf-reg-agent",
-      "tag": "0.12.0-001385.46cf6c2"
+      "tag": "0.12.0"
     },
     "ignite": {
       "URL": "docker.io/gridgain",
@@ -4390,7 +4443,7 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
                   readThrough: "false"
                   timeToLiveSeconds: "3600"
                   properties:
-                    cache.uri: "redis://localhost:6379?database=0"
+                    cache.uri: redis://~redis_NAME~.~PROJECT~.svc.cluster.local:6379?database=0
                     cache.codec: "io.lettuce.core.codec.StringCodec"
       call-tracing:
         properties:
@@ -5721,6 +5774,1228 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
       name: ~NAME~
 `;
 //================================================
+hpe5gResources.defaults['nudm-li-tf']['template']=
+//================================================
+`
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-secret
+    namespace: ~PROJECT~
+  type: Opaque
+  data: 
+    "keystore.jks": |- 
+      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
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-log4j
+    namespace: ~PROJECT~
+  data:
+    log4j2.xml: |
+  `
+  +log4j2xml+
+  `
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap
+    namespace: ~PROJECT~
+  data:
+    nudm-li-tf-nf-config.yaml: |
+      # Sample Network function DEFAULT configuration.
+      #
+      # The parameters below can be overridden by an external configuration.
+      #
+      # HTTP/2 REST client subsystem
+      caching-providers:
+        - cache-managers:
+          - caches:
+            - eternal: "true"
+              keyType: java.lang.String
+              name: simple-redis-cache
+              properties:
+                cache.codec: com.hpe.cms5g.udm.li.common.utils.TFEncryptionCodec
+                cache.connect: false
+                cache.uri: redis://~redis_NAME~.~PROJECT~.svc.cluster.local:6379?database=0
+              readThrough: "false"
+              valueType: java.lang.String
+              writeThrough: "false"
+            classloader: '#notused'
+            properties: null
+            uri: paas://redis-caching-manager
+          classloader: '#notused'
+          properties:
+            caching.provider.class.name: com.hpe.paas.middleware.sdk.impl.cache.redis.RedisCachingProvider
+          uri: paas://redis-caching-manager  
+      
+      logging:
+      
+        locale: en-US
+        loggers:
+        - factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          name: log4j2
+      
+      statistics-configuration:
+        id: nudm-li-tf-statistics
+      
+        enabled: true
+        http-client-enabled: true
+        http-server-enabled: true
+        jmx:
+          domain: Nnef_UDM_LiTf
+          enabled: true
+          properties:
+            com.hpe.imsc.statistics.jmx.descriptors: "true"
+            com.hpe.imsc.statistics.jmx.notifications: "true"
+        jvm-metrics: true
+        properties:
+          com.hpe.imsc.statistics.influxdb.server.database: nflitf
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
+          com.hpe.imsc.statistics.influxdb.server.port: "8086"
+          com.hpe.imsc.statistics.influxdb.server.protocol: http
+          com.hpe.imsc.statistics.publish.jsonDescriptors: true
+      
+      # Schema Validation
+      validation:
+        internationalE164: "[0-9]{1,15}"
+        imsi: "[0-9]{6,15}"
+        imei: "[0-9]{14}"
+        imeiCheckDigit: "[0-9]{15}"
+        imeisv: "[0-9]{16}"
+        ipv4Address: "((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])"
+        ipv6Address: "([0-9a-f]{4}:){7}([0-9a-f]{4})"
+        tcpport: "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+        udpport: "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+        emailAddress: "[a-zA-Z0-9\\\\.!#$%&amp;'\\\\*\\\\+\\\\\\\\/=\\\\?\\\\^_\`\\\\{\\\\|\\\\}~\\\\-]+@[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\\\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*"
+        uuid: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+        token: "^(\\\\S+)"
+        qualifiedMicrosecondDateTime: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\\\.[0-9]{6}(Z|[+-][0-9]{2}:[0-9]{2})$"
+        version: "v1.6.1"
+        deliveryType: "X2Only"
+        enableKeepAlive: true
+      
+      keepAlive:
+        TIME_P2: 60
+        
+      dataEncryption:
+        dataSecret: "VU5JWjVBQkNENjc4OTBFRg=="
+        keySecret: "secureMe"
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-swarm-configmap
+    namespace: ~PROJECT~
+  data:
+    project-5g-nudm-li-tf.yml: |
+      # Sample Thorntail global configuration.
+      #
+      
+      swarm:
+        https:
+          only: true
+          port: 8443
+          keystore:
+            embedded: true
+          certificate:
+            generate: true
+            host: localhost
+        http:
+          port: 8080
+        undertow:
+          alias: localhost
+          servers:
+            default-server:
+              http-listeners:
+                default:
+                  enabled: true
+                  socket-binding: http
+                  enable-http2: true
+                  always-set-keep-alive: true
+              https-listeners:
+                default-https:
+                  enabled: true
+                  socket-binding: https
+                  enable-http2: true
+                  ssl-context: twoWaySSC
+                  always-set-keep-alive: true
+          application-security-domains:
+            applicationDomain:
+              security-domain: myDomain 
+        elytron:
+          key-store-realms:
+            ksRealm:
+              key-store: twoWayTS
+          x500-attribute-principal-decoders:
+            CNDecoder:
+              oid: 2.5.4.3
+              maximum-segments: 1
+          security-domains:
+            myDomain:
+              realms:
+                - realm: ksRealm
+              default-realm: ksRealm
+              principal-decoder: CNDecoder
+              permission-mapper: default-permission-mapper
+             
+          server-ssl-contexts:
+            twoWaySSC:
+              protocols: TLSv1.2
+              key-manager: twoWayKM
+              trust-manager: twoWayTM
+              need-client-auth: true
+              security-domain: myDomain
+          key-managers:
+            twoWayKM:
+              key-store: twoWayKS
+              credential-reference:
+                clear-text: password
+          trust-managers:
+            twoWayTM:
+              key-store: twoWayTS
+              credential-reference:
+                clear-text: password
+          key-stores:
+            twoWayKS:
+              path: "/etc/opt/hpe/nf/udm/li-tf/security/keystore.jks"
+              credential-reference:
+                clear-text: password
+              type: JKS
+            twoWayTS:
+              path: "/etc/opt/hpe/nf/udm/li-tf/security/keystore.jks"
+              credential-reference:
+                clear-text: password
+              type: JKS
+          file-audit-logs:
+            local-audit:
+              path: /var/opt/hpe/nf/udm/li-tf/logs/audit.log
+        logging:
+          root-logger:
+            level: INFO
+            handlers:
+            - CONSOLE
+          loggers:
+      
+            com.hpe:
+              level: INFO
+            io.netty:
+              level: INFO
+            io.undertow:
+              level: INFO
+            okhttp3:
+              level: INFO
+            org.jboss.as:
+              level: INFO
+            org.wildfly:
+              level: INFO
+            stdout:
+              handlers:
+              - STDOUT
+              level: INFO
+          console-handlers:
+            STDOUT:
+              named-formatter: null
+              formatter: "%s%e%n"
+            CONSOLE:
+              named-formatter: null
+              formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1.1.1.20.}] (%t) %s%e%n"
+- kind: Service
+  apiVersion: v1
+  metadata: 
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    type: NodePort
+    ports:
+      - port: 8443
+        nodePort: 30673
+        protocol: TCP
+        name: https-nudm-nf
+  selector:
+      name: ~NAME~
+      deploymentconfig: ~NAME~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    replicas: ~REPLICAS~
+    template:
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        volumes:
+          - name: ~NAME~-config-volume
+            projected:
+              sources:
+              - configMap:
+                  name: ~NAME~-swarm-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap-log4j   
+          - name: ~NAME~-secrets-volume
+            projected:
+              sources:
+              - secret:
+                  name: ~NAME~-secret
+        containers:
+          - name: ~NAME~
+            image: ~IMAGE_STREAM~
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+            - name:  ~NAME~-config-volume
+              mountPath: /etc/opt/hpe/nf/udm/li-tf
+            - name:  ~NAME~-secrets-volume
+              mountPath: /etc/opt/hpe/nf/udm/li-tf/security
+            ports:
+              - name: https
+                containerPort: 8443
+                protocol: TCP
+            ports:
+              - name: health
+                containerPort: 8080
+                protocol: TCP
+            env:
+              - name: JAVA_OPTS
+                value:  -Xms512m -Xmx512m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe/nf/udm/li-tf/nudm-li-tf-nf-config.yaml -Dpaas.service.name=nudm-li-tf
+            livenessProbe:
+              httpGet:
+                path: /rest/probes/healthy
+                port: health             
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              timeoutSeconds: 10
+            readinessProbe:
+              httpGet:
+                path: /rest/probes/healthz
+                port: health              
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              timeoutSeconds: 10
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 2048Mi
+              requests:
+                cpu: 500m
+                memory: 1024Mi
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    to:
+      kind: Service
+      name: ~NAME~
+`;
+//================================================
+hpe5gResources.defaults['nudm-ueau']['template']=
+//================================================
+`
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-secret
+    namespace: ~PROJECT~
+  type: Opaque
+  data: 
+    "keystore.jks": |- 
+      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
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-call-tracing
+    namespace: ~PROJECT~
+  data:
+    call-tracing-provisioning.yaml: |
+      ue-provisioning:
+        - ue-id:
+            - "imsi-0555555555"
+            - "msisdn-6666666666"
+          traced-service:
+            - ~NAME~
+          propagate-trace: true
+          trace-depth: "MEDIUM"
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-log4j
+    namespace: ~PROJECT~
+  data:
+    log4j2.xml: |
+  `
+  +log4j2xml+
+  `
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-nnrf-registration
+    namespace: ~PROJECT~
+  data:
+    nnrf-register.config: |
+      {
+      "nfInstanceId": "0590E150-4C69-4d86-A49C-990BF056F993",
+      "nfType":"UDM",
+      "nfStatus":"REGISTERED",
+      "heartBeatTimer": "45",
+      "ipv4Addresses":["127.0.0.1"],
+      "plmnList":[{"mcc":111,"mnc":222}, {"mcc":111,"mnc":333}],
+  
+      "fqdn":"localhost",
+      "allowedNfTypes": ["AUSF"],
+      "nfServices" : [ {
+          "serviceInstanceId" : "UDM-UEAU-HPE",
+          "serviceName" : "~NAME~",
+          "versions" : [ {
+            "apiVersionInUri" : "v1",
+            "apiFullVersion" : "1.0.1"
+          } ],
+  
+          "scheme" : "https",
+  
+          "nfServiceStatus" : "REGISTERED",
+          "fqdn":"localhost",
+          "ipEndPoints" : [ {
+            "ipv4Address" : "127.0.0.1",
+            "transport" : "TCP",
+            "port" : "30046"
+          } ],
+          "allowedNfTypes": ["AUSF"]
+        } ]
+      }
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-udr-discovery
+    namespace: ~PROJECT~
+  data:
+    udr-disc.json: |
+      [ {
+      "nfInstanceId" : "57fc19a1-b366-477a-8c2b-080044e680b5",
+      "nfType" : "UDR",
+      "nfStatus" : "REGISTERED",
+      "plmnList" : [ {
+        "mcc" : "111",
+        "mnc" : "222"
+      } ],
+      "ipv4Addresses":["127.0.0.1"],
+      "nfServicePersistence" : false,
+      "nfServices" : [ {
+          "serviceInstanceId" : "57fc19a1-b366-477a-8c2b-080044e680b5",
+          "serviceName" : "~nudr-dr_NAME~",
+          "versions" : [ {
+            "apiVersionInUri" : "v1",
+            "apiFullVersion" : "1.0.0"
+          } ],
+          "scheme" : "https",
+          "nfServiceStatus" : "REGISTERED",
+          "ipEndPoints" : [ {
+            "ipv4Address" : "127.0.0.1",
+            "transport" : "TCP",
+            "port" : "5090"
+          } ],
+        "allowedPlmns" : [ {
+          "mcc" : "208",
+          "mnc" : "01"
+        } ],
+        "allowedNfTypes" : [ "NEF", "UDM", "PCF", "BSF" ],
+        "allowedNfDomains" : [ "pfdmanagement.nnef.cms5g.hpe.com" ]
+      } ]
+      } ]
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap
+    namespace: ~PROJECT~
+  data:
+    nudm-ueau-nf-config.yaml: |
+      #
+      # Sample Network function configuration.
+      #
+      # HTTP/2 REST client subsystem
+      ---
+      rest-client:
+        connector-provider: com.hpe.paas.middleware.jersey.okhttp.connector.OkhttpConnectorProvider
+        properties:
+          jersey.config.client.async.threadPoolSize: 50
+          jersey.config.client.followRedirects: false
+          jersey.config.client.connectTimeout: 1000
+          jersey.config.client.readTimeout: 10000
+      
+        security:
+          keyCertificateLocation:
+          keystoreLocation:
+          keystorePassword: password
+          keyCertificatePKLocation:
+          keyCertificateKeyPairPassword:
+          keyManagerFactoryAlgorithm:
+          truststoreLocation:
+          trustCertificateLocation:
+          truststorePassword:
+          trustCertificatePKLocation:
+          trustCertificateKeyPairPassword:
+          trustManagerFactoryAlgorithm:
+          cryptoProtocol: TLSv1.2
+          passwordEncoded: false
+      
+      udm-ueau:
+        hplmn.mcc: 909
+        hplmn.mnc: 88
+      
+        cmod:
+          hostname: cmod
+          port: 8060
+          scheme: https
+        threadpool:
+          size: 30  
+      
+      nnrf-client:
+        server-scheme: https
+        server-fqdn: nrf.server.hpecorp.net
+        server-port: 8443
+        server-version: v1
+        nfprofile-uri: /etc/opt/hpe/nf/udm/ueau/nnrf-register.config
+        enable-cache: false
+        default-cache-validity-period-secs: 3600
+        discover-stub-mode: false
+        # json file containing remote NF profile to be discovered in stub-mode
+        stub-remote-nf-profile: /etc/opt/hpe/nf/udm/ueau/udr-disc.json
+      
+      logging:
+        locale: en-US
+        loggers:
+          - name: log4j2
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          - name: fluentd
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
+            properties:
+              host: fluentd.logging
+              port: 24224
+      
+      statistics-configuration:
+        id: nudm-ueau-statistics
+        enabled: true
+        jvm-metrics: true
+        properties:
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.port: 8086
+          com.hpe.imsc.statistics.influxdb.server.protocol: http
+          com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
+          com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
+        jmx:
+          enabled: false
+      call-tracing:
+        properties:
+          JAEGER_SERVICE_NAME: ~NAME~
+          JAEGER_AGENT_HOST: localhost
+          JAEGER_AGENT_PORT: 8090
+          JAEGER_ENDPOINT: http://localhost:6831/api/traces
+          JAEGER_REPORTER_FLUSH_INTERVAL: 100
+          JAEGER_REPORTER_LOG_SPANS: false
+          JAEGER_SAMPLER_TYPE: "probabilistic"
+          JAEGER_SAMPLER_PARAM: 1.0
+        enabled: true
+        trace-all-operations: true
+        trace-all-ues: false
+        provisioning-uri: "file:///etc/opt/hpe/nf/udm/ueau/call-tracing-provisioning.yaml"
+        max-trace-depth: MINIMUM
+        max-body-length: 1200
+        autorefresh-provisioning-period: 30
+      
+      caching-providers:
+        - cache-managers:
+          - caches: null
+            classloader: '#notused'
+            properties: null
+            uri: paas://redis-cache-manager
+          classloader: '#notused'
+          properties:
+            caching.provider.class.name: com.hpe.paas.middleware.sdk.impl.cache.redis.RedisCachingProvider
+          uri: paas://redis-caching-provider
+
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-swarm-configmap
+    namespace: ~PROJECT~
+  data:
+    project-5g-nudm-ueau.yml: |
+      #
+      # Sample Thorntail global configuration.
+      #
+      swarm:
+        
+        https:
+          only: false
+          port: 8443
+          keystore:
+            embedded: true
+          certificate:
+            generate: true
+            host: localhost
+  
+        io:
+          workers:
+            default:
+              io-threads: 4
+              task-max-threads: 32
+        undertow:
+          alias: localhost
+          servers:
+            default-server:
+              https-listeners:
+                default-https:
+                  socket-binding: https
+                  enable-http2: true
+                  ssl-context: sslctx
+                  buffer-pool: 
+                  http2-header-table-size: 
+                  http2-initial-window-size: 
+                  http2-max-concurrent-streams: 
+                  http2-max-frame-size: 
+                  http2-max-header-list-size:
+                  max-buffered-request-size:
+                  max-connections: 2000
+                  max-header-size:
+                  max-headers:
+                  max-processing-time:
+                  no-request-timeout: 
+                  read-timeout:
+                  receive-buffer:
+                  send-buffer: 
+                  ssl-session-cache-size:
+                  ssl-session-timeout:
+                  url-charset:
+                  verify-client:
+        elytron:
+          server-ssl-contexts:
+            sslctx:
+              protocols: TLSv1.2
+              key-manager: km
+          key-managers:
+            km:
+              key-store: ks
+              credential-reference:
+                clear-text: password
+          key-stores:
+            ks:
+              path: /etc/opt/hpe/nf/udm/ueau/security/keystore.jks
+              credential-reference:
+                clear-text: password
+              type: JKS
+          file-audit-logs:
+            local-audit:
+              path: /var/opt/hpe/nf/udm/ueau/logs/audit.log
+        logging:
+          root-logger:
+            level: INFO
+            handlers:
+            - CONSOLE
+          loggers:
+            com.hpe:
+              level: INFO
+            io.netty:
+              level: INFO
+            io.undertow:
+              level: INFO
+            okhttp3:
+              level: INFO
+            org.jboss.as:
+              level: INFO
+            org.wildfly:
+              level: INFO
+            stdout:
+              handlers:
+              - STDOUT
+              level: INFO
+          console-handlers:
+            STDOUT:
+              named-formatter: null
+              formatter: "%s%e%n"
+            CONSOLE:
+              named-formatter: null
+              formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1.1.1.20.}] (%t) %s%e%n"
+- kind: Service
+  apiVersion: v1
+  metadata: 
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    type: NodePort
+    ports:
+      - port: 8443
+        protocol: TCP
+        name:  https-nudm-nf
+        targetPort: 30046
+  selector:
+      name: ~NAME~
+      deploymentconfig: ~NAME~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    replicas: ~REPLICAS~
+    template:
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        volumes:
+          - name: ~NAME~-config-volume
+            projected:
+              sources:
+              - configMap:
+                  name: ~NAME~-swarm-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap-nnrf-registration
+              - configMap:
+                  name: ~NAME~-application-configmap-log4j
+              - configMap:
+                  name: ~NAME~-application-configmap-udr-discovery
+              - configMap:
+                  name: ~NAME~-application-configmap-call-tracing    
+          - name: ~NAME~-secrets-volume
+            projected:
+              sources:
+              - secret:
+                  name: ~NAME~-secret
+        containers:
+          - name: ~NAME~
+            image: ~IMAGE_STREAM~
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+            - name:  ~NAME~-config-volume
+              mountPath: /etc/opt/hpe/nf/udm/ueau
+            - name:  ~NAME~-secrets-volume
+              mountPath: /etc/opt/hpe/nf/udm/ueau/security
+            ports:
+              - name: https
+                containerPort: 8443
+                protocol: TCP
+            ports:
+              - name: health
+                containerPort: 8080
+                protocol: TCP
+            env:
+              - name: JAVA_OPTS
+                value:  -Xms512m -Xmx512m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe/nf/udm/ueau/nudm-ueau-nf-config.yaml
+            livenessProbe:
+              httpGet:
+                path: /rest/probes/healthy
+                port: health             
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              timeoutSeconds: 40
+            readinessProbe:
+              httpGet:
+                path: /rest/probes/healthz
+                port: health              
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              timeoutSeconds: 40
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 2048Mi
+              requests:
+                cpu: 500m
+                memory: 1024Mi
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    to:
+      kind: Service
+      name: ~NAME~
+`;
+//================================================
+hpe5gResources.defaults['nudm-uecm']['template']=
+//================================================
+`
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-secret
+    namespace: ~PROJECT~
+  type: Opaque
+  data: 
+    "keystore.jks": |- 
+      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
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-call-tracing
+    namespace: ~PROJECT~
+  data:
+    call-tracing-provisioning.yaml: |
+      ue-provisioning:
+        - ue-id:
+            - "imsi-0555555555"
+            - "msisdn-6666666666"
+          traced-service:
+            - ~NAME~
+          propagate-trace: true
+          trace-depth: "MEDIUM"
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-log4j
+    namespace: ~PROJECT~
+  data:
+    log4j2.xml: |
+  `
+  +log4j2xml+
+  `
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-nnrf-registration
+    namespace: ~PROJECT~
+  data:
+    nnrf-register.config: |
+      {
+      "nfInstanceId": "0590E150-4C69-4d86-A49C-990BF056F992",
+      "nfType":"UDM",
+      "nfStatus":"REGISTERED",
+      "heartBeatTimer": "45",
+      "ipv4Addresses":["127.0.0.1"],
+      "plmnList":[{"mcc":111,"mnc":222}, {"mcc":111,"mnc":333}],
+      "fqdn":"localhost",
+      "allowedPlmns":[{"mcc":111,"mnc":222}, {"mcc":111,"mnc":333}],
+      "allowedNfTypes": ["AMF","SMF", "NEF","GMLC"],
+      "nfServices" : [ {
+          "serviceInstanceId" : "UDM-UECM-HPE",
+          "serviceName" : "nudm-uecm",
+          "versions" : [ {
+            "apiVersionInUri" : "v1",
+            "apiFullVersion" : "1.0.2"
+          } ],
+          "scheme" : "https",
+          "nfServiceStatus" : "REGISTERED",
+          "fqdn":"localhost",
+          "ipEndPoints" : [ {
+            "ipv4Address" : "127.0.0.1",
+            "transport" : "TCP",
+            "port" : "30044"
+          } ],
+            "allowedPlmns":[{"mcc":111,"mnc":222}, {"mcc":111,"mnc":333}],
+          "allowedNfTypes": ["AMF","SMF","NEF","GMLC"]
+        } ]
+      }
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap-udr-discovery
+    namespace: ~PROJECT~
+  data:
+    udr-disc.json: |
+      [ {
+      "nfInstanceId" : "57fc19a1-b366-477a-8c2b-080044e680b5",
+      "nfType" : "UDR",
+      "nfStatus" : "REGISTERED",
+      "plmnList" : [ {
+        "mcc" : "111",
+        "mnc" : "222"
+      } ],
+      "ipv4Addresses":["127.0.0.1"],
+      "nfServicePersistence" : false,
+      "nfServices" : [ {
+          "serviceInstanceId" : "57fc19a1-b366-477a-8c2b-080044e680b5",
+          "serviceName" : "~nudr-dr_NAME~",
+          "versions" : [ {
+            "apiVersionInUri" : "v1",
+            "apiFullVersion" : "1.0.0"
+          } ],
+          "scheme" : "https",
+          "nfServiceStatus" : "REGISTERED",
+          "ipEndPoints" : [ {
+            "ipv4Address" : "127.0.0.1",
+            "transport" : "TCP",
+            "port" : "5090"
+          } ],
+        "allowedPlmns" : [ {
+          "mcc" : "208",
+          "mnc" : "01"
+        } ],
+        "allowedNfTypes" : [ "NEF", "UDM", "PCF", "BSF" ],
+        "allowedNfDomains" : [ "pfdmanagement.nnef.cms5g.hpe.com" ]
+      } ]
+      } ]
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap
+    namespace: ~PROJECT~
+  data:
+    nudm-uecm-nf-config.yaml: |
+      #
+      # Sample Network function configuration.
+      #
+      # HTTP/2 REST client subsystem
+      rest-client:
+        connector-provider: com.hpe.paas.middleware.jersey.okhttp.connector.OkhttpConnectorProvider
+        properties:
+          jersey.config.client.async.threadPoolSize: 50
+          jersey.config.client.followRedirects: false
+          jersey.config.client.connectTimeout: 1000
+          jersey.config.client.readTimeout: 10000
+        security:
+          keyCertificateLocation:
+          keystoreLocation:
+          keystorePassword: password
+          keyCertificatePKLocation:
+          keyCertificateKeyPairPassword:
+          keyManagerFactoryAlgorithm:
+          truststoreLocation:
+          trustCertificateLocation:
+          truststorePassword:
+          trustCertificatePKLocation:
+          trustCertificateKeyPairPassword:
+          trustManagerFactoryAlgorithm:
+          cryptoProtocol: TLSv1.2
+          passwordEncoded: false
+      udm-uecm:
+        hplmn.mcc: 909
+        hplmn.mnc: 88
+        features:
+          ee-enable: false
+          roamingODBDataCheck: false
+          OperatorPolicyForSharedData:
+            Registration: AllowedWithSharedData
+          LIEnbld: false
+      nnrf-client:
+        server-scheme: https
+        server-fqdn: nrf.server.hpecorp.net
+        server-port: 8443
+        server-version: v1
+        nfprofile-uri: /etc/opt/hpe/nf/udm/uecm/nnrf-register.config
+        enable-cache: false
+        default-cache-validity-period-secs: 3600
+        discover-stub-mode: false
+        # json file containing remote NF profile to be discovered in stub-mode
+        stub-remote-nf-profile: /etc/opt/hpe/nf/udm/uecm/udr-disc.json
+      logging:
+        locale: en-US
+        loggers:
+          - name: log4j2
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          - name: fluentd
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
+            properties:
+              host: fluentd.logging
+              port: 24224
+      statistics-configuration:
+        id: nudm-uecm-statistics
+        enabled: true
+        jvm-metrics: true
+        properties:
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.port: 8086
+          com.hpe.imsc.statistics.influxdb.server.protocol: http
+          com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
+          com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
+        jmx:
+          enabled: false
+      call-tracing:
+        properties:
+          JAEGER_SERVICE_NAME: ~NAME~
+          JAEGER_AGENT_HOST: localhost
+          JAEGER_AGENT_PORT: 8090
+          JAEGER_ENDPOINT: http://localhost:6831/api/traces
+          JAEGER_REPORTER_FLUSH_INTERVAL: 100
+          JAEGER_REPORTER_LOG_SPANS: false
+          JAEGER_SAMPLER_TYPE: "probabilistic"
+          JAEGER_SAMPLER_PARAM: 1.0
+        enabled: true
+        trace-all-operations: true
+        trace-all-ues: false
+        provisioning-uri: "file:/etc/opt/hpe/nf/udm/uecm/call-tracing-provisioning.yaml"
+        max-trace-depth: MINIMUM
+        max-body-length: 1200
+        autorefresh-provisioning-period: 30
+      caching-providers:
+        - cache-managers:
+          - caches: null
+            classloader: '#notused'
+            properties: null
+            uri: paas://redis-cache-manager
+          classloader: '#notused'
+          properties:
+            caching.provider.class.name: com.hpe.paas.middleware.sdk.impl.cache.redis.RedisCachingProvider
+          uri: paas://redis-caching-provider
+      # Kafka configuration
+      pubsub:
+        brokers:
+         - 10.233.3.53:9092
+        properties:
+          group.id: UDMMsgConsumerGroup
+          max.block.ms: 1000
+        ServingSystemMsgQueue: UDMServingSystem
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-swarm-configmap
+    namespace: ~PROJECT~
+  data:
+    project-5g-nudm-uecm.yml: |
+      #
+      # Sample Thorntail global configuration.
+      #
+      swarm:
+        
+        https:
+          only: false
+          port: 8443
+          keystore:
+            embedded: true
+          certificate:
+            generate: true
+            host: localhost
+  
+        io:
+          workers:
+            default:
+              io-threads: 4
+              task-max-threads: 32
+        undertow:
+          alias: localhost
+          servers:
+            default-server:
+              https-listeners:
+                default-https:
+                  socket-binding: https
+                  enable-http2: true
+                  ssl-context: sslctx
+                  buffer-pool: 
+                  http2-header-table-size: 
+                  http2-initial-window-size: 
+                  http2-max-concurrent-streams: 
+                  http2-max-frame-size: 
+                  http2-max-header-list-size:
+                  max-buffered-request-size:
+                  max-connections: 2000
+                  max-header-size:
+                  max-headers:
+                  max-processing-time:
+                  no-request-timeout: 
+                  read-timeout:
+                  receive-buffer:
+                  send-buffer: 
+                  ssl-session-cache-size:
+                  ssl-session-timeout:
+                  url-charset:
+                  verify-client:
+        elytron:
+          server-ssl-contexts:
+            sslctx:
+              protocols: TLSv1.2
+              key-manager: km
+          key-managers:
+            km:
+              key-store: ks
+              credential-reference:
+                clear-text: password
+          key-stores:
+            ks:
+              path: /etc/opt/hpe/nf/udm/uecm/security/keystore.jks
+              credential-reference:
+                clear-text: password
+              type: JKS
+          file-audit-logs:
+            local-audit:
+              path: /var/opt/hpe/nf/udm/uecm/logs/audit.log
+        logging:
+          root-logger:
+            level: INFO
+            handlers:
+            - CONSOLE
+          loggers:
+            com.hpe:
+              level: INFO
+            io.netty:
+              level: INFO
+            io.undertow:
+              level: INFO
+            okhttp3:
+              level: INFO
+            org.jboss.as:
+              level: INFO
+            org.wildfly:
+              level: INFO
+            stdout:
+              handlers:
+              - STDOUT
+              level: INFO
+          console-handlers:
+            STDOUT:
+              named-formatter: null
+              formatter: "%s%e%n"
+            CONSOLE:
+              named-formatter: null
+              formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1.1.1.20.}] (%t) %s%e%n"
+- kind: Service
+  apiVersion: v1
+  metadata: 
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    type: NodePort
+    ports:
+      - port: 8443
+        protocol: TCP
+        name:  https-nudm-nf
+        targetPort: 30044
+  selector:
+      name: ~NAME~
+      deploymentconfig: ~NAME~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    replicas: ~REPLICAS~
+    template:
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        volumes:
+          - name: ~NAME~-config-volume
+            projected:
+              sources:
+              - configMap:
+                  name: ~NAME~-swarm-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap-nnrf-registration
+              - configMap:
+                  name: ~NAME~-application-configmap-log4j
+              - configMap:
+                  name: ~NAME~-application-configmap-udr-discovery
+              - configMap:
+                  name: ~NAME~-application-configmap-call-tracing    
+          - name: ~NAME~-secrets-volume
+            projected:
+              sources:
+              - secret:
+                  name: ~NAME~-secret
+        containers:
+          - name: ~NAME~
+            image: ~IMAGE_STREAM~
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+            - name:  ~NAME~-config-volume
+              mountPath: /etc/opt/hpe/nf/udm/uecm
+            - name:  ~NAME~-secrets-volume
+              mountPath: /etc/opt/hpe/nf/udm/uecm/security
+            ports:
+              - name: https
+                containerPort: 8443
+                protocol: TCP
+            ports:
+              - name: health
+                containerPort: 8080
+                protocol: TCP
+            env:
+              - name: JAVA_OPTS
+                value:  -Xms512m -Xmx512m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe/nf/udm/uecm/nudm-uecm-nf-config.yaml
+            livenessProbe:
+              httpGet:
+                path: /rest/probes/healthy
+                port: health             
+              initialDelaySeconds: 100
+              periodSeconds: 10
+              timeoutSeconds: 10
+            readinessProbe:
+              httpGet:
+                path: /rest/probes/healthz
+                port: health              
+              initialDelaySeconds: 100
+              periodSeconds: 10
+              timeoutSeconds: 10
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 2048Mi
+              requests:
+                cpu: 500m
+                memory: 1024Mi
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    to:
+      kind: Service
+      name: ~NAME~
+`;
+
+//================================================
 hpe5gResources.defaults['nudm-sdm']['template']=
 //================================================
 `
@@ -5749,7 +7024,6 @@ hpe5gResources.defaults['nudm-sdm']['template']=
             - ~NAME~
           propagate-trace: true
           trace-depth: "MEDIUM"
-
 - kind: ConfigMap
   apiVersion: v1
   metadata:
