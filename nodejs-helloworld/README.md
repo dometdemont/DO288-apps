@@ -82,22 +82,23 @@ If this attribute is missing:
 -	Through the REST interface, the project passed as parameter is used as a default. Example:
 -	If the project parameter is not provided in the REST request, the default ‘hpe5g’ value is used.
 
-### GET<a name="GET"></a>
-#### View an existing session GUI
+### REST operations
+#### GET<a name="GET"></a>
+##### View an existing session GUI
 `curl  -X GET  http://<host:port>/<session>`   
 Where:
 - session is the HTML session file on the application server
-#### Dump the resources defined in an existing session
+##### Dump the resources defined in an existing session
 `curl  -X GET  http://<host:port>/<session>/dump`   
 Where:
 - session is the HTML session file on the application server
-#### Dump the catalog content
+##### Dump the catalog content
 `curl  -X GET  http://<host:port>/<session>/catalog[?catalog=<catalog>]`   
 Where:
 - session is the HTML session file on the application server, typically hpe5g.html delivered as an empty session by the github project.
 - Optional parameter: catalog is the catalog json file on the application server. Default: list the default catalog content. 
 
-### PUT<a name="PUT"></a>
+#### PUT<a name="PUT"></a>
 Build and retrieve or run an installer or a Heat template from an HTML session available on the application server:
 
 `curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
@@ -122,7 +123,7 @@ Where:
 
 The section, attributes and values supported are detailed in [Sections detailed specifications](#SectionsDetails).  
 This resources json file can be built from the interactive mode by dumping the session once populated interactively.
-### DELETE<a name="DELETE"></a>
+#### DELETE<a name="DELETE"></a>
 Build and retrieve or run an undeployer from an HTML session available on the application server:   
 `curl -X DELETE -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
 
@@ -207,7 +208,7 @@ Where helm.json starts with:
 [{"HelmCharts":[{"Type":"nudm","Name":"myudm","Chart":"hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz","Values":"<Helm values>"}]}]
 ```
 ### Failure examples
-#### Deploy an invalid set of resources
+##### Deploy an invalid set of resources
 Attempt to deploy resources using an unknown type or unknown attributes: wrong.json defines one unknown network function and backing services with unknown attributes:
 ```
 [
@@ -246,7 +247,7 @@ Unknown attribute Wild attribute in section DirectServices ignored.
         Expecting one of: Type,Name,Project,URL,insecure,Image,Tag,Storage,Volume,Replicas,Dependencies,Pipeline GIT,directory,branch
 
 ```
-#### Deploy a network function missing dependencies
+##### Deploy a network function missing dependencies
 Attempt to deploy a udsf function from an empty session not providing the ignite and influxdb required services.   
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data "@udsf.json"
@@ -277,7 +278,7 @@ Where udsf.json contains:
 NetworkFunctions: myudsf missing dependency ignite on project hpe5g
 NetworkFunctions: myudsf missing dependency influxdb on project hpe5g
 ```
-#### Deploy an incompatible udsf function on top of the backing services set defined in bs-set.html  
+##### Deploy an incompatible udsf function on top of the backing services set defined in bs-set.html  
 The ignite version configured in the bs-set session is not compatible with the udsf deployed version, thus preventing udsf to start.   
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy --data "@udsf.json"
