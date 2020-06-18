@@ -326,8 +326,8 @@ Attributes:
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
 	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+	  - get_oc_resources: display the OpenShift current project and existing resources        
+	  - manual_approval: expect the end  user to explicitly approve the build        
 	branch: (optional) git branch to use, eg: master
 	
 
@@ -351,8 +351,8 @@ Attributes:
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
 	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+	  - get_oc_resources: display the OpenShift current project and existing resources        
+	  - manual_approval: expect the end  user to explicitly approve the build        
 	branch: (optional) git branch to use, eg: master
 	
 NOTES: 
@@ -386,8 +386,8 @@ Attributes:
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
 	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+	  - get_oc_resources: display the OpenShift current project and existing resources        
+	  - manual_approval: expect the end  user to explicitly approve the build        
 	branch: (optional) git branch to use, eg: master
 	
 NOTES: 
@@ -410,8 +410,8 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
 	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+	  - get_oc_resources: display the OpenShift current project and existing resources        
+	  - manual_approval: expect the end  user to explicitly approve the build        
 	branch: (optional) git branch to use, eg: master
 	
 
@@ -429,8 +429,8 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
 	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+	  - get_oc_resources: display the OpenShift current project and existing resources    
+	  - manual_approval: expect the end  user to explicitly approve the build    
 	branch: (optional) git branch to use, eg: master
 	
 
