@@ -1,6 +1,6 @@
 {
   "name": "hpe5g",
-  "version": "0.71.0",
+  "version": "0.72.0",
   "description": "CMS5G Core Stack automated deployer",
   "main": "hpe5g.js",
   "scripts": {

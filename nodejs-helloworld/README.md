@@ -53,17 +53,19 @@ oc expose svc/automated-deployer
 ## Operations <a name="Operations"></a>
 ### Target cluster(s) connection
 The installer can connect to the target cluster(s) either using oc (OpenShift command line) or curl (OpenShift REST interface).
-If the Clusters section defines one or more enabled target(s), then the installer relies on the OpenShift REST interface invoking curl.
-Otherwise, the installer invokes the oc OpenShift command line.   
-
+If the Clusters section defines one or more enabled target(s), then the installer relies on the OpenShift REST interface invoking curl.   
 If no target cluster is enabled, the installer relies on the OpenShift oc CLI to perform the deployment. 
-In that case, the installer has to be invoked in the context of an OpenShift user connected to the target cluster (ie oc whoami succeeds).
+In that case, the installer has to be invoked in the context of an OpenShift user connected to the target cluster (ie oc whoami succeeds).   
+NOTE: helm based resources are deployed by invoking the helm command line: as a consequence:
+- this CLI has to be available
+- the OpenShift REST interface is not used: in other words, no target clusters should be enabled when deploying helm based resources, the deployment is performed on the default cluster set in the context of the caller.  
+
 ### Installer invocation
 The deployer REST interface offers two options to invoke the installer: direct  or local.
 #### Direct
 The target in the REST request is: deploy (or undeploy)
-- curl -X PUT -H "Content-Type: application/json" http://<ENDPOINT>/<SESSION>/deploy ...
-- curl -X DELETE -H "Content-Type: application/json" http://<ENDPOINT>/<SESSION>/undeploy ...
+- curl -X PUT -H "Content-Type: application/json" http://ENDPOINT/SESSION/deploy ...
+- curl -X DELETE -H "Content-Type: application/json" http://ENDPOINT/SESSION/undeploy ...
 
 The installer is directly invoked from the application server running the deployer nodejs application. This requires either that:
 -	The OpenShift oc CLI is available on the nodejs server and logged with the proper user,
@@ -71,18 +73,22 @@ The installer is directly invoked from the application server running the deploy
 
 #### Local
 The target in the REST request is: hpe5g.sh
-- curl -X PUT -H "Content-Type: application/json" http://<ENDPOINT>/<SESSION>/hpe5g.sh ...
-- curl -X DELETE -H "Content-Type: application/json" http://<ENDPOINT>/<SESSION>/hpe5g.sh ...
+- curl -X PUT -H "Content-Type: application/json" http://ENDPOINT/SESSION/hpe5g.sh ...
+- curl -X DELETE -H "Content-Type: application/json" http://ENDPOINT/SESSION/hpe5g.sh ...
 
 The installer is returned to the caller for direct invocation: in that case, all prerequisites apply to the caller environment, not to the nodejs server.
 ### OpenShift Project naming
-Any resource is deployed in an OpenShift project: this project name is defined at the resource level using the ‘Project’ attribute.
+Any resource is deployed in an OpenShift project: this project name is defined at the resource level using the Project attribute.
 If this attribute is missing:
 -	In the GUI, the user is prompted to provide a project name,
--	Through the REST interface, the project passed as parameter is used as a default. Example:
--	If the project parameter is not provided in the REST request, the default ‘hpe5g’ value is used.
+-	Through the REST interface, the project passed as parameter is used as a default.
+-	If the project parameter is not provided in the REST request, the default hpe5g value is used.
 
 ### REST operations
+The RESTful interface is exposing three verbs:
+- [GET](#GET) to access the interactive GUI, dump an existing session or a catalog
+- [PUT](#PUT) to deploy a set of resources by building and retrieving or running an installer
+- [DELETE](#DELETE) to delete or undeploy a set of resources and projects.
 #### GET<a name="GET"></a>
 ##### View an existing session GUI
 `curl  -X GET  http://<host:port>/<session>`   
@@ -108,7 +114,7 @@ Where:
 - target is either:
     - deploy: to deploy resources on existing OpenShift clusters from the application server. Prerequisites:
       - bash is the default shell interpreter 
-      - curl or oc (OpenShift command line) available on the application server, 
+      - curl or oc (OpenShift command line) or helm commands available on the application server, 
       - network connectivity on the application server to reach the target clusters
       - the generated installer does not exceed Linux MAX\_ARG\_STRLEN (usually 128kB); beyond this limit, the E2BIG error is returned, and the 'hpe5g.sh' target has to be used instead of the 'deploy' one. 
     - hpe5g.sh: to retrieve an installer deploying resources on existing OpenShift clusters
@@ -133,12 +139,15 @@ Where all PUT parameters apply, except the target 'deploy' changed to 'undeploy'
 ### Dump the services defined in the backing services set bs-set.html  
 ```
 curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/dump
-[{"DirectServices":[{"Type":"ignite","Name":"gridgain","URL":"docker.io/gridgain","Image":"community","Tag":"8.7.14","Storage":"250Mi","Replicas":"1"},{"Type":"influxdb","Name":"udsf-flux","URL":"docker.io/bitnami","Image":"influxdb","Tag":"1.7.10","Storage":"1Gi","Replicas":"1"},{"Type":"redis","Name":"myredis","URL":"docker.io/bitnami","Image":"redis","Tag":"latest","Storage":"100Mi","Replicas":"1"}]},{"IndirectServices":[{"Type":"jenkins","Name":"myjenkins","URL":"quay.io/openshift","Image":"origin-jenkins","Tag":"latest","Replicas":"1"},{"Type":"elasticsearch","Name":"myelastic","URL":"docker.elastic.co/elasticsearch","Image":"elasticsearch-oss","Tag":"6.7.0","Storage":"4Gi","Replicas":"1"},{"Type":"prometheus-alertmanager","Name":"myalert","URL":"docker.io/prom","Image":"alertmanager","Tag":"v0.20.0","Storage":"8Gi","Replicas":"1"},{"Type":"prometheus","Name":"myprom","URL":"docker.io/prom","Image":"prometheus","Tag":"v2.16.0","Storage":"200Mi","Replicas":"1"},{"Type":"pushgateway","Name":"mygateway","URL":"docker.io/prom","Image":"pushgateway","Tag":"v1.0.1","Replicas":"1"}]},{"Operators":[{"Type":"jaeger","Name":"mike","Pipeline GIT":"https://github.hpe.com/CMS-5GCS/automated-deployer","directory":"pipelines/manual_approval","branch":"master"},{"Type":"svc-mesh-ctlplane","Name":"myplane"},{"Type":"kafka","Name":"kaaaaa"}]}]
 ```
+Output:   
+[{"DirectServices":[{"Type":"ignite","Name":"gridgain","URL":"docker.io/gridgain","Image":"community","Tag":"8.7.14","Storage":"250Mi","Replicas":"1"},{"Type":"influxdb","Name":"udsf-flux","URL":"docker.io/bitnami","Image":"influxdb","Tag":"1.7.10","Storage":"1Gi","Replicas":"1"},{"Type":"redis","Name":"myredis","URL":"docker.io/bitnami","Image":"redis","Tag":"latest","Storage":"100Mi","Replicas":"1"}]},{"IndirectServices":[{"Type":"jenkins","Name":"myjenkins","URL":"quay.io/openshift","Image":"origin-jenkins","Tag":"latest","Replicas":"1"},{"Type":"elasticsearch","Name":"myelastic","URL":"docker.elastic.co/elasticsearch","Image":"elasticsearch-oss","Tag":"6.7.0","Storage":"4Gi","Replicas":"1"},{"Type":"prometheus-alertmanager","Name":"myalert","URL":"docker.io/prom","Image":"alertmanager","Tag":"v0.20.0","Storage":"8Gi","Replicas":"1"},{"Type":"prometheus","Name":"myprom","URL":"docker.io/prom","Image":"prometheus","Tag":"v2.16.0","Storage":"200Mi","Replicas":"1"},{"Type":"pushgateway","Name":"mygateway","URL":"docker.io/prom","Image":"pushgateway","Tag":"v1.0.1","Replicas":"1"}]},{"Operators":[{"Type":"jaeger","Name":"mike","Pipeline GIT":"https://github.hpe.com/CMS-5GCS/automated-deployer","directory":"pipelines/manual_approval","branch":"master"},{"Type":"svc-mesh-ctlplane","Name":"myplane"},{"Type":"kafka","Name":"kaaaaa"}]}]
 ### Dump a specific catalog  
 ```
 curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/catalog?catalog=bs-only.catalog.json 
 ```
+Output: (ellipsized)   
+{"types":{"NetworkFunctions":[],"IndirectServices":["jenkins","elasticsearch","prometheus-alertmanager","prometheus","kube-state-metrics","pushgateway","grafana"],"DirectServices":["ignite","redis","influxdb","fluentd"],"Operators":["jaeger","kiali","svc-mesh-ctlplane","kafka","elasticSearchOperator"],"HelmCharts":[]},"dependencies":{"jenkins":[],"elasticsearch":[],"prometheus-alertmanager":[],"prometheus":[],"kube-state-metrics":[],"pushgateway":[],"grafana":[],"ignite":[],"redis":[],"influxdb":[],"fluentd":[],"jaeger":[],"kiali":[],"svc-mesh-ctlplane":[],"kafka":[],"elasticSearchOperator":[]},"values":{"jenkins":{"URL":"quay.io/openshift","image":"origin-jenkins","tag":"latest","template":...
 ### Deploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data '[{"Clusters":[{"Name":"ocp1","Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443","Token":"lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY","Targeted":true}]}]'
@@ -286,15 +295,16 @@ curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assist
 The installer is not able to detect this incompatibility. The client has to check the application status from the standard OpenShift API/CLI.   
 
 <a name="SectionsDetails"></a>
+
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 
 ### Clusters
 OpenShift clusters candidate for deployment:
 - Name: nickname of this cluster
-- Endpoint: OpenShift API endpoint for this cluster. 
+- Endpoint: OpenShift API endpoint for this cluster.   
   Typically retrieved from a session with: oc config current-context | cut -d/ -f2 | tr - .
-- Token: security token for this cluster identifying an authorized user
+- Token: security token for this cluster identifying an authorized user    
   Typically retrieved from a session with: oc whoami -t
 - Targeted: check this box to deploy the defined resources to this cluster
 
@@ -303,19 +313,19 @@ Attributes:
 - Type: the type of the resource to deploy
 - Name: one word resource name for this instance
 - Project: the OpenShift project hosting this resource instance
-- URL, Image and tag: the docker image to use for this resource
+- URL, Image and tag: the docker image to use for this resource    
   Default valid values are provided when fields are left blank.
-- insecure: check this box if this URL points to insecure registries
-  images from insecure registries are pulled then pushed to the internal registry using docker, properly configured .
-  otherwise, images are directly pulled by the OpenShift image stream from their original URL
+- insecure: check this box if this URL points to insecure registries    
+  Images from insecure registries are pulled then pushed to the internal registry using docker, properly configured.        
+  Otherwise, images are directly pulled by the OpenShift image stream from their original URL.
 - Storage, Volume: the storage size with its unit (like 1Gi) and the OpenShift persistent volume used by this resource
 - Replicas: number of replicas deployed for this instance.
-- Dependencies: comma separated list of resources names resolving this function dependencies within this project
+- Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master
@@ -328,19 +338,19 @@ Attributes:
 - Type: the type of the resource to deploy
 - Name: one word resource name for this instance
 - Project: the OpenShift project hosting this resource instance
-- URL, Image and tag: the docker image to use for this resource
+- URL, Image and tag: the docker image to use for this resource    
   Default valid values are provided when fields are left blank.
-- insecure: check this box if this URL points to insecure registries
-  images from insecure registries are pulled then pushed to the internal registry using docker, properly configured .
-  otherwise, images are directly pulled by the OpenShift image stream from their original URL
+- insecure: check this box if this URL points to insecure registries    
+  Images from insecure registries are pulled then pushed to the internal registry using docker, properly configured.        
+  Otherwise, images are directly pulled by the OpenShift image stream from their original URL.
 - Storage, Volume: the storage size with its unit (like 1Gi) and the OpenShift persistent volume used by this resource
 - Replicas: number of replicas deployed for this instance.
-- Dependencies: comma separated list of resources names resolving this function dependencies within this project
+- Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master
@@ -363,19 +373,19 @@ Attributes:
 - Type: the type of the resource to deploy
 - Name: one word resource name for this instance
 - Project: the OpenShift project hosting this resource instance
-- URL, Image and tag: the docker image to use for this resource
+- URL, Image and tag: the docker image to use for this resource    
   Default valid values are provided when fields are left blank.
-- insecure: check this box if this URL points to insecure registries
-  images from insecure registries are pulled then pushed to the internal registry using docker, properly configured .
-  otherwise, images are directly pulled by the OpenShift image stream from their original URL
+- insecure: check this box if this URL points to insecure registries    
+  Images from insecure registries are pulled then pushed to the internal registry using docker, properly configured.        
+  Otherwise, images are directly pulled by the OpenShift image stream from their original URL.
 - Storage, Volume: the storage size with its unit (like 1Gi) and the OpenShift persistent volume used by this resource
 - Replicas: number of replicas deployed for this instance.
-- Dependencies: comma separated list of resources names resolving this function dependencies within this project
+- Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master
@@ -396,10 +406,10 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Type: the type of the operator to instantiate
 - Name: one word resource name for this operator instance
 - Project: the OpenShift project hosting this operator instance
-- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile     
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master
@@ -415,10 +425,10 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Project: the OpenShift project hosting this chart instance
 - Chart: name of the chart to deploy; Helm must be configured on the infrastructure to provide this chart
 - Values: local file injected in this chart as deployment values
-- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile     
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master

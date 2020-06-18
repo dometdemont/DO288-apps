@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-12 Version 0.71</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-18 Version 0.72</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
@@ -114,6 +114,7 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-06-18 0.72	nudsf and nudr OpenShift templates refresh. Markdown doc cosmetic fixes.
 2020-06-12 0.71	Json session format: move to a list of attribute:value {a:x, b:y, ...} instead of a table of the same [{a:x},{b:y},...]
     Add a Build Doc button compiling the Help text of a selection of sections in a markdown document 
 2020-06-11 0.70	Allow multiple instances of the same type in one project: add a new optional attribute in resources, Dependencies, to resolve ambiguity in dependencies
@@ -1426,9 +1427,9 @@ var Clusters = new vnfResource("Clusters", [
 
 Clusters.help = function(){return `OpenShift clusters candidate for deployment:
 - Name: nickname of this cluster
-- Endpoint: OpenShift API endpoint for this cluster. 
+- Endpoint: OpenShift API endpoint for this cluster.   
   Typically retrieved from a session with: oc config current-context | cut -d/ -f2 | tr - .
-- Token: security token for this cluster identifying an authorized user
+- Token: security token for this cluster identifying an authorized user    
   Typically retrieved from a session with: oc whoami -t
 - Targeted: check this box to deploy the defined resources to this cluster
 `
@@ -1497,19 +1498,19 @@ hpe5gResource.prototype.help = function(){return `Attributes:
 - Type: the type of the resource to deploy
 - Name: one word resource name for this instance
 - Project: the OpenShift project hosting this resource instance
-- URL, Image and tag: the docker image to use for this resource
+- URL, Image and tag: the docker image to use for this resource    
   Default valid values are provided when fields are left blank.
-- insecure: check this box if this URL points to insecure registries
-  images from insecure registries are pulled then pushed to the internal registry using docker, properly configured .
-  otherwise, images are directly pulled by the OpenShift image stream from their original URL
+- insecure: check this box if this URL points to insecure registries    
+  Images from insecure registries are pulled then pushed to the internal registry using docker, properly configured.        
+  Otherwise, images are directly pulled by the OpenShift image stream from their original URL.
 - Storage, Volume: the storage size with its unit (like 1Gi) and the OpenShift persistent volume used by this resource
 - Replicas: number of replicas deployed for this instance.
-- Dependencies: comma separated list of resources names resolving this function dependencies within this project
+- Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master
@@ -1766,10 +1767,10 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Type: the type of the operator to instantiate
 - Name: one word resource name for this operator instance
 - Project: the OpenShift project hosting this operator instance
-- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile     
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master
@@ -1799,10 +1800,10 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Project: the OpenShift project hosting this chart instance
 - Chart: name of the chart to deploy; Helm must be configured on the infrastructure to provide this chart
 - Values: local file injected in this chart as deployment values
-- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
+- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile     
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
 	  - get_oc_resources: display the OpenShift current project and existing resources
 	  - manual_approval: expect the end  user to explicitly approve the build
 	branch: (optional) git branch to use, eg: master
@@ -3127,12 +3128,10 @@ var defaultCatalog=`
     ],
     "nudr-dr": [
       "ignite",
-      "nudr-prov",
-      "influxdb"
+      "nudr-prov"
     ],
     "nudr-prov": [
-      "ignite",
-      "influxdb"
+      "ignite"
     ],
     "nudr-reg-agent": [
     	"redis","influxdb"
@@ -3542,25 +3541,31 @@ hpe5gResources.defaults['nudsf-dr']['template']=
       #
       # Sample Network function configuration.
       #
+  
       logging:
         locale: en-US
         loggers:
-          - name: log4j2
-            factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+      #    - name: log4j2
+      #      factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          - name: fluentd
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
+            properties:
+              host: fluentd
+              port: 24224
       statistics-configuration:
-        id: nudsf-dr-statistics
-        jvm-metrics: false
+        id: hpe-sde-udsf-dr-statistics
         jmx:
-          domain: nudsf-dr
+          domain: hpe-sde-udsf-dr
           enabled: false
           properties:
             com.hpe.imsc.statistics.jmx.descriptors: "false"
             com.hpe.imsc.statistics.jmx.notifications: "false"
+        jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.notifications: "false"
-          com.hpe.imsc.statistics.influxdb.server.database: nudsf-dr
+          com.hpe.imsc.statistics.influxdb.server.database: hpe-sde-udsf-dr
           com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
-          com.hpe.imsc.statistics.influxdb.server.port: "8086"
+          com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
         enabled: false
@@ -3581,8 +3586,6 @@ hpe5gResources.defaults['nudsf-dr']['template']=
               masterUrl: https://openshift.default.svc.cluster.local:443
               namespace: ~PROJECT~
               serviceName: ~ignite_NAME~
-          properties:
-            enableGridCompute: false
       model:
         realms:
         - id: realm0
@@ -3609,13 +3612,15 @@ hpe5gResources.defaults['nudsf-dr']['template']=
           alias: localhost
           servers:
             default-server:
+  
               https-listeners:
                 default-https:
                   socket-binding: https
                   enable-http2: true
                   ssl-context: sslctx
                   http2-initial-window-size: 32000000
-                  no-request-timeout: 600000            
+                  http2-max-concurrent-streams: 200
+                  no-request-timeout: 600000
         elytron:
           server-ssl-contexts:
             sslctx:
@@ -3680,6 +3685,14 @@ hpe5gResources.defaults['nudsf-dr']['template']=
 hpe5gResources.defaults['nudr-dr']['template']=
 //================================================
 `
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-secret
+    namespace: ~PROJECT~
+  type: Opaque
+  data:
+    keystore.jks: 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
 - kind: ServiceAccount
   apiVersion: v1
   metadata:
@@ -3727,9 +3740,22 @@ hpe5gResources.defaults['nudr-dr']['template']=
       spec:
         containers:
         - name: ~NAME~
+          volumeMounts:
+            - name: ~NAME~-config-volume
+              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/
+            - name: ~NAME~-secrets-volume
+              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/security
+          ports:
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          ports:
+            - name: health
+              containerPort: 8080
+              protocol: TCP
           env:
           - name: JAVA_OPTS
-            value: -Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-dr/nudr-nf-config.yaml
+            value: -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ScavengeBeforeFullGC -XX:+DisableExplicitGC -XX:MaxGCPauseMillis=200 -Xms1g -Djava.net.preferIPv4Stack=true   -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-dr/nudr-nf-config.yaml -Dpaas.service.name=nudr-dr
           - name: SPRING_PROFILES_ACTIVE
             value: ignite
           image: ~IMAGE_STREAM~
@@ -3740,39 +3766,37 @@ hpe5gResources.defaults['nudr-dr']['template']=
           Limits:
             cpu:  8000m
             memory: 4000Mi
-          ports:
-          - containerPort: 8443
-            protocol: TCP
-          volumeMounts:
-            - name: ~NAME~
-              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/
-            - name: ~NAME~-secrets
-              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/security
           livenessProbe:
-            failureThreshold: 3000
             httpGet:
               path: /nudr-dr/v2/probes/healthy
-              port: 8080
-              scheme: HTTP
+              port: health
             initialDelaySeconds: 60
             periodSeconds: 5
-            timeoutSeconds: 15
+            timeoutSeconds: 3
           readinessProbe:
-            failureThreshold: 3000
             httpGet:
               path: /nudr-dr/v2/probes/healthz
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 30
-            periodSeconds: 60
-            timeoutSeconds: 15
+              port: health
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 3
         volumes:
-          - name: ~NAME~
-            configMap:
-              name: ~NAME~
-          - name: ~NAME~-secrets
-            secret:
-              secretName: ~NAME~
+          - name: ~NAME~-config-volume
+            projected:
+              sources:
+              - configMap:
+                  name: ~NAME~-swarm-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap-nnrf-registration
+              - configMap:
+                name: nudr-shared-application-configmap-call-tracing-provisioning
+          - name: ~NAME~-secrets-volume
+            projected:
+              sources:
+              - secret:
+                  name: ~NAME~-secret
     selector:
       name: ~NAME~
     replicas: ~REPLICAS~
@@ -3785,11 +3809,12 @@ hpe5gResources.defaults['nudr-dr']['template']=
       name: ~NAME~
       deploymentconfig: ~NAME~
   spec:
-    type: LoadBalancer
+    type: NodePort
     ports:
-    - port: 8443
-      protocol: TCP
-      targetPort: 30043
+      - port: 8443
+        nodePort: 30001
+        protocol: TCP
+        name: https-nudr-dr
     selector:
       name: ~NAME~
       deploymentconfig: ~NAME~
@@ -3808,44 +3833,87 @@ hpe5gResources.defaults['nudr-dr']['template']=
 - kind: ConfigMap
   apiVersion: v1
   metadata:
-    name: ~NAME~
+    name: nudr-shared-application-configmap-call-tracing-provisioning
+    namespace: ~PROJECT~
+  data:
+    call-tracing-provisioning.yaml: |
+      # Copyright (c) 2019-2020 Hewlett-Packard Enterprise Development LP.
+      # All Rights Reserved.
+      #
+      # This software is the confidential and proprietary information of
+      # Hewlett-Packard Enterprise Development LP.
+      #
+      ue-provisioning:
+        - ue-id:
+          - "imsi-0123456789"
+          - "msisdn-9876543210"
+          traced-service:
+            - "UDM"
+            - "UDR"
+          propagate-trace: true
+          trace-depth: "MEDIUM"
+        - ue-id:
+          - "imsi-9999999999"
+          - "msisdn-8888888888"
+          traced-service:
+            - "nudm-uecm"
+            - "nudm-ueau"
+          propagate-trace: true
+          trace-depth: "MEDIUM"
+        - ue-id:
+          - "nai-77777777777"
+          - "msisdn-6666666666666"
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap
     namespace: ~PROJECT~
   data:
     nudr-nf-config.yaml: |
       #
+      # Copyright (c) 2019-2020 Hewlett-Packard Enterprise Development LP.
+      # All Rights Reserved.
+      #
+      # This software is the confidential and proprietary information of
+      # Hewlett-Packard Enterprise Development LP.
+      #
+  
+      #
       # Sample Network function configuration.
       #
+  
+      udr:
+        source-conf: "From HELM"
+        udr-root-dir: "/var/opt/hpe-5g/sde-udr-nudr-dr"
+        # nrf:
+        #   hostname: localhost
+        #   port: 5090
+        #   scheme: https
+        #   version: v1
+        #   nrfRegistrationStubMode: true
+        #   nrfDiscoverStubMode: true
+        #   nfRegfile: /etc/opt/hpe-5g/sde-udr-nudr-dr/nnrf-register.config
+        #   udrDescfile: /etc/opt/hpe-5g/sde-udr-nudr-dr/udr-disc.json
+  
       logging:
         locale: en-US
         loggers:
           - name: log4j2
             factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
-      statistics-configuration:
-        id: nudr-prov-statistics
-        jvm-metrics: false
-        jmx:
-          domain: nudr-prov
-          enabled: false
-          properties:
-            com.hpe.imsc.statistics.jmx.descriptors: "false"
-            com.hpe.imsc.statistics.jmx.notifications: "false"
-        properties:
-          com.hpe.imsc.statistics.influxdb.notifications: "false"
-          com.hpe.imsc.statistics.influxdb.server.database: nudr-prov
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
-          com.hpe.imsc.statistics.influxdb.server.port: "8086"
-          com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
         enabled: false
         properties:
-          JAEGER_AGENT_HOST: localhost
-          JAEGER_AGENT_PORT: 6831
-          JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
+          JAEGER_SERVICE_NAME: ~NAME~
           JAEGER_REPORTER_FLUSH_INTERVAL: 100
           JAEGER_REPORTER_LOG_SPANS: true
-          JAEGER_SAMPLER_PARAM: 1
-          JAEGER_SAMPLER_TYPE: probabilistic
-          JAEGER_SERVICE_NAME: ~NAME~
+          JAEGER_SAMPLER_TYPE: "probabilistic"
+          JAEGER_SAMPLER_PARAM: 1.0
+        provisioning-uri: file:/etc/opt/hpe-5g/sde-udr-nudr-dr/call-tracing-provisioning.yaml
+        max-trace-depth: MINIMUM
+        max-body-length: 1200
+        trace-all-ues: false
+        trace-all-operations: true
+        autorefresh-provisioning-period: 30
       datasources:
         - id: ignite
           profile:
@@ -3854,25 +3922,32 @@ hpe5gResources.defaults['nudr-dr']['template']=
               masterUrl: https://openshift.default.svc.cluster.local:443
               namespace: ~PROJECT~
               serviceName: ~ignite_NAME~
-          properties:
-            enableGridCompute: false
       model:
         realms:
         - id: realm0
           properties:
             replicas: 1
       publisher-subscriber:
-          enable: false
-          parameters:
-            topic: UDRNotifier
-            application-kind: UDR
-          pubsub:
-            brokers:
-             - localhost:9092
-            properties:
-              group.id: group1
-              reconnect.backoff.ms: 7200000
-              reconnect.backoff.max.ms: 14400000 
+        enable: false
+        parameters:
+          application-kind: UDR
+          topic: UDRNotifier
+        pubsub:
+          brokers:
+          - localhost:9092
+          properties:
+            group.id: group1
+            reconnect.backoff.max.ms: 14400000
+            reconnect.backoff.ms: 7200000
+      # TEMPORARY WORKAROUND FOR PAAS 0.14.0, EMPTY CLIENT DEFINITION
+      rest-client:
+        id:
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-swarm-configmap
+    namespace: ~PROJECT~
+  data:
     project-nudr-dr.yml: |+
       #
       # Sample Thorntail global configuration.
@@ -3954,14 +4029,47 @@ hpe5gResources.defaults['nudr-dr']['template']=
             CONSOLE:
               named-formatter: null
               formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"
-- kind: Secret
+- kind: ConfigMap
   apiVersion: v1
   metadata:
-    name: ~NAME~
+    name: ~NAME~-application-configmap-nnrf-registration
     namespace: ~PROJECT~
-  type: Opaque
   data:
-    keystore.jks: /u3+7QAAAAIAAAABAAAAAQAOaHBlY21zNWdzZXJ2ZXIAAAFu4UME5gAABQIwggT+MA4GCisGAQQBKgIRAQEFAASCBOojyq6XmGavwNrIox2dFoQqtW4nhmNfDjrd4Ji6otOtYggUKL4h7hkEfasPVtqOAbGlvENZdo5yX5AvETDxqYU6MfDeSu6A9OnQTjwbEJP+vSKW6VWV7dGHrT/UEVcxus3D3gb3G3xs5IzfYt5N5yxNMbqALEscAvVp/RqoSKbZCDUh4urIl6xT9gU4Ct8LpZ1YrzXn5q2m3tHXcJWd1RYuXl5xgORU8J10p02Xztn6MPViWkqxJ1rb4ZTfpIqT7ZslKEY/hHcUAYttTjtS/XU5oJffym8VpxfxXSEzdFJN1OiBocRZXHNx7jt1ionnHfaRdCxp7LejfESkO9x4CAOnMakY9LU12NSRxCS7h1IJsrUvystx6+ReVhy7U5o86bqfM+EoOSp+VZsGm6Z9mDhWzAOWyN4Iqb/Jf/BlLrvuKUvNOHQdU4M24TkwGCsuZYePbT7350UaF/N1e77d0HCSZgLhvXntXlI8EWdn2YzNqJ7bIQOfvtC2SHzTPP0SbAmwMtfp6aEykEIlmwQIdsBFayQSsKbPx3xbEiKa69861dIrxj4no70jy6waV/s1hU/eIv3m05nKH/NVEOxoB6fJTel84WXlK1WbbE1Qo4BMZeqZkcBtB9zaVu9eoqgZGdsXomBVyf1NDNAAx+qX6wyyDjun89JJq+sixNe2Vdry+1TJWYWmJ3oOMZ1JsCiRUVxBgxi7yu5U+8ZGHE2d1e1XvF9l3ZczgkU9EhFHoSYVw/ypaGFNcKKw90qfro58Zg8BYY//ITIlWjNaRWpfL1PT18I4lbI+8ecxhxGtl6c0+NDXURF2+TWH1FvwTwz7R80or1zpzDXzz+cTNOhJ7gFq15DJXA5YDERsYx7hUNthOwZ/6xO623JV1ZbokxrFntXNwuGJ1cMka74/GSm09Y5h+zQ0q3yRwPwr69EUALpQCR1op/7PYaZSjCY6bwUOSOL9HsXzWuYhplHv9Ffee7hM4u5EWAaDgqt8eSk8+Ddt/rZbmvAExhrIO5ItE2wSne3OWCq3JPiz7ZXCffk3OEPikEw0lSBihKdYL1TS5yPV8W5ZRkjewo0aYRChunTk9fRNfvDdmdoBBzEC1iG7xQtWR/k7C0vZdsuSzgOToRthFy75NEuvlcHKiL3YrlFTf/YM0M3eN/92p53HLSedXxb3pfi05GPj4ngy/aFFl7eCRSO0OtlY2Hmx56iK3U8de+2LCSb5uSFKy8VCPXuAbNNqpyXLtN7jgfLK9xVlpTWiP3wqy5rt2ySehVrsHT4DidSwNtr7/szke5hSNdGBuPGTrL1u9AnYepcNdBZ7XBBir96bHlNAgIHNmpoDIkZb0AG3PUJFG2ukxifcZ52Kq4s7zRnqRXBIjYMPk1EMPVM67zuAFMKI88oYNrN0S+aqLJNsbnWNIsR9UVu4icjr2DGVlr9DtNuo0MnKHFd/A16bpyuB7O8jvlxpeRtQXBQqXAroez7sE2SDGG+C+WmzXGCCbx6Gznk1hj1oi5Kw7aWUm+fSOr2xvPXLNklJpBobQsbokParDsay4un1LH4LNGi/k0cbNwiGw5RK8MQzVIlr1zRJYTgzQELOfZ62kePnovkryMGuly0ooOFlS+iosjYWEVBNK88MNs6Jn6aaA9WTjSMztROexSQhf56Q4URvgA4V/AVWHuRVkq5MAAAAAgAFWC41MDkAAAO3MIIDszCCApugAwIBAgIJAN+Nl0D64XdAMA0GCSqGSIb3DQEBCwUAMGcxCzAJBgNVBAYTAkZSMQ4wDAYDVQQIDAVJU0VSRTERMA8GA1UEBwwIR1JFTk9CTEUxDDAKBgNVBAoMA0hQRTEOMAwGA1UECwwFQ01TNUcxFzAVBgNVBAMMDmhwZWNtczVncm9vdGNhMB4XDTE5MTIwNzE2NDczNFoXDTIxMTIwNjE2NDczNFowZzELMAkGA1UEBhMCRlIxDjAMBgNVBAgMBUlTRVJFMREwDwYDVQQHDAhHUkVOT0JMRTEMMAoGA1UECgwDSFBFMQ4wDAYDVQQLDAVDTVM1RzEXMBUGA1UEAwwOaHBlY21zNWdzZXJ2ZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVTbtq339pXYyf5R/V2zAt3RBosOej9ntsgTL7Q2QvUwPD6xcmivQhZEb1kJvbDOfP/lXL16Pn4JtAl70tDdz9Kng0grYvTopW0jPTixyJG99NDVuW3UwFkBvF31DRAu8VrABHToiMBVdefG9a9XuKF18YKOSqj14RMfv+Ny5eBXoioglOnxBlTj5HbC+fzO9GvNQ5tx4RDJl/WBUpKDQjCM8RSEcfwERQIL3wrhmo1XQyBg0qQnBFYeX2cMI+ymQ+2gitnBBoSbUJw+OuzHbBgGvMDSl4/nQkW/6LMuSu/i8UCFM8m2SjprWGllJm1hC9sX7wg8RMG9wZwIv5CZ+VAgMBAAGjYjBgMAkGA1UdEwQCMAAwHQYDVR0OBBYEFPwOHzc7eQoeXnpFtqXfc+vLYoI7MCcGA1UdEQQgMB6CCWxvY2FsaG9zdIIRKi5ncmUuaHBlY29ycC5uZXQwCwYDVR0PBAQDAgXgMA0GCSqGSIb3DQEBCwUAA4IBAQCTELYubc4IybJP3V2SepF62ZCoNaEFU1atylWIL3PWJK70JMnCb9Q6pTnfW6a0zF3QYiL4R9uAE+k/vGzO5r/kjIu2f0oBSKfGmx0P0joX/1CshIhYO7TH7PJyAOnkpOfQva0mXSD8IDLm/IrV2Y4J1OpU5ah2t5ttdSAL6CQW0MbNvRLJQEfV3s8csgiVtxYQ+RxUdka1P1DdogdAldTky5vcyWqq4TJH2OQErkECro9/bbw7X9phV4e6dth+fbFz9wsAq2Kc4Kh1sruETtEHIKCP7c2RNHt3FTh3BEDrDvPZhvrG31hxS8hhXfP2ZvLZE9EnlWNuwhJV40skUpp9AAVYLjUwOQAAA04wggNKMIICMgIJAOVQIcfLzQpnMA0GCSqGSIb3DQEBCwUAMGcxCzAJBgNVBAYTAkZSMQ4wDAYDVQQIDAVJU0VSRTERMA8GA1UEBwwIR1JFTk9CTEUxDDAKBgNVBAoMA0hQRTEOMAwGA1UECwwFQ01TNUcxFzAVBgNVBAMMDmhwZWNtczVncm9vdGNhMB4XDTE5MTIwNzE2NDcwNloXDTI5MTIwNDE2NDcwNlowZzELMAkGA1UEBhMCRlIxDjAMBgNVBAgMBUlTRVJFMREwDwYDVQQHDAhHUkVOT0JMRTEMMAoGA1UECgwDSFBFMQ4wDAYDVQQLDAVDTVM1RzEXMBUGA1UEAwwOaHBlY21zNWdyb290Y2EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCaD4IrB0cxzztefz7pKtG+byO/IBjyS7MHzdngOTMIdUM/1tHgGH/W0OE5/qD/ocRhrBsvBGT4bkZ3Eq3fxMxp2Zos7FnCgk3iLPUTOn2Hs3ctsgbHJmXES2t3ncYi1zkn77YjDIU+F2y97AQ039xbXFdVm3bGW/U48mksdFhs0Z9qa2cXVFC4Rd081L+FQZtFKgOQm0ENq12Ko5qCO8svgHJSJzieMKl6H70XN/IrqXXkhO1GhJG8I+X7WKAM/AI/l8bYcPIii+ypyguqR2HnDq7qctLOdqWukCuh4+Lhzl+3xajXW0htF+Ve97vRXHEXyHDQpXBBfnLfD0SpAzzzAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAGqw0v007kc1VA4NYTY++SPkDFfgEb1OgLcc6QhqDjKQodm5MtxUPihjjqnJdEl0k8xmIS/2dj417zdEOuiyESWuI5+T1MRKecnqzl2fggfGpuC1KQ7yZlmUHWK1GKnBz4c0BB9cRtseSXYmBDiY+m+rKZTRjeJy+NLgJBvxYMQsekWknFUBDjJ9TNZ6IU38igpGkXCclIRQmB1iD8+30RehFwPJ701ngtkr5RciriOeNuGfOCM9YvOzS4ig3P2twql40g32GlO0e0/GFZxo6rljRvbcTduxPObeTKtVXLb/bdv6hKEwEbykSxQjreVq0oeFDh4pUMl8+gxv+8L6lrA8Gn+lCvjzuYIxbAQrRDlrMGAkgQ==
+    nnrf-register.config: |
+      {
+      	  "nfInstanceId": "0777E150-4D00-4d86-A49C-8BADF00D0000",
+      	  "nfType":"UDR",
+      	  "nfStatus":"REGISTERED",
+      	  "heartBeatTimer": "45",
+      	  "fqdn": "localhost",
+      	  "ipv4Addresses":["localhost"],
+      	  "udrInfo":{
+      	    "groupId":"udrgroup01",
+      	    "supiRanges":[{"start":"200000000000000","end":"399999999999999"}],
+      	    "supportedDataSets":["SUBSCRIPTION","POLICY","EXPOSURE","APPLICATION"]
+      	  },
+      	  "nfServices" : [ {
+      	      "serviceInstanceId" : "0777E150-4D00-4d86-A49C-8BADF00D0000",
+      	      "serviceName" : "nudr-dr",
+      	      "versions" : [ {
+      	        "apiVersionInUri" : "v2",
+      	        "apiFullVersion" : "2.1.0"
+      	      } ],
+      
+      	      "scheme" : "https",
+      
+      	      "nfServiceStatus" : "REGISTERED",
+      	      "fqdn": "localhost",
+      	      "ipEndPoints" : [ {
+      	        "ipv4Address" : "localhost",
+      	        "transport" : "TCP",
+      
+      	        "port" : "30001"
+      
+      	      } ]
+      	    } ]
+      	}
+
 `;
 
 //================================================
@@ -4017,7 +4125,7 @@ hpe5gResources.defaults['nudr-prov']['template']=
         - name: ~NAME~
           env:
           - name: JAVA_OPTS
-            value: -Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-prov/nudr-nf-config.yaml
+            value: -Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-prov/nudr-nf-config.yaml -Dpaas.service.name=nudr-prov
           - name: SPRING_PROFILES_ACTIVE
             value: ignite
           image: ~IMAGE_STREAM~
@@ -4101,39 +4209,36 @@ hpe5gResources.defaults['nudr-prov']['template']=
   data:
     nudr-nf-config.yaml: |
       #
+      # Copyright (c) 2019-2020 Hewlett-Packard Enterprise Development LP.
+      # All Rights Reserved.
+      #
+      # This software is the confidential and proprietary information of
+      # Hewlett-Packard Enterprise Development LP.
+      #
+      #
       # Sample Network function configuration.
       #
+      udr:
+        source-conf: "From HELM"
       logging:
         locale: en-US
         loggers:
           - name: log4j2
             factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
-      statistics-configuration:
-        id: nudr-prov-statistics
-        jvm-metrics: false
-        jmx:
-          domain: nudr-prov
-          enabled: false
-          properties:
-            com.hpe.imsc.statistics.jmx.descriptors: "false"
-            com.hpe.imsc.statistics.jmx.notifications: "false"
-        properties:
-          com.hpe.imsc.statistics.influxdb.notifications: "false"
-          com.hpe.imsc.statistics.influxdb.server.database: nudr-prov
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
-          com.hpe.imsc.statistics.influxdb.server.port: "8086"
-          com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
         enabled: false
         properties:
-          JAEGER_AGENT_HOST: localhost
-          JAEGER_AGENT_PORT: 6831
-          JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
+          JAEGER_SERVICE_NAME: ~NAME~
           JAEGER_REPORTER_FLUSH_INTERVAL: 100
           JAEGER_REPORTER_LOG_SPANS: true
-          JAEGER_SAMPLER_PARAM: 1
-          JAEGER_SAMPLER_TYPE: probabilistic
-          JAEGER_SERVICE_NAME: ~NAME~
+          JAEGER_SAMPLER_TYPE: "probabilistic"
+          JAEGER_SAMPLER_PARAM: 1.0
+        provisioning-uri: file:/etc/opt/hpe-5g/sde-udr-nudr-prov/call-tracing-provisioning.yaml
+        max-trace-depth: MINIMUM
+        max-body-length: 1200
+        trace-all-ues: false
+        trace-all-operations: true
+        autorefresh-provisioning-period: 30
       datasources:
         - id: ignite
           profile:
@@ -4142,13 +4247,26 @@ hpe5gResources.defaults['nudr-prov']['template']=
               masterUrl: https://openshift.default.svc.cluster.local:443
               namespace: ~PROJECT~
               serviceName: ~ignite_NAME~
-          properties:
-            enableGridCompute: false
       model:
         realms:
         - id: realm0
           properties:
             replicas: 1
+      publisher-subscriber:
+        enable: false
+        parameters:
+          application-kind: UDR
+          topic: UDRNotifier
+        pubsub:
+          brokers:
+          - localhost:9092
+          properties:
+            group.id: group1
+            reconnect.backoff.max.ms: 14400000
+            reconnect.backoff.ms: 7200000
+      # TEMPORARY WORKAROUND FOR PAAS 0.14.0, EMPTY CLIENT DEFINITION
+      rest-client:
+        id:
     project-nudr-prov.yml: |+
       #
       # Sample Thorntail global configuration.
@@ -4373,10 +4491,13 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
     namespace: ~PROJECT~
   data:
     nnrf-reg-agent-config.yaml: |
+      #
       # Network function NNRF Client MicroService configuration.
       #
       # The parameters below can be overridden by an external configuration.
       #
+  
+  
       # HTTP/2 REST client subsystem
       ---
       rest-client:
@@ -4407,9 +4528,14 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
         loggers:
           - name: log4j2
             factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          - name: fluentd
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
+            properties:
+              host: fluentd.logging
+              port: 24224
+  
       statistics-configuration:
-        id: nudr-reg-agent-statistics
-        default-group: nnrf
+        id: hpe-nf-nrf-reg-agent-statistics
         jmx:
           domain: nnrf-reg-agent
           enabled: false
@@ -4417,54 +4543,19 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
             com.hpe.imsc.statistics.jmx.descriptors: "false"
             com.hpe.imsc.statistics.jmx.notifications: "false"
         jvm-metrics: true
-        period: 5
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nnrf-reg-agent
           com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
-      
-      caching-providers:
-        - uri: "paas://redis-caching-manager"
-          classloader: "#notused"
-          properties:
-            caching.provider.class.name: "com.hpe.paas.middleware.sdk.impl.cache.redis.RedisCachingProvider"
-          cache-managers:
-            - uri: "paas://redis-cache-manager" 
-              classloader: "#notused"
-              properties:
-              caches:
-                - name: "nnrf-client-cache"
-                  keyType: "java.lang.String"
-                  valueType: "java.lang.String"
-                  eternal: "true"
-                  writeThrough: "false"
-                  readThrough: "false"
-                  timeToLiveSeconds: "3600"
-                  properties:
-                    cache.uri: redis://~redis_NAME~.~PROJECT~.svc.cluster.local:6379?database=0
-                    cache.codec: "io.lettuce.core.codec.StringCodec"
-      call-tracing:
-        properties:
-          JAEGER_SERVICE_NAME: ~NAME~
-          JAEGER_AGENT_HOST: localhost
-          JAEGER_AGENT_PORT: 6831
-          JAEGER_ENDPOINT: http://localhost:14268/api/traces
-          JAEGER_REPORTER_FLUSH_INTERVAL: 100
-          JAEGER_REPORTER_LOG_SPANS: true
-          JAEGER_SAMPLER_TYPE: probabilistic
-          JAEGER_SAMPLER_PARAM: 1
-        enabled: true
-        trace-all-operations: true
-        trace-all-ues: true
-        provisioning-uri: file:/etc/opt/hpe-5g/hpe-nnrf-reg-agent/call-tracing-provisioning.yaml
+  
       nnrf-client:
         discover-stub-mode: false
         # json file containing remote NF profile to be discovered in stub-mode
         stub-remote-nf-profile: 
         server-scheme: https
-        server-fqdn: ghost41.gre.hpecorp.net
+        server-fqdn: nrf.server.hpecorp.net
         server-port: 8443
         server-version: v1
         retry-limit: -1
@@ -4473,11 +4564,11 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
         disable-deregister: false
         opentracing-enabled: false
         enable-cache: false
-        default-cache-validity-period-secs: 
-        self-service-name: nudr-reg-agent
-        monitor-service-name: nudr-dr
+        default-cache-validity-period-secs: 3600
+        self-service-name: hpe-nf-nrf-reg-agent
+        monitor-service-name: 
         monitor-interval: 15000
-        kubernetes-namespace: 3gpp-nf-all
+        kubernetes-namespace: default
     project-nnrf-reg-agent.yml: |+
       #
       # Sample Thorntail global configuration.
