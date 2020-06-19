@@ -60,6 +60,7 @@ app.use('/:session/:target', function (req, res, next) {
 	  var mydom=mywin.document;
 	  mywin.headless=true;
 	  var direct;
+	  var DOMresult=false;
 	  if(req.query.project)mywin.default_project=req.query.project;
 	  switch(req.method){
 	  	case 'PUT': case 'POST': direct='deploy'; break;
@@ -81,13 +82,15 @@ app.use('/:session/:target', function (req, res, next) {
 				});
 				break;
 			   case 'hpe5g.sh': success=mywin.buildNetworkFunctions(); break;
+			   case 'dump': success=mywin.buildNetworkFunctions() && mywin.jsonSession(); break;
+			   case 'save': success=mywin.buildNetworkFunctions() ; DOMresult=true; break;
 			   case 'hpe5g.yml': 
 			   case 'hpe5g.yaml': success=mywin.buildHeatTemplate(); break;
 			   default: res.status(400).send('Unknown target '+req.params.target+'; expected: '+direct+', hpe5g.sh or hpe5g.y(a)ml'); break;
 			}
 		 }
 		 switch(success){
-			case true: res.send(mywin.rawUserOutput); break;
+			case true: res.send(DOMresult ? mywin.document.documentElement.outerHTML: mywin.rawUserOutput); break;
 			case false: res.status(400).send(mywin.rawUserOutput); break;
 			default: /* let nodejs wait for the asynchronous final status */ break;
 		 }

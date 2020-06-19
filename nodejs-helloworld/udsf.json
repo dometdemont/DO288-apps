@@ -1,1 +1,10 @@
-[{"NetworkFunctions": [[{"Type": "nudsf-dr"}]]}]
+[
+  {
+    "NetworkFunctions": [
+      {
+        "Type": "nudsf-dr",
+        "Name": "myudsf"
+      }
+    ]
+  }
+]

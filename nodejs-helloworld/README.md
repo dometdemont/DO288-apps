@@ -118,6 +118,8 @@ Where:
       - network connectivity on the application server to reach the target clusters
       - the generated installer does not exceed Linux MAX\_ARG\_STRLEN (usually 128kB); beyond this limit, the E2BIG error is returned, and the 'hpe5g.sh' target has to be used instead of the 'deploy' one. 
     - hpe5g.sh: to retrieve an installer deploying resources on existing OpenShift clusters
+    - dump: to retrieve the concatenation of resources passed as payload with the resources defined in the session; the returned json is a merge of both set of resources, ready for a single shot deployment
+    - save: similar to dump, but resulting in an HTML session ready to use as a starting point for other deployments  
     - hpe5g.yaml: to retrieve an OpenStack Heat template deploying a full OpenShift cluster and HPE5G resources
 - Optional parameters:
     - project is the default OpenShift project (namespace) in which resources not specifically attatched to a project are to be deployed; default: hpe5g
@@ -164,10 +166,15 @@ Where ignite.json defines one ignite backing service named memorydb; all other v
 ```
 [{"DirectServices":[{"Type":"ignite","Name":"memorydb"}]}]
 ```
-### Deploy a network function and services with specific image 
-Build an installer deploying an udsf function and related services ignite, influxdb in the default project using default values from the default catalog except for ignite deployed with a specific image and influxdb with a specific storage size:
+### Create a new backing services set bs-set-udsf.html from the existing bs-set adding a specific ignite version named udsf-db for udsf compatibility
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data "@udsf_bs.json"
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/save?project=alif --data '[{"DirectServices": [{"Type": "ignite","Name": "udsf-db","URL": "docker.io/apacheignite","Image": "ignite","Tag": "2.7.5"}]}]' > bs-set-udsf.html
+```
+Copy this new backing services set to the application server and check http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html
+### Deploy a udsf network function using this new backing services set
+Deploy a udsf function and related services ignite, influxdb in the alif project using the bs-set-udsf backing services set deploying ignite with a specific image compatible with udsf:
+```
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html/deploy?project=alif --data "@udsf_bs.json"
 ```
 Where udsf_bs.json defines one udsf network function with its backing services:
 ```
@@ -186,23 +193,8 @@ Where udsf_bs.json defines one udsf network function with its backing services:
     "NetworkFunctions": [
       {
         "Type": "nudsf-dr",
-        "Name": "myudsf"
-      }
-    ]
-  },
-  {
-    "DirectServices": [
-      {
-        "Type": "ignite",
-        "Name": "memorydb",
-        "URL": "docker.io/apacheignite",
-        "Image": "ignite",
-        "Tag": "2.7.5"
-      },
-      {
-        "Type": "influxdb",
-        "Name": "myflux",
-        "Storage": "100Mi"
+        "Name": "myudsf",
+        "Dependencies": "udsf-db, udsf-flux"
       }
     ]
   }
