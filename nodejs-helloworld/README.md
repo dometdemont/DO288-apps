@@ -23,13 +23,13 @@ Examples of attributes: name, project, image, storage
 A section is a logical group of types sharing the same list of attributes and the same deployment method.  
 Examples: DirectServices, IndirectServices, Operators
 ### Resource
-A resource is an instance of a type, defined by a specific set of attributes values, optional or mandatory.  
+A resource is an instance of a type, defined by a name and a specific set of attributes values, optional or mandatory.  
 A deployment consists in a list of sections, each section being a list of resources to be deployed.  
 Example: memorydb is a resource of type ignite in the DirectServices section, using the image docker.io/gridgain/community:8.7.14 with 250Mi persistent storage
 ### Catalog
 The catalog is an internal object listing all known types, their cross dependencies, and default values for all attributes.  
 Some kind of types deployable through OpenShift templates must have a 'template' attribute in the catalog.  
-The default catalog can be exported and imported in order to expand, restrict or change the default catalog. This materializes as a json payload.  
+The catalog can be exported and imported in order to expand, restrict or change the default catalog. This materializes as a json payload.  
 ### Session
 A session is a snapshot of a specific deployment, ie a list of resources. It can be saved as an HTML or json file. An HTML session
 can be used as a starting point for a deployment; typically, a set of backing services can be saved as a session and used later to resolve dependencies required by network functions deployment.
@@ -69,7 +69,7 @@ The target in the REST request is: deploy (or undeploy)
 
 The installer is directly invoked from the application server running the deployer nodejs application. This requires either that:
 -	The OpenShift oc CLI and/or helm are available on the nodejs server and configured with the proper user,
--	Or the curl utility is available on the nodejs server and all target clusters are reachable from this server.
+-	Or the curl utility is available on the nodejs server and all targeted clusters are reachable from this server.
 
 #### Local
 The target in the REST request is: hpe5g.sh
@@ -112,12 +112,12 @@ Build and retrieve or run an installer or a Heat template from an HTML session a
 Where:
 - session is the HTML session file to start from on the application server, typically hpe5g.html delivered as an empty session by the github project. This session can be user defined and dropped on the application server, for instance to start from a known set of backing services.
 - target is either:
-    - deploy: to deploy resources on existing OpenShift clusters from the application server. Prerequisites:
+    - deploy: to deploy resources on targeted OpenShift clusters from the application server. Prerequisites on this server:
       - bash is the default shell interpreter 
-      - curl or oc (OpenShift command line) or helm commands available on the application server, 
-      - network connectivity on the application server to reach the target clusters
-      - the generated installer does not exceed Linux MAX\_ARG\_STRLEN (usually 128kB); beyond this limit, the E2BIG error is returned, and the 'hpe5g.sh' target has to be used instead of the 'deploy' one. 
-    - hpe5g.sh: to retrieve an installer deploying resources on existing OpenShift clusters
+      - curl or oc (OpenShift command line) or helm commands available, 
+      - network connectivity to reach the target clusters
+      - the generated installer does not exceed Linux MAX\_ARG\_STRLEN (usually 128kB); beyond this limit, the E2BIG error is returned, and the 'hpe5g.sh' target has to be used instead. 
+    - hpe5g.sh: to retrieve an installer deploying resources; this installer has to be invoked by the user to actually perform the deployment.
     - dump: to retrieve the concatenation of resources passed as payload with the resources defined in the session; the returned json is a merge of both set of resources, ready for a single shot deployment
     - save: similar to dump, but resulting in an HTML session ready to use as a starting point for other deployments  
     - hpe5g.yaml: to retrieve an OpenStack Heat template deploying a full OpenShift cluster and HPE5G resources
@@ -174,8 +174,8 @@ Build, retrieve then copy this new backing services set to the application serve
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/save?project=alif --data '[{"DirectServices": [{"Type": "ignite","Name": "udsf-db","URL": "docker.io/apacheignite","Image": "ignite","Tag": "2.7.5"}]}]' > bs-set-udsf.html
 assistant_pod=$(oc get pods -n assistant  | grep Running | awk '{print $1}')
-oc cp bs-set-udsf.html $assistant_pod:/tmp/bs-set-udsf.html
-oc exec -it $assistant_pod -- bash -c "mv -f /tmp/bs-set-udsf.html ."
+oc cp -n assistant bs-set-udsf.html $assistant_pod:/tmp/bs-set-udsf.html
+oc exec -n assistant -it $assistant_pod -- bash -c "mv -f /tmp/bs-set-udsf.html ."
 ```
 Check the new session at http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html
 ### Deploy a udsf network function using this new backing services set
@@ -208,7 +208,7 @@ Where udsf_bs.json defines one udsf network function with its backing services:
 ]
 ```
 ### Deploy udm from an Helm chart
-Save in tmp.sh the installer tmp.sh deploying udm in the project alpha:
+Save in tmp.sh the installer deploying udm in the project alpha:
 ```
 curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json" > tmp.sh
 ```
