@@ -29,9 +29,9 @@ Example: memorydb is a resource of type ignite in the DirectServices section, us
 ### Catalog
 The catalog is an internal object listing all known types, their cross dependencies, and default values for all attributes.  
 Some kind of types deployable through OpenShift templates must have a 'template' attribute in the catalog.  
-The default catalog can be exported using the GUI, or imported in order to expand, restrict or change the default catalog. This materializes as a json payload.  
+The default catalog can be exported and imported in order to expand, restrict or change the default catalog. This materializes as a json payload.  
 ### Session
-A session is a snapshot of a specific deployment, ie a list of resources. It can be saved from the GUI as an HTML or json file. An HTML session
+A session is a snapshot of a specific deployment, ie a list of resources. It can be saved as an HTML or json file. An HTML session
 can be used as a starting point for a deployment; typically, a set of backing services can be saved as a session and used later to resolve dependencies required by network functions deployment.
 ## Deployment <a name="Deployment"></a>
 The headless automated deployer is a nodejs application deployed as per the [package.json](package.json) specification from [hpe5g.js](hpe5g.js) file.   
@@ -52,13 +52,13 @@ oc expose svc/automated-deployer
 
 ## Operations <a name="Operations"></a>
 ### Target cluster(s) connection
-The installer can connect to the target cluster(s) either using oc (OpenShift command line) or curl (OpenShift REST interface).
+The installer can connect to the target cluster(s) either using the OpenShift command line (oc) or the OpenShift REST interface (curl).
 If the Clusters section defines one or more enabled target(s), then the installer relies on the OpenShift REST interface invoking curl.   
 If no target cluster is enabled, the installer relies on the OpenShift oc CLI to perform the deployment. 
 In that case, the installer has to be invoked in the context of an OpenShift user connected to the target cluster (ie oc whoami succeeds).   
 NOTE: helm based resources are deployed by invoking the helm command line: as a consequence:
-- this CLI has to be available
-- the OpenShift REST interface is not used: in other words, no target clusters should be enabled when deploying helm based resources, the deployment is performed on the default cluster set in the context of the caller.  
+- this helm CLI has to be available
+- as helm is not supported by the OpenShift REST interface, no target clusters should be enabled when deploying helm based resources: the deployment is performed on the default cluster set in the context of the caller.  
 
 ### Installer invocation
 The deployer REST interface offers two options to invoke the installer: direct  or local.
@@ -68,7 +68,7 @@ The target in the REST request is: deploy (or undeploy)
 - curl -X DELETE -H "Content-Type: application/json" http://ENDPOINT/SESSION/undeploy ...
 
 The installer is directly invoked from the application server running the deployer nodejs application. This requires either that:
--	The OpenShift oc CLI is available on the nodejs server and logged with the proper user,
+-	The OpenShift oc CLI and/or helm are available on the nodejs server and configured with the proper user,
 -	Or the curl utility is available on the nodejs server and all target clusters are reachable from this server.
 
 #### Local
@@ -76,7 +76,7 @@ The target in the REST request is: hpe5g.sh
 - curl -X PUT -H "Content-Type: application/json" http://ENDPOINT/SESSION/hpe5g.sh ...
 - curl -X DELETE -H "Content-Type: application/json" http://ENDPOINT/SESSION/hpe5g.sh ...
 
-The installer is returned to the caller for direct invocation: in that case, all prerequisites apply to the caller environment, not to the nodejs server.
+The installer is returned to the caller for local invocation: in that case, all prerequisites apply to the caller environment, not to the nodejs server.
 ### OpenShift Project naming
 Any resource is deployed in an OpenShift project: this project name is defined at the resource level using the Project attribute.
 If this attribute is missing:
@@ -86,8 +86,8 @@ If this attribute is missing:
 
 ### REST operations
 The RESTful interface is exposing three verbs:
-- [GET](#GET) to access the interactive GUI, dump an existing session or a catalog
-- [PUT](#PUT) to deploy a set of resources by building and retrieving or running an installer
+- [GET](#GET) to access the interactive GUI, dump an existing session or a catalog,
+- [PUT](#PUT) to deploy a set of resources by building and retrieving or running an installer, or to build a new session,
 - [DELETE](#DELETE) to delete or undeploy a set of resources and projects.
 #### GET<a name="GET"></a>
 ##### View an existing session GUI
@@ -105,12 +105,12 @@ Where:
 - Optional parameter: catalog is the catalog json file on the application server. Default: list the default catalog content. 
 
 #### PUT<a name="PUT"></a>
-Build and retrieve or run an installer or a Heat template from an HTML session available on the application server:
+Build and retrieve or run an installer or a Heat template from an HTML session available on the application server, or build a new session:
 
 `curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
 
 Where:
-- session is the HTML session file to start from on the application server, typically hpe5g.html delivered as an empty session by the github project. This session can be user defined in interactive mode and dropped on the application server for the headless mode, for instance to start from a known set of backing services.
+- session is the HTML session file to start from on the application server, typically hpe5g.html delivered as an empty session by the github project. This session can be user defined and dropped on the application server, for instance to start from a known set of backing services.
 - target is either:
     - deploy: to deploy resources on existing OpenShift clusters from the application server. Prerequisites:
       - bash is the default shell interpreter 
@@ -158,19 +158,26 @@ curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assist
 ```
 curl -X DELETE -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/undeploy?project=bs-set --data '[{"Clusters":[{"Name":"ocp1","Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443","Token":"lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY","Targeted":true}]}]'
 ```
-### Build an installer deploying an ignite service named memorydb in the project 'myproject' using the default values
+### Build an installer deploying an ignite service named memorydb in the project 'alif' using the default values
+Save the installer tmp.sh deploying one ignite backing service named memorydb; all other attributes values are retrieved from the default catalog:
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh?project=myproject --data "@ignite.json"
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh?project=alif --data '[{"DirectServices":[{"Type":"ignite","Name":"memorydb"}]}]' > tmp.sh
 ```
-Where ignite.json defines one ignite backing service named memorydb; all other values are retrieved from the default catalog:
+Deploy by invoking this installer, then undeploy thanks to the --undeploy option
 ```
-[{"DirectServices":[{"Type":"ignite","Name":"memorydb"}]}]
-```
+chmod a+x tmp.sh
+./tmp.sh
+./tmp.sh --undeploy
+``` 
 ### Create a new backing services set bs-set-udsf.html from the existing bs-set adding a specific ignite version named udsf-db for udsf compatibility
+Build, retrieve then copy this new backing services set to the application server:
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/save?project=alif --data '[{"DirectServices": [{"Type": "ignite","Name": "udsf-db","URL": "docker.io/apacheignite","Image": "ignite","Tag": "2.7.5"}]}]' > bs-set-udsf.html
+assistant_pod=$(oc get pods -n assistant  | grep Running | awk '{print $1}')
+oc cp bs-set-udsf.html $assistant_pod:/tmp/bs-set-udsf.html
+oc exec -it $assistant_pod -- bash -c "mv -f /tmp/bs-set-udsf.html ."
 ```
-Copy this new backing services set to the application server and check http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html
+Check the new session at http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html
 ### Deploy a udsf network function using this new backing services set
 Deploy a udsf function and related services ignite, influxdb in the alif project using the bs-set-udsf backing services set deploying ignite with a specific image compatible with udsf:
 ```
@@ -194,19 +201,26 @@ Where udsf_bs.json defines one udsf network function with its backing services:
       {
         "Type": "nudsf-dr",
         "Name": "myudsf",
-        "Dependencies": "udsf-db, udsf-flux"
+        "Dependencies": "udsf-db,udsf-flux"
       }
     ]
   }
 ]
 ```
 ### Deploy udm from an Helm chart
+Save in tmp.sh the installer tmp.sh deploying udm in the project alpha:
 ```
-curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json"
+curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json" > tmp.sh
 ```
 Where helm.json starts with:
 ```
-[{"HelmCharts":[{"Type":"nudm","Name":"myudm","Chart":"hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz","Values":"<Helm values>"}]}]
+[{"HelmCharts":[{"Type":"nudm","Name":"myudm","Project":"alpha","Chart":"hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz","Values":"<Helm values>"}]}]
+```
+Deploy by invoking this installer, then undeploy thanks to the --undeploy option
+```
+chmod a+x tmp.sh
+./tmp.sh
+./tmp.sh --undeploy
 ```
 ### Failure examples
 ##### Deploy an invalid set of resources
@@ -292,7 +306,7 @@ The installer is not able to detect this incompatibility. The client has to chec
 This chapter is a compilation of the detailed sections specifications.
 
 ### Clusters
-OpenShift clusters candidate for deployment:
+OpenShift clusters candidate for deployment through OpenShift RESTful API:
 - Name: nickname of this cluster
 - Endpoint: OpenShift API endpoint for this cluster.   
   Typically retrieved from a session with: oc config current-context | cut -d/ -f2 | tr - .
