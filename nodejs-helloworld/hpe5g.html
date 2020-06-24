@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-18 Version 0.72</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-24 Version 0.73</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
@@ -114,6 +114,8 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-06-24 0.73	Helm based deployments: optional version and extra options attributes; Operators deployment: optional replicas attribute; 
+	Add telegraf in the default catalog as IndirectService and HelmChart; use it as influxdb resource for all Network Functions  
 2020-06-18 0.72	nudsf and nudr OpenShift templates refresh. Markdown doc cosmetic fixes.
 2020-06-12 0.71	Json session format: move to a list of attribute:value {a:x, b:y, ...} instead of a table of the same [{a:x},{b:y},...]
     Add a Build Doc button compiling the Help text of a selection of sections in a markdown document 
@@ -1545,12 +1547,17 @@ hpe5gResource.prototype.build = function(target){
 		var volume=this.getAndSetValue(row, nameIndexes, 'Volume');
 		var displayChart="";
 		var chart=this.getAndSetValue(row, nameIndexes, 'Chart', hpe5gResources.defaults[type]['chart']);
+		var chartVersion=this.getAndSetValue(row, nameIndexes, 'Version', hpe5gResources.defaults[type]['version']);
+		var chartOptions=this.getAndSetValue(row, nameIndexes, 'Options');
 		var delButton=row.getElementsByClassName("delButton")[0];
 		var values=window[this.title + "_Values_" + delButton.id];
-		if(chart.length>0)displayChart=" with chart "+chart;
+		if(chart)displayChart=" with chart "+chart;
+		if(chartVersion)chartOptions+=" --version "+chartVersion;
+		if(chartOptions)displayChart+=" "+chartOptions;
 		this.check += checkDependency(this.title=='HelmCharts', [values!=undefined && values.content!=undefined && chart.length>0], this.title+" "+name,", Helm chart and values are required");
 		var displayVolume="";
-		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas', "1");
+		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas');
+		if(!replicas)replicas="1";
 		var dependenciesList=this.getAndSetValue(row, nameIndexes, 'Dependencies');
 		var dependencies=undefined;
 		if(dependenciesList)dependencies=dependenciesList.split(',');
@@ -1580,14 +1587,14 @@ hpe5gResource.prototype.build = function(target){
 			continue;
 		} 
 		var displayReplicas="";
-		if(replicas.length>0)displayReplicas=replicas+ " replica(s) of type: ";
+		if(replicas)displayReplicas=replicas+ " replica(s) of type: ";
 		
 		// Record this provider to resolve dependencies later per type and per project
 		if(!hpe5gResources.provides[type])hpe5gResources.provides[type] = new Array();
 		if(!hpe5gResources.provides[type][project])hpe5gResources.provides[type][project]=new Array();
 		hpe5gResources.provides[type][project].push(name);
 		
-		hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)));
+		hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)));
 		
 		if(insecure && hpe5gResources.insecureRegistries.indexOf(URL) < 0)hpe5gResources.insecureRegistries.push(URL);
 		
@@ -1601,7 +1608,7 @@ hpe5gResource.prototype.build = function(target){
 };
 
 //Class implementing a network function: name, image (including the tag), URL (hosting the image), pipeline, Helm chart 
-var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVolume, aReplicas, aDependency, aURL, anHelmChart, anHelmChartValues, aPipeline){
+var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVolume, aReplicas, aDependency, aURL, anHelmChart, anHelmChartValues, anHelmChartOptions, aPipeline){
 	this.type=aType;
 	this.name=aName;
 	this.image=anImage;
@@ -1612,7 +1619,7 @@ var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVol
 	if(aVolume != undefined && aVolume.length > 0)this.volume="volumeName: "+aVolume;
 	this.replicas=aReplicas;
 	this.dependency=aDependency;
-	this.helmChart=anHelmChart; this.helmChartValues=anHelmChartValues;
+	this.helmChart=anHelmChart; this.helmChartValues=anHelmChartValues; this.helmChartOptions=anHelmChartOptions;
 	this.pipeline=aPipeline;
 	// Insecure registries are managed by docker; secured registries are pulled directly from the URL
 	this.insecureURL = function(){return hpe5gResources.insecureRegistries.indexOf(this.URL) >= 0;}
@@ -1659,7 +1666,7 @@ hpe5gResources.compile = function(){
 	var check="";
 	hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
 		// Check if all dependencies for this network function type are satisfied on this project
-		hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
+		if(hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
 			if(networkFunction.resolve(requirement))return;
 			check += "\nNetworkFunctions: "+networkFunction.name+" missing dependency "+requirement+" on project "+networkFunction.project;
 			if(networkFunction.dependency)check+=" in the provided list: "+networkFunction.dependency;
@@ -1757,6 +1764,7 @@ var Operators = new hpe5gResource("Operators", [
 	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.resources['Operators']}}, 
 	{name:'Name', type:'text', width:'100px'},
 	{name:'Project', type:'text', width:'60px'},
+	{name:'Replicas', type:'text', width:'40px'},
 	{name:'Pipeline GIT', type:'text', width:'200px'},
 	{name:'directory', type:'text', width:'120px'},
 	{name:'branch', type:'text', width:'120px'}
@@ -1767,6 +1775,7 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Type: the type of the operator to instantiate
 - Name: one word resource name for this operator instance
 - Project: the OpenShift project hosting this operator instance
+- Replicas: number of replicas passsed to this operator instance.
 - Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile     
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
@@ -1787,6 +1796,8 @@ var HelmCharts = new hpe5gResource("HelmCharts", [
 	{name:'Project', type:'text', width:'60px'},
 	{name:'Chart', type:'text', width:'200px'},
 	{name:'Values', type:'file', width:'200px'},
+	{name:'Version', type:'text', width:'60px'},
+	{name:'Options', type:'text', width:'120px'},
 	{name:'Pipeline GIT', type:'text', width:'200px'},
 	{name:'directory', type:'text', width:'120px'},
 	{name:'branch', type:'text', width:'120px'}
@@ -1800,6 +1811,8 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Project: the OpenShift project hosting this chart instance
 - Chart: name of the chart to deploy; Helm must be configured on the infrastructure to provide this chart
 - Values: local file injected in this chart as deployment values
+- Version: specify the exact chart version to install. If this is not specified, the latest version is installed
+- Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
 - Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile     
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
@@ -2019,9 +2032,9 @@ function hpe5gDeploymentScript(warningMessage){
 var _shellTemplate=`
 if $_deploy ; then 
 	_ocAction="apply"
-	_helmAction="'{print \\"helm upgrade --install \\" \\$2,\\$3 \\" --values \\" \\$N}'"
+	_helmAction() { helm upgrade --install $_HPE5G_name $_HPE5G_template --values _tmp_$_helmValues $_HPE5G_options; }
 else
-	_helmAction="'{print \\"helm delete \\" \\$2}'"
+	_helmAction() { helm delete $_HPE5G_name ; }
 	_ocAction="delete"
 fi
 
@@ -2070,9 +2083,9 @@ _log_ "$_displayedAction the network functions and Helm instances"
 for _project in $oc_projects; do 
 	oc project $_project &>> $hpe5g_log_file || _fail_ "Cannot switch to project $_project"
 	# File naming convention for Network functions: openshift_project_<project>.yaml
-	# File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
+	# File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
 	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && oc process -f openshift_project_$_project.yaml | oc $_ocAction -f - &>> $hpe5g_log_file && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
-	for _helmValues in $(ls openshift_helm_$\{_project}*.yaml 2> /dev/null) ; do _log_ "$_displayedAction $_helmValues on project $_project" && $(ls $_helmValues | eval awk -F'~' $_helmAction) &>> $hpe5g_log_file && rm -f $_helmValues &>> $hpe5g_log_file || _fail_ "$_displayedAction Helm instance on project $_project" ; done
+	for _helmValues in $(ls openshift_helm_$\{_project}_*.yaml 2> /dev/null) ; do eval $(head -1 $_helmValues) && _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" && tail -n +2 $_helmValues > _tmp_$_helmValues && _helmAction &>> $hpe5g_log_file && rm -f $_helmValues _tmp_$_helmValues &>> $hpe5g_log_file || _fail_ "$_displayedAction Helm instance on project $_project" ; done
 	# Undeployment: wait for pods termination  
 	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $hpe5g_log_file ; do : ; done
 	# Indulge 5 seconds to stabilize, then delete the project if no pods, otherwise log a status
@@ -2095,7 +2108,7 @@ function hpe5gHelmValues(header, footer, tab){
 	hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
 		if(networkFunction.helmChartValues == undefined)return;
 		var helmValues="\n"+networkFunction.helmChartValues.content;
-		if(header != undefined)result+=header(networkFunction.project, networkFunction.name, networkFunction.helmChart);
+		if(header != undefined)result+=header(networkFunction.project, networkFunction.name, networkFunction.helmChart, networkFunction.helmChartOptions);
 		if(tab != undefined)helmValues=helmValues.replace(/\n/g, "\n"+tab);	// indentation of objects compared to the project header
 		result+=helmValues;
 		if(footer != undefined)result+=footer(networkFunction.project, networkFunction.name);
@@ -2145,7 +2158,7 @@ objects:
 			deployment=deployment.replace(/~PERSISTENCE_START~[\s\S]*?~PERSISTENCE_END~/mg,'');
 		}
 		
-		hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
+		if(hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
 			var ereg=new RegExp("~"+requirement+"_NAME~","g");
 			deployment=deployment.replace(ereg, networkFunction.resolve(requirement));
 			});
@@ -2641,10 +2654,12 @@ function buildHeatTemplate(){
     heat+=n0+"    description: set of OpenShift templates ready for deployment";
     heat+=n0+"    value:";
     // OpenShift network functions and Helm instances, per project
-	// File naming convention for Network functions: openshift_project_<project>.yaml
-	// File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
+	// File naming convention for Network functions and services: openshift_project_<project>.yaml
+	// File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
 	function heatHeader(project){return "\nopenshift_project_"+project+":";}
-	function heatHelmValuesHeader(project, name, template){return "\nopenshift_helm_"+project+"~"+name+"~"+template+"~:";}
+	function heatHelmValuesHeader(project, name, template, options){
+		return "\nopenshift_helm_"+project+"_"+name+":\n  _HPE5G_name="+name+" _HPE5G_template="+template+" _HPE5G_options='"+options+"'";
+	}
 	
 	// List of NetworkFunctions deployed on openshift
 	heat+=hpe5gNetworkFunctions(heatHeader,undefined,'  ').replace(/\n/g, "\n"+  
@@ -2837,9 +2852,11 @@ function buildNetworkFunctions(){
 
 	if(Clusters.targeted == undefined || Clusters.targeted.length == 0){
     	// File naming convention for Network functions: openshift_project_<project>.yaml
-    	// File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
+    	// File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
     	function catHeader(project){return "\ncat > openshift_project_"+project+".yaml << 'EOFILE'"};
-    	function catHelmValuesHeader(project, name, template){return "\ncat > openshift_helm_"+project+"~"+name+"~"+template+"~"+".yaml << 'EOFILE'"};
+    	function catHelmValuesHeader(project, name, template, options){
+    		return "\ncat > openshift_helm_"+project+"_"+name+".yaml << 'EOFILE'\n_HPE5G_name="+name+" _HPE5G_template="+template+" _HPE5G_options='"+options+"'";
+    	}
     	function catFooter(project){return "\nEOFILE"};
     	
     	shell=shellHeader('oc');
@@ -3089,6 +3106,7 @@ var defaultCatalog=`
     "IndirectServices": [
       "jenkins",
       "elasticsearch",
+      "telegraf",
       "prometheus-alertmanager",
       "prometheus",
       "kube-state-metrics",
@@ -3109,22 +3127,16 @@ var defaultCatalog=`
       "elasticSearchOperator"
     ],
     "HelmCharts": [
-      "nudm",
-      "nudr",
+      "nudm-chart",
+      "nudr-chart",
+      "telegraf-chart",
       "generic"
     ]
   },
   "dependencies": {
-    "jenkins": [],
-    "elasticsearch": [],
-    "prometheus-alertmanager": [],
-    "prometheus": [],
-    "kube-state-metrics": [],
-    "pushgateway": [],
-    "grafana": [],
     "nudsf-dr": [
       "ignite",
-      "influxdb"
+      "telegraf"
     ],
     "nudr-dr": [
       "ignite",
@@ -3134,46 +3146,33 @@ var defaultCatalog=`
       "ignite"
     ],
     "nudr-reg-agent": [
-    	"redis","influxdb"
+    	"redis","telegraf"
     ],
     "nudm-ee": [
-      "influxdb", "nudr-dr"
+      "telegraf", "nudr-dr"
     ],
     "nudm-li-poi": [
-      "redis","kafka","influxdb"
+      "redis","kafka","telegraf"
     ],
     "nudm-li-tf": [
-        "redis","influxdb"
+        "redis","telegraf"
     ],
     "nudm-ueau": [
-        "influxdb", "nudr-dr"
+        "telegraf", "nudr-dr"
     ],
     "nudm-uecm": [
-        "influxdb", "nudr-dr"
+        "telegraf", "nudr-dr"
     ],
     "nudm-sdm": [
-      "influxdb", "nudr-dr"
+      "telegraf", "nudr-dr"
     ],
     "nudm-notify": [
-      "influxdb", "nudr-dr"
+      "telegraf", "nudr-dr"
     ],
-    "sf-cmod": [],
     "nrf-reg-agent": [
-      "influxdb",
+      "telegraf",
       "fluentd"
-    ],
-    "ignite": [],
-    "redis": [],
-    "influxdb": [],
-    "fluentd": [],
-    "jaeger": [],
-    "kiali": [],
-    "svc-mesh-ctlplane": [],
-    "kafka": [],
-    "elasticSearchOperator": [],
-    "nudm": [],
-    "nudr": [],
-    "generic": []
+    ]
   },
   "admin": {
 	    "fluentd": true,
@@ -3191,6 +3190,11 @@ var defaultCatalog=`
       "image": "elasticsearch-oss",
       "tag": "6.7.0",
       "storage": "4Gi"
+    },
+    "telegraf": {
+        "URL": "docker.io",
+        "image": "telegraf",
+        "tag": "1.14-alpine"
     },
     "prometheus-alertmanager": {
       "URL": "docker.io/prom",
@@ -3311,11 +3315,14 @@ var defaultCatalog=`
     "svc-mesh-ctlplane": {},
     "kafka": {},
     "elasticSearchOperator": {},
-    "nudm": {
+    "nudm-chart": {
       "chart": "hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz"
     },
-    "nudr": {
+    "nudr-chart": {
       "chart": "hpe-sde-udr-1.1.0-004136.0166df3.tgz"
+    },
+    "telegraf-chart": {
+      "chart": "influxdata/telegraf"
     },
     "generic": {
     }
@@ -3564,7 +3571,7 @@ hpe5gResources.defaults['nudsf-dr']['template']=
         properties:
           com.hpe.imsc.statistics.influxdb.notifications: "false"
           com.hpe.imsc.statistics.influxdb.server.database: hpe-sde-udsf-dr
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
@@ -4545,7 +4552,7 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nnrf-reg-agent
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -4958,7 +4965,7 @@ hpe5gResources.defaults['nrf-reg-agent']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nnrf-reg-agent
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -5303,7 +5310,7 @@ hpe5gResources.defaults['nudm-ee']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -5698,7 +5705,7 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nflipoi
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -5942,7 +5949,7 @@ hpe5gResources.defaults['nudm-li-tf']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nflitf
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -6390,7 +6397,7 @@ hpe5gResources.defaults['nudm-ueau']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -6825,7 +6832,7 @@ hpe5gResources.defaults['nudm-uecm']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -7326,7 +7333,7 @@ hpe5gResources.defaults['nudm-sdm']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -7823,7 +7830,7 @@ hpe5gResources.defaults['nudm-notify']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -8857,6 +8864,139 @@ hpe5gResources.defaults['elasticsearch']['template']=
       kind: Service
       name: ~NAME~
 `;
+//================================================
+hpe5gResources.defaults['telegraf']['template']=
+//================================================
+`
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: RoleBinding
+  apiVersion: authorization.openshift.io/v1
+  metadata:
+    name: ~NAME~-view
+    namespace: ~PROJECT~
+  roleRef:
+    kind: Role
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source        
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    template: 
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        serviceAccountName: ~NAME~
+        containers:
+        - name: ~NAME~
+          namespace: ~PROJECT~
+          image: ~IMAGE_STREAM~
+          env:
+          - name: HOSTNAME
+            value: telegraf-polling-service
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/telegraf
+        volumes:
+          - name: config-volume
+            configMap:
+              name: ~NAME~
+    selector:
+      name: ~NAME~
+    replicas: ~REPLICAS~
+- kind: Service
+  apiVersion: v1
+  metadata: 
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    type: ClusterIP
+    ports:
+    - port: 8888
+      targetPort: 8888
+      name: "health"
+    - port: 8125
+      targetPort: 8125
+      protocol: "UDP"
+      name: "statsd"
+    selector:
+      name: ~NAME~
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    to:
+      kind: Service
+      name: ~NAME~
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  data:
+    telegraf.conf: |+    
+      [agent]
+        collection_jitter = "0s"
+        debug = false
+        flush_interval = "10s"
+        flush_jitter = "0s"
+        hostname = "$HOSTNAME"
+        interval = "10s"
+        logfile = ""
+        metric_batch_size = 1000
+        metric_buffer_limit = 10000
+        omit_hostname = false
+        precision = ""
+        quiet = false
+        round_interval = true
+      [[processors.enum]]
+        [[processors.enum.mapping]]
+          dest = "status_code"
+          field = "status"
+          [processors.enum.mapping.value_mappings]
+              critical = 3
+              healthy = 1
+              problem = 2
+      [[outputs.prometheus_client]]
+        listen = ":9273"
+        path = "/metrics"
+      [[inputs.internal]]
+        collect_memstats = false
+      [[inputs.influxdb_listener]]
+        service_address = ":8888"
+`;
+
 //================================================
 hpe5gResources.defaults['prometheus-alertmanager']['template']=
 //================================================
@@ -10258,7 +10398,7 @@ hpe5gResources.defaults['kafka']['template']=
   spec:
     kafka:
       version: 2.4.0
-      replicas: 3
+      replicas: ~REPLICAS~
       listeners:
         plain: {}
         tls: {}
@@ -10270,7 +10410,7 @@ hpe5gResources.defaults['kafka']['template']=
       storage:
         type: ephemeral
     zookeeper:
-      replicas: 3
+      replicas: ~REPLICAS~
       storage:
         type: ephemeral
     entityOperator:

@@ -207,14 +207,35 @@ Where udsf_bs.json defines one udsf network function with its backing services:
   }
 ]
 ```
-### Deploy udm from an Helm chart
+### Deploy from Helm charts udm and a specific version of telegraf 
 Save in tmp.sh the installer deploying udm in the project alpha:
 ```
 curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json" > tmp.sh
 ```
-Where helm.json starts with:
+Where helm.json looks like:
 ```
-[{"HelmCharts":[{"Type":"nudm","Name":"myudm","Project":"alpha","Chart":"hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz","Values":"<Helm values>"}]}]
+[
+  {
+    "HelmCharts": [
+      {
+        "Type": "nudm-chart",
+        "Name": "udm",
+        "Project": "alif",
+        "Chart": "hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz",
+        "Values": "..."
+      },
+      {
+        "Type": "telegraf-chart",
+        "Name": "telegraf-old",
+        "Project": "alif",
+        "Chart": "influxdata/telegraf",
+        "Values": "...",
+        "Version": "1.7.10",
+        "Options": "--force --set key1=val1,key2=val2"
+      }
+    ]
+  }
+]
 ```
 Deploy by invoking this installer, then undeploy thanks to the --undeploy option
 ```
@@ -301,7 +322,6 @@ curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assist
 The installer is not able to detect this incompatibility. The client has to check the application status from the standard OpenShift API/CLI.   
 
 <a name="SectionsDetails"></a>
-
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 
@@ -404,7 +424,7 @@ NOTES:
 - grafana default admin password is the name of the instance.
 - redis default admin password is the name of the instance.
  
-IndirectServices supported types: jenkins,elasticsearch,prometheus-alertmanager,prometheus,kube-state-metrics,pushgateway,grafana
+IndirectServices supported types: jenkins,elasticsearch,telegraf,prometheus-alertmanager,prometheus,kube-state-metrics,pushgateway,grafana
 
 ### Operators
 Operator instantiation:
@@ -412,6 +432,7 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Type: the type of the operator to instantiate
 - Name: one word resource name for this operator instance
 - Project: the OpenShift project hosting this operator instance
+- Replicas: number of replicas passsed to this operator instance.
 - Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile     
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
@@ -431,6 +452,8 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Project: the OpenShift project hosting this chart instance
 - Chart: name of the chart to deploy; Helm must be configured on the infrastructure to provide this chart
 - Values: local file injected in this chart as deployment values
+- Version: specify the exact chart version to install. If this is not specified, the latest version is installed
+- Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
 - Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile     
 	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
 	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
@@ -440,4 +463,4 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 	branch: (optional) git branch to use, eg: master
 	
 
-HelmCharts supported types: nudm,nudr,generic
+HelmCharts supported types: nudm-chart,nudr-chart,telegraf-chart,generic

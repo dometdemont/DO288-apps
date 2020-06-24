@@ -7,10 +7,10 @@
 <table border="0" width="100%">
 <tbody><tr><td valign="top" align="left">
 <h1>CMS5G Core Stack</h1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-12 Version 0.71</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-24 Version 0.73</a></p>
 <p>
 <label for="quickDescription">Description :</label>
-<input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description" value="Set of services with jenkins pipelines">
+<input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description" value="Set of services with jenkins pipeline on jaeger">
 </p>
 </td>
 <td valign="top" align="right">
@@ -21,7 +21,7 @@
 <h3>Summary: <a id="summary" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></h3>
 
 <form>
-<div id="tableInsertionPoint"><div id="NetworksSection" style="display: none;"><a name="Networks"><h2>Networks</h2></a><table border="1" id="Networks"><tbody><tr><th><input type="button" value="Add" onclick="Networks.add();"></th><th class="Networksnetwork" style="width: 80px;">network</th><th class="Networksinterface" style="width: 50px;">interface</th><th class="Networksmask" style="width: 120px;">mask</th><th class="Networksportgroup" style="width: 120px;">portgroup</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Networks.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Networks.help());"></div><div id="MiscSection" style="display: none;"><a name="Misc"><h2>Misc</h2></a><table border="1" id="Misc"><tbody><tr><th><input type="button" value="Add" onclick="Misc.add();"></th><th class="MiscProperty" style="width: 200px;">Property</th><th class="MiscValue" style="width: 400px;">Value</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Misc.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Misc.help());"></div><div id="NodesSection" style="display: none;"><a name="Nodes"><h2>Nodes</h2></a><table border="1" id="Nodes"><tbody><tr><th><input type="button" value="Add" onclick="Nodes.add();"></th><th class="NodesMGMT fqdn" style="width: 120px;">MGMT fqdn</th><th class="NodesMGMT IP addr" style="width: 120px;">MGMT IP addr</th><th class="NodesPUBLIC IP addr" style="width: 120px;">PUBLIC IP addr</th><th class="NodesMaster" style="width: 15px;">Master</th><th class="NodesEtcd" style="width: 15px;">Etcd</th><th class="NodesWorker" style="width: 15px;">Worker</th><th class="NodesTester" style="width: 15px;">Tester</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Nodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Nodes.help());"></div><div id="FlavorsSection" style="display: none;"><a name="Flavors"><h2>Flavors</h2></a><table border="1" id="Flavors"><tbody><tr><th><input type="button" value="Add" onclick="Flavors.add();"></th><th class="FlavorsInfrastructure" style="width: 100px;">Infrastructure</th><th class="FlavorsFlavor" style="width: 120px;">Flavor</th><th class="Flavorsname" style="width: 80px;">name</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Flavors.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Flavors.help());"></div><div id="CinderVolumesSection" style="display: none;"><a name="CinderVolumes"><h2>CinderVolumes</h2></a><table border="1" id="CinderVolumes"><tbody><tr><th><input type="button" value="Add" onclick="CinderVolumes.add();"></th><th class="CinderVolumesName" style="width: 120px;">Name</th><th class="CinderVolumesSize" style="width: 80px;">Size</th><th class="CinderVolumesDescription" style="width: 300px;">Description</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CinderVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CinderVolumes.help());"></div><div id="PersistentVolumesSection" style="display: none;"><a name="PersistentVolumes"><h2>PersistentVolumes</h2></a><table border="1" id="PersistentVolumes"><tbody><tr><th><input type="button" value="Add" onclick="PersistentVolumes.add();"></th><th class="PersistentVolumesName" style="width: 120px;">Name</th><th class="PersistentVolumesSize" style="width: 80px;">Size</th><th class="PersistentVolumesType" style="width: 80px;">Type</th><th class="PersistentVolumesAccess" style="width: 120px;">Access</th><th class="PersistentVolumesReclaim" style="width: 120px;">Reclaim</th><th class="PersistentVolumesCinderVolume" style="width: 120px;">CinderVolume</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(PersistentVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(PersistentVolumes.help());"></div><div id="ClustersSection" style="display: none;"><a name="Clusters"><h2>Clusters</h2></a><table border="1" id="Clusters"><tbody><tr><th><input type="button" value="Add" onclick="Clusters.add();"></th><th class="ClustersName" style="width: 80px;">Name</th><th class="ClustersEndpoint" style="width: 300px;">Endpoint</th><th class="ClustersToken" style="width: 200px;">Token</th><th class="ClustersTargeted" style="width: 15px;">Targeted</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Clusters.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Clusters.help());"></div><div id="NetworkFunctionsSection" style="display: none;"><a name="NetworkFunctions"><h2>NetworkFunctions</h2></a><table border="1" id="NetworkFunctions"><tbody><tr><th><input type="button" value="Add" onclick="NetworkFunctions.add();"></th><th class="NetworkFunctionsType" style="width: 100px;">Type</th><th class="NetworkFunctionsName" style="width: 80px;">Name</th><th class="NetworkFunctionsProject" style="width: 60px;">Project</th><th class="NetworkFunctionsURL" style="width: 200px;">URL</th><th class="NetworkFunctionsinsecure" style="width: 15px;">insecure</th><th class="NetworkFunctionsImage" style="width: 120px;">Image</th><th class="NetworkFunctionsTag" style="width: 120px;">Tag</th><th class="NetworkFunctionsStorage" style="width: 60px;">Storage</th><th class="NetworkFunctionsVolume" style="width: 60px;">Volume</th><th class="NetworkFunctionsReplicas" style="width: 40px;">Replicas</th><th class="NetworkFunctionsDependencies" style="width: 100px;">Dependencies</th><th class="NetworkFunctionsPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="NetworkFunctionsdirectory" style="width: 120px;">directory</th><th class="NetworkFunctionsbranch" style="width: 120px;">branch</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(NetworkFunctions.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(NetworkFunctions.help());"></div><div id="DirectServicesSection" style=""><a name="DirectServices"><h2>DirectServices</h2></a><table border="1" id="DirectServices"><tbody><tr><th><input type="button" value="Add" onclick="DirectServices.add();"></th><th class="DirectServicesType" style="width: 100px;">Type</th><th class="DirectServicesName" style="width: 80px;">Name</th><th class="DirectServicesProject" style="width: 60px;">Project</th><th class="DirectServicesURL" style="width: 200px;">URL</th><th class="DirectServicesinsecure" style="width: 15px;">insecure</th><th class="DirectServicesImage" style="width: 120px;">Image</th><th class="DirectServicesTag" style="width: 120px;">Tag</th><th class="DirectServicesStorage" style="width: 60px;">Storage</th><th class="DirectServicesVolume" style="width: 60px;">Volume</th><th class="DirectServicesReplicas" style="width: 40px;">Replicas</th><th class="DirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="DirectServicesPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="DirectServicesdirectory" style="width: 120px;">directory</th><th class="DirectServicesbranch" style="width: 120px;">branch</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton1" onclick="DirectServices.delete('delButton1');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite" selected="selected">ignite</option><option value="redis">redis</option><option value="influxdb">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="gridgain" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/gridgain" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="community" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="8.7.14" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="250Mi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline GIT" style="width: 200px;"><input class="DirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="DirectServicesdirectory" style="width: 120px;"><input class="DirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="DirectServicesbranch" style="width: 120px;"><input class="DirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton2" onclick="DirectServices.delete('delButton2');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite">ignite</option><option value="redis">redis</option><option value="influxdb" selected="selected">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="udsf-flux" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/bitnami" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="influxdb" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="1.7.10" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="1Gi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline GIT" style="width: 200px;"><input class="DirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="DirectServicesdirectory" style="width: 120px;"><input class="DirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="DirectServicesbranch" style="width: 120px;"><input class="DirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton3" onclick="DirectServices.delete('delButton3');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite">ignite</option><option value="redis" selected="selected">redis</option><option value="influxdb">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="myredis" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/bitnami" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="redis" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="100Mi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline GIT" style="width: 200px;"><input class="DirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="DirectServicesdirectory" style="width: 120px;"><input class="DirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="DirectServicesbranch" style="width: 120px;"><input class="DirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(DirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(DirectServices.help());"></div><div id="IndirectServicesSection" style=""><a name="IndirectServices"><h2>IndirectServices</h2></a><table border="1" id="IndirectServices"><tbody><tr><th><input type="button" value="Add" onclick="IndirectServices.add();"></th><th class="IndirectServicesType" style="width: 100px;">Type</th><th class="IndirectServicesName" style="width: 80px;">Name</th><th class="IndirectServicesProject" style="width: 60px;">Project</th><th class="IndirectServicesURL" style="width: 200px;">URL</th><th class="IndirectServicesinsecure" style="width: 15px;">insecure</th><th class="IndirectServicesImage" style="width: 120px;">Image</th><th class="IndirectServicesTag" style="width: 120px;">Tag</th><th class="IndirectServicesStorage" style="width: 60px;">Storage</th><th class="IndirectServicesVolume" style="width: 60px;">Volume</th><th class="IndirectServicesReplicas" style="width: 40px;">Replicas</th><th class="IndirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="IndirectServicesPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="IndirectServicesdirectory" style="width: 120px;">directory</th><th class="IndirectServicesbranch" style="width: 120px;">branch</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton4" onclick="IndirectServices.delete('delButton4');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins" selected="selected">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myjenkins" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="quay.io/openshift" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="origin-jenkins" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton5" onclick="IndirectServices.delete('delButton5');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch" selected="selected">elasticsearch</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myelastic" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.elastic.co/elasticsearch" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="elasticsearch-oss" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="6.7.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="4Gi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton6" onclick="IndirectServices.delete('delButton6');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="prometheus-alertmanager" selected="selected">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myalert" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="alertmanager" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v0.20.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="8Gi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton7" onclick="IndirectServices.delete('delButton7');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus" selected="selected">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myprom" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="prometheus" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v2.16.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="200Mi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton8" onclick="IndirectServices.delete('delButton8');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway" selected="selected">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="mygateway" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="pushgateway" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v1.0.1" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(IndirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(IndirectServices.help());"></div><div id="OperatorsSection" style=""><a name="Operators"><h2>Operators</h2></a><table border="1" id="Operators"><tbody><tr><th><input type="button" value="Add" onclick="Operators.add();"></th><th class="OperatorsType" style="width: 140px;">Type</th><th class="OperatorsName" style="width: 100px;">Name</th><th class="OperatorsProject" style="width: 60px;">Project</th><th class="OperatorsPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="Operatorsdirectory" style="width: 120px;">directory</th><th class="Operatorsbranch" style="width: 120px;">branch</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton9" onclick="Operators.delete('delButton9');"></td><td class="OperatorsType" style="width: 140px;"><select class="OperatorsType" style="width: 140px;"><option value="jaeger" selected="selected">jaeger</option><option value="kiali">kiali</option><option value="svc-mesh-ctlplane">svc-mesh-ctlplane</option><option value="kafka">kafka</option><option value="elasticSearchOperator">elasticSearchOperator</option></select></td><td class="OperatorsName" style="width: 100px;"><input class="OperatorsName" type="text" value="mike" style="width: 100px;"></td><td class="OperatorsProject" style="width: 60px;"><input class="OperatorsProject" type="text" value="" style="width: 60px;"></td><td class="OperatorsPipeline GIT" style="width: 200px;"><input class="OperatorsPipeline GIT" type="text" value="https://github.hpe.com/CMS-5GCS/automated-deployer" style="width: 200px;"></td><td class="Operatorsdirectory" style="width: 120px;"><input class="Operatorsdirectory" type="text" value="pipelines/manual_approval" style="width: 120px;"></td><td class="Operatorsbranch" style="width: 120px;"><input class="Operatorsbranch" type="text" value="master" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton10" onclick="Operators.delete('delButton10');"></td><td class="OperatorsType" style="width: 140px;"><select class="OperatorsType" style="width: 140px;"><option value="jaeger">jaeger</option><option value="kiali">kiali</option><option value="svc-mesh-ctlplane" selected="selected">svc-mesh-ctlplane</option><option value="kafka">kafka</option><option value="elasticSearchOperator">elasticSearchOperator</option></select></td><td class="OperatorsName" style="width: 100px;"><input class="OperatorsName" type="text" value="myplane" style="width: 100px;"></td><td class="OperatorsProject" style="width: 60px;"><input class="OperatorsProject" type="text" value="" style="width: 60px;"></td><td class="OperatorsPipeline GIT" style="width: 200px;"><input class="OperatorsPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="Operatorsdirectory" style="width: 120px;"><input class="Operatorsdirectory" type="text" value="" style="width: 120px;"></td><td class="Operatorsbranch" style="width: 120px;"><input class="Operatorsbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton11" onclick="Operators.delete('delButton11');"></td><td class="OperatorsType" style="width: 140px;"><select class="OperatorsType" style="width: 140px;"><option value="jaeger">jaeger</option><option value="kiali">kiali</option><option value="svc-mesh-ctlplane">svc-mesh-ctlplane</option><option value="kafka" selected="selected">kafka</option><option value="elasticSearchOperator">elasticSearchOperator</option></select></td><td class="OperatorsName" style="width: 100px;"><input class="OperatorsName" type="text" value="kaaaaa" style="width: 100px;"></td><td class="OperatorsProject" style="width: 60px;"><input class="OperatorsProject" type="text" value="" style="width: 60px;"></td><td class="OperatorsPipeline GIT" style="width: 200px;"><input class="OperatorsPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="Operatorsdirectory" style="width: 120px;"><input class="Operatorsdirectory" type="text" value="" style="width: 120px;"></td><td class="Operatorsbranch" style="width: 120px;"><input class="Operatorsbranch" type="text" value="" style="width: 120px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Operators.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Operators.help());"></div><div id="HelmChartsSection" style="display: none;"><a name="HelmCharts"><h2>HelmCharts</h2></a><table border="1" id="HelmCharts"><tbody><tr><th><input type="button" value="Add" onclick="HelmCharts.add();"></th><th class="HelmChartsType" style="width: 140px;">Type</th><th class="HelmChartsName" style="width: 100px;">Name</th><th class="HelmChartsProject" style="width: 60px;">Project</th><th class="HelmChartsChart" style="width: 200px;">Chart</th><th class="HelmChartsValues" style="width: 200px;">Values</th><th class="HelmChartsPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="HelmChartsdirectory" style="width: 120px;">directory</th><th class="HelmChartsbranch" style="width: 120px;">branch</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(HelmCharts.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(HelmCharts.help());"></div></div>
+<div id="tableInsertionPoint"><div id="NetworksSection" style="display: none;"><a name="Networks"><h2>Networks</h2></a><table border="1" id="Networks"><tbody><tr><th><input type="button" value="Add" onclick="Networks.add();"></th><th class="Networksnetwork" style="width: 80px;">network</th><th class="Networksinterface" style="width: 50px;">interface</th><th class="Networksmask" style="width: 120px;">mask</th><th class="Networksportgroup" style="width: 120px;">portgroup</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Networks.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Networks.help());"></div><div id="MiscSection" style="display: none;"><a name="Misc"><h2>Misc</h2></a><table border="1" id="Misc"><tbody><tr><th><input type="button" value="Add" onclick="Misc.add();"></th><th class="MiscProperty" style="width: 200px;">Property</th><th class="MiscValue" style="width: 400px;">Value</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Misc.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Misc.help());"></div><div id="NodesSection" style="display: none;"><a name="Nodes"><h2>Nodes</h2></a><table border="1" id="Nodes"><tbody><tr><th><input type="button" value="Add" onclick="Nodes.add();"></th><th class="NodesMGMT fqdn" style="width: 120px;">MGMT fqdn</th><th class="NodesMGMT IP addr" style="width: 120px;">MGMT IP addr</th><th class="NodesPUBLIC IP addr" style="width: 120px;">PUBLIC IP addr</th><th class="NodesMaster" style="width: 15px;">Master</th><th class="NodesEtcd" style="width: 15px;">Etcd</th><th class="NodesWorker" style="width: 15px;">Worker</th><th class="NodesTester" style="width: 15px;">Tester</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Nodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Nodes.help());"></div><div id="FlavorsSection" style="display: none;"><a name="Flavors"><h2>Flavors</h2></a><table border="1" id="Flavors"><tbody><tr><th><input type="button" value="Add" onclick="Flavors.add();"></th><th class="FlavorsInfrastructure" style="width: 100px;">Infrastructure</th><th class="FlavorsFlavor" style="width: 120px;">Flavor</th><th class="Flavorsname" style="width: 80px;">name</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Flavors.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Flavors.help());"></div><div id="CinderVolumesSection" style="display: none;"><a name="CinderVolumes"><h2>CinderVolumes</h2></a><table border="1" id="CinderVolumes"><tbody><tr><th><input type="button" value="Add" onclick="CinderVolumes.add();"></th><th class="CinderVolumesName" style="width: 120px;">Name</th><th class="CinderVolumesSize" style="width: 80px;">Size</th><th class="CinderVolumesDescription" style="width: 300px;">Description</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CinderVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CinderVolumes.help());"></div><div id="PersistentVolumesSection" style="display: none;"><a name="PersistentVolumes"><h2>PersistentVolumes</h2></a><table border="1" id="PersistentVolumes"><tbody><tr><th><input type="button" value="Add" onclick="PersistentVolumes.add();"></th><th class="PersistentVolumesName" style="width: 120px;">Name</th><th class="PersistentVolumesSize" style="width: 80px;">Size</th><th class="PersistentVolumesType" style="width: 80px;">Type</th><th class="PersistentVolumesAccess" style="width: 120px;">Access</th><th class="PersistentVolumesReclaim" style="width: 120px;">Reclaim</th><th class="PersistentVolumesCinderVolume" style="width: 120px;">CinderVolume</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(PersistentVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(PersistentVolumes.help());"></div><div id="ClustersSection" style="display: none;"><a name="Clusters"><h2>Clusters</h2></a><table border="1" id="Clusters"><tbody><tr><th><input type="button" value="Add" onclick="Clusters.add();"></th><th class="ClustersName" style="width: 80px;">Name</th><th class="ClustersEndpoint" style="width: 300px;">Endpoint</th><th class="ClustersToken" style="width: 200px;">Token</th><th class="ClustersTargeted" style="width: 15px;">Targeted</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Clusters.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Clusters.help());"></div><div id="NetworkFunctionsSection" style="display: none;"><a name="NetworkFunctions"><h2>NetworkFunctions</h2></a><table border="1" id="NetworkFunctions"><tbody><tr><th><input type="button" value="Add" onclick="NetworkFunctions.add();"></th><th class="NetworkFunctionsType" style="width: 100px;">Type</th><th class="NetworkFunctionsName" style="width: 80px;">Name</th><th class="NetworkFunctionsProject" style="width: 60px;">Project</th><th class="NetworkFunctionsURL" style="width: 200px;">URL</th><th class="NetworkFunctionsinsecure" style="width: 15px;">insecure</th><th class="NetworkFunctionsImage" style="width: 120px;">Image</th><th class="NetworkFunctionsTag" style="width: 120px;">Tag</th><th class="NetworkFunctionsStorage" style="width: 60px;">Storage</th><th class="NetworkFunctionsVolume" style="width: 60px;">Volume</th><th class="NetworkFunctionsReplicas" style="width: 40px;">Replicas</th><th class="NetworkFunctionsDependencies" style="width: 100px;">Dependencies</th><th class="NetworkFunctionsPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="NetworkFunctionsdirectory" style="width: 120px;">directory</th><th class="NetworkFunctionsbranch" style="width: 120px;">branch</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(NetworkFunctions.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(NetworkFunctions.help());"></div><div id="DirectServicesSection" style=""><a name="DirectServices"><h2>DirectServices</h2></a><table border="1" id="DirectServices"><tbody><tr><th><input type="button" value="Add" onclick="DirectServices.add();"></th><th class="DirectServicesType" style="width: 100px;">Type</th><th class="DirectServicesName" style="width: 80px;">Name</th><th class="DirectServicesProject" style="width: 60px;">Project</th><th class="DirectServicesURL" style="width: 200px;">URL</th><th class="DirectServicesinsecure" style="width: 15px;">insecure</th><th class="DirectServicesImage" style="width: 120px;">Image</th><th class="DirectServicesTag" style="width: 120px;">Tag</th><th class="DirectServicesStorage" style="width: 60px;">Storage</th><th class="DirectServicesVolume" style="width: 60px;">Volume</th><th class="DirectServicesReplicas" style="width: 40px;">Replicas</th><th class="DirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="DirectServicesPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="DirectServicesdirectory" style="width: 120px;">directory</th><th class="DirectServicesbranch" style="width: 120px;">branch</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton1" onclick="DirectServices.delete('delButton1');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite" selected="selected">ignite</option><option value="redis">redis</option><option value="influxdb">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="gridgain" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/gridgain" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="community" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="8.7.14" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="250Mi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline GIT" style="width: 200px;"><input class="DirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="DirectServicesdirectory" style="width: 120px;"><input class="DirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="DirectServicesbranch" style="width: 120px;"><input class="DirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton2" onclick="DirectServices.delete('delButton2');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite">ignite</option><option value="redis">redis</option><option value="influxdb" selected="selected">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="udsf-flux" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/bitnami" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="influxdb" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="1.7.10" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="1Gi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline GIT" style="width: 200px;"><input class="DirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="DirectServicesdirectory" style="width: 120px;"><input class="DirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="DirectServicesbranch" style="width: 120px;"><input class="DirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton3" onclick="DirectServices.delete('delButton3');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite">ignite</option><option value="redis" selected="selected">redis</option><option value="influxdb">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="myredis" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/bitnami" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="redis" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="100Mi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline GIT" style="width: 200px;"><input class="DirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="DirectServicesdirectory" style="width: 120px;"><input class="DirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="DirectServicesbranch" style="width: 120px;"><input class="DirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(DirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(DirectServices.help());"></div><div id="IndirectServicesSection" style=""><a name="IndirectServices"><h2>IndirectServices</h2></a><table border="1" id="IndirectServices"><tbody><tr><th><input type="button" value="Add" onclick="IndirectServices.add();"></th><th class="IndirectServicesType" style="width: 100px;">Type</th><th class="IndirectServicesName" style="width: 80px;">Name</th><th class="IndirectServicesProject" style="width: 60px;">Project</th><th class="IndirectServicesURL" style="width: 200px;">URL</th><th class="IndirectServicesinsecure" style="width: 15px;">insecure</th><th class="IndirectServicesImage" style="width: 120px;">Image</th><th class="IndirectServicesTag" style="width: 120px;">Tag</th><th class="IndirectServicesStorage" style="width: 60px;">Storage</th><th class="IndirectServicesVolume" style="width: 60px;">Volume</th><th class="IndirectServicesReplicas" style="width: 40px;">Replicas</th><th class="IndirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="IndirectServicesPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="IndirectServicesdirectory" style="width: 120px;">directory</th><th class="IndirectServicesbranch" style="width: 120px;">branch</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton4" onclick="IndirectServices.delete('delButton4');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins" selected="selected">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myjenkins" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="quay.io/openshift" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="origin-jenkins" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton5" onclick="IndirectServices.delete('delButton5');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch" selected="selected">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myelastic" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.elastic.co/elasticsearch" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="elasticsearch-oss" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="6.7.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="4Gi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton6" onclick="IndirectServices.delete('delButton6');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager" selected="selected">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myalert" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="alertmanager" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v0.20.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="8Gi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton7" onclick="IndirectServices.delete('delButton7');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus" selected="selected">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myprom" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="prometheus" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v2.16.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="200Mi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton8" onclick="IndirectServices.delete('delButton8');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway" selected="selected">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="mygateway" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="pushgateway" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v1.0.1" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline GIT" style="width: 200px;"><input class="IndirectServicesPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="IndirectServicesdirectory" style="width: 120px;"><input class="IndirectServicesdirectory" type="text" value="" style="width: 120px;"></td><td class="IndirectServicesbranch" style="width: 120px;"><input class="IndirectServicesbranch" type="text" value="" style="width: 120px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(IndirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(IndirectServices.help());"></div><div id="OperatorsSection" style=""><a name="Operators"><h2>Operators</h2></a><table border="1" id="Operators"><tbody><tr><th><input type="button" value="Add" onclick="Operators.add();"></th><th class="OperatorsType" style="width: 140px;">Type</th><th class="OperatorsName" style="width: 100px;">Name</th><th class="OperatorsProject" style="width: 60px;">Project</th><th class="OperatorsReplicas" style="width: 40px;">Replicas</th><th class="OperatorsPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="Operatorsdirectory" style="width: 120px;">directory</th><th class="Operatorsbranch" style="width: 120px;">branch</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton9" onclick="Operators.delete('delButton9');"></td><td class="OperatorsType" style="width: 140px;"><select class="OperatorsType" style="width: 140px;"><option value="jaeger" selected="selected">jaeger</option><option value="kiali">kiali</option><option value="svc-mesh-ctlplane">svc-mesh-ctlplane</option><option value="kafka">kafka</option><option value="elasticSearchOperator">elasticSearchOperator</option></select></td><td class="OperatorsName" style="width: 100px;"><input class="OperatorsName" type="text" value="mike" style="width: 100px;"></td><td class="OperatorsProject" style="width: 60px;"><input class="OperatorsProject" type="text" value="" style="width: 60px;"></td><td class="OperatorsReplicas" style="width: 40px;"><input class="OperatorsReplicas" type="text" style="width: 40px;"></td><td class="OperatorsPipeline GIT" style="width: 200px;"><input class="OperatorsPipeline GIT" type="text" value="https://github.hpe.com/CMS-5GCS/automated-deployer" style="width: 200px;"></td><td class="Operatorsdirectory" style="width: 120px;"><input class="Operatorsdirectory" type="text" value="pipelines/manual_approval" style="width: 120px;"></td><td class="Operatorsbranch" style="width: 120px;"><input class="Operatorsbranch" type="text" value="master" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton10" onclick="Operators.delete('delButton10');"></td><td class="OperatorsType" style="width: 140px;"><select class="OperatorsType" style="width: 140px;"><option value="jaeger">jaeger</option><option value="kiali">kiali</option><option value="svc-mesh-ctlplane" selected="selected">svc-mesh-ctlplane</option><option value="kafka">kafka</option><option value="elasticSearchOperator">elasticSearchOperator</option></select></td><td class="OperatorsName" style="width: 100px;"><input class="OperatorsName" type="text" value="myplane" style="width: 100px;"></td><td class="OperatorsProject" style="width: 60px;"><input class="OperatorsProject" type="text" value="" style="width: 60px;"></td><td class="OperatorsReplicas" style="width: 40px;"><input class="OperatorsReplicas" type="text" style="width: 40px;"></td><td class="OperatorsPipeline GIT" style="width: 200px;"><input class="OperatorsPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="Operatorsdirectory" style="width: 120px;"><input class="Operatorsdirectory" type="text" value="" style="width: 120px;"></td><td class="Operatorsbranch" style="width: 120px;"><input class="Operatorsbranch" type="text" value="" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton11" onclick="Operators.delete('delButton11');"></td><td class="OperatorsType" style="width: 140px;"><select class="OperatorsType" style="width: 140px;"><option value="jaeger">jaeger</option><option value="kiali">kiali</option><option value="svc-mesh-ctlplane">svc-mesh-ctlplane</option><option value="kafka" selected="selected">kafka</option><option value="elasticSearchOperator">elasticSearchOperator</option></select></td><td class="OperatorsName" style="width: 100px;"><input class="OperatorsName" type="text" value="kaaaaa" style="width: 100px;"></td><td class="OperatorsProject" style="width: 60px;"><input class="OperatorsProject" type="text" value="" style="width: 60px;"></td><td class="OperatorsReplicas" style="width: 40px;"><input class="OperatorsReplicas" type="text" style="width: 40px;"></td><td class="OperatorsPipeline GIT" style="width: 200px;"><input class="OperatorsPipeline GIT" type="text" value="" style="width: 200px;"></td><td class="Operatorsdirectory" style="width: 120px;"><input class="Operatorsdirectory" type="text" value="" style="width: 120px;"></td><td class="Operatorsbranch" style="width: 120px;"><input class="Operatorsbranch" type="text" value="" style="width: 120px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Operators.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Operators.help());"></div><div id="HelmChartsSection" style="display: none;"><a name="HelmCharts"><h2>HelmCharts</h2></a><table border="1" id="HelmCharts"><tbody><tr><th><input type="button" value="Add" onclick="HelmCharts.add();"></th><th class="HelmChartsType" style="width: 140px;">Type</th><th class="HelmChartsName" style="width: 100px;">Name</th><th class="HelmChartsProject" style="width: 60px;">Project</th><th class="HelmChartsChart" style="width: 200px;">Chart</th><th class="HelmChartsValues" style="width: 200px;">Values</th><th class="HelmChartsVersion" style="width: 60px;">Version</th><th class="HelmChartsOptions" style="width: 120px;">Options</th><th class="HelmChartsPipeline GIT" style="width: 200px;">Pipeline GIT</th><th class="HelmChartsdirectory" style="width: 120px;">directory</th><th class="HelmChartsbranch" style="width: 120px;">branch</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(HelmCharts.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(HelmCharts.help());"></div></div>
 </form>
 
 <hr>
@@ -128,6 +128,9 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-06-24 0.73	Helm based deployments: optional version and extra options attributes; Operators deployment: optional replicas attribute; 
+	Add telegraf in the default catalog as IndirectService and HelmChart; use it as influxdb resource for all Network Functions  
+2020-06-18 0.72	nudsf and nudr OpenShift templates refresh. Markdown doc cosmetic fixes.
 2020-06-12 0.71	Json session format: move to a list of attribute:value {a:x, b:y, ...} instead of a table of the same [{a:x},{b:y},...]
     Add a Build Doc button compiling the Help text of a selection of sections in a markdown document 
 2020-06-11 0.70	Allow multiple instances of the same type in one project: add a new optional attribute in resources, Dependencies, to resolve ambiguity in dependencies
@@ -1438,11 +1441,11 @@ var Clusters = new vnfResource("Clusters", [
 	]
 	);
 
-Clusters.help = function(){return `OpenShift clusters candidate for deployment:
+Clusters.help = function(){return `OpenShift clusters candidate for deployment through OpenShift RESTful API:
 - Name: nickname of this cluster
-- Endpoint: OpenShift API endpoint for this cluster. 
+- Endpoint: OpenShift API endpoint for this cluster.   
   Typically retrieved from a session with: oc config current-context | cut -d/ -f2 | tr - .
-- Token: security token for this cluster identifying an authorized user
+- Token: security token for this cluster identifying an authorized user    
   Typically retrieved from a session with: oc whoami -t
 - Targeted: check this box to deploy the defined resources to this cluster
 `
@@ -1511,21 +1514,21 @@ hpe5gResource.prototype.help = function(){return `Attributes:
 - Type: the type of the resource to deploy
 - Name: one word resource name for this instance
 - Project: the OpenShift project hosting this resource instance
-- URL, Image and tag: the docker image to use for this resource
+- URL, Image and tag: the docker image to use for this resource    
   Default valid values are provided when fields are left blank.
-- insecure: check this box if this URL points to insecure registries
-  images from insecure registries are pulled then pushed to the internal registry using docker, properly configured .
-  otherwise, images are directly pulled by the OpenShift image stream from their original URL
+- insecure: check this box if this URL points to insecure registries    
+  Images from insecure registries are pulled then pushed to the internal registry using docker, properly configured.        
+  Otherwise, images are directly pulled by the OpenShift image stream from their original URL.
 - Storage, Volume: the storage size with its unit (like 1Gi) and the OpenShift persistent volume used by this resource
 - Replicas: number of replicas deployed for this instance.
-- Dependencies: comma separated list of resources names resolving this function dependencies within this project
+- Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
+	  - get_oc_resources: display the OpenShift current project and existing resources        
+	  - manual_approval: expect the end  user to explicitly approve the build        
 	branch: (optional) git branch to use, eg: master
 	
 `;
@@ -1558,12 +1561,17 @@ hpe5gResource.prototype.build = function(target){
 		var volume=this.getAndSetValue(row, nameIndexes, 'Volume');
 		var displayChart="";
 		var chart=this.getAndSetValue(row, nameIndexes, 'Chart', hpe5gResources.defaults[type]['chart']);
+		var chartVersion=this.getAndSetValue(row, nameIndexes, 'Version', hpe5gResources.defaults[type]['version']);
+		var chartOptions=this.getAndSetValue(row, nameIndexes, 'Options');
 		var delButton=row.getElementsByClassName("delButton")[0];
 		var values=window[this.title + "_Values_" + delButton.id];
-		if(chart.length>0)displayChart=" with chart "+chart;
+		if(chart)displayChart=" with chart "+chart;
+		if(chartVersion)chartOptions+=" --version "+chartVersion;
+		if(chartOptions)displayChart+=" "+chartOptions;
 		this.check += checkDependency(this.title=='HelmCharts', [values!=undefined && values.content!=undefined && chart.length>0], this.title+" "+name,", Helm chart and values are required");
 		var displayVolume="";
-		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas', "1");
+		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas');
+		if(!replicas)replicas="1";
 		var dependenciesList=this.getAndSetValue(row, nameIndexes, 'Dependencies');
 		var dependencies=undefined;
 		if(dependenciesList)dependencies=dependenciesList.split(',');
@@ -1593,14 +1601,14 @@ hpe5gResource.prototype.build = function(target){
 			continue;
 		} 
 		var displayReplicas="";
-		if(replicas.length>0)displayReplicas=replicas+ " replica(s) of type: ";
+		if(replicas)displayReplicas=replicas+ " replica(s) of type: ";
 		
 		// Record this provider to resolve dependencies later per type and per project
 		if(!hpe5gResources.provides[type])hpe5gResources.provides[type] = new Array();
 		if(!hpe5gResources.provides[type][project])hpe5gResources.provides[type][project]=new Array();
 		hpe5gResources.provides[type][project].push(name);
 		
-		hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)));
+		hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)));
 		
 		if(insecure && hpe5gResources.insecureRegistries.indexOf(URL) < 0)hpe5gResources.insecureRegistries.push(URL);
 		
@@ -1614,7 +1622,7 @@ hpe5gResource.prototype.build = function(target){
 };
 
 //Class implementing a network function: name, image (including the tag), URL (hosting the image), pipeline, Helm chart 
-var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVolume, aReplicas, aDependency, aURL, anHelmChart, anHelmChartValues, aPipeline){
+var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVolume, aReplicas, aDependency, aURL, anHelmChart, anHelmChartValues, anHelmChartOptions, aPipeline){
 	this.type=aType;
 	this.name=aName;
 	this.image=anImage;
@@ -1625,7 +1633,7 @@ var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVol
 	if(aVolume != undefined && aVolume.length > 0)this.volume="volumeName: "+aVolume;
 	this.replicas=aReplicas;
 	this.dependency=aDependency;
-	this.helmChart=anHelmChart; this.helmChartValues=anHelmChartValues;
+	this.helmChart=anHelmChart; this.helmChartValues=anHelmChartValues; this.helmChartOptions=anHelmChartOptions;
 	this.pipeline=aPipeline;
 	// Insecure registries are managed by docker; secured registries are pulled directly from the URL
 	this.insecureURL = function(){return hpe5gResources.insecureRegistries.indexOf(this.URL) >= 0;}
@@ -1672,7 +1680,7 @@ hpe5gResources.compile = function(){
 	var check="";
 	hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
 		// Check if all dependencies for this network function type are satisfied on this project
-		hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
+		if(hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
 			if(networkFunction.resolve(requirement))return;
 			check += "\nNetworkFunctions: "+networkFunction.name+" missing dependency "+requirement+" on project "+networkFunction.project;
 			if(networkFunction.dependency)check+=" in the provided list: "+networkFunction.dependency;
@@ -1770,6 +1778,7 @@ var Operators = new hpe5gResource("Operators", [
 	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.resources['Operators']}}, 
 	{name:'Name', type:'text', width:'100px'},
 	{name:'Project', type:'text', width:'60px'},
+	{name:'Replicas', type:'text', width:'40px'},
 	{name:'Pipeline GIT', type:'text', width:'200px'},
 	{name:'directory', type:'text', width:'120px'},
 	{name:'branch', type:'text', width:'120px'}
@@ -1780,12 +1789,13 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Type: the type of the operator to instantiate
 - Name: one word resource name for this operator instance
 - Project: the OpenShift project hosting this operator instance
-- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+- Replicas: number of replicas passsed to this operator instance.
+- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile     
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
+	  - get_oc_resources: display the OpenShift current project and existing resources        
+	  - manual_approval: expect the end  user to explicitly approve the build        
 	branch: (optional) git branch to use, eg: master
 	
 `;
@@ -1800,6 +1810,8 @@ var HelmCharts = new hpe5gResource("HelmCharts", [
 	{name:'Project', type:'text', width:'60px'},
 	{name:'Chart', type:'text', width:'200px'},
 	{name:'Values', type:'file', width:'200px'},
+	{name:'Version', type:'text', width:'60px'},
+	{name:'Options', type:'text', width:'120px'},
 	{name:'Pipeline GIT', type:'text', width:'200px'},
 	{name:'directory', type:'text', width:'120px'},
 	{name:'branch', type:'text', width:'120px'}
@@ -1813,12 +1825,14 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Project: the OpenShift project hosting this chart instance
 - Chart: name of the chart to deploy; Helm must be configured on the infrastructure to provide this chart
 - Values: local file injected in this chart as deployment values
-- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile 
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines : 
-	  - get_oc_resources: display the OpenShift current project and existing resources
-	  - manual_approval: expect the end  user to explicitly approve the build
+- Version: specify the exact chart version to install. If this is not specified, the latest version is installed
+- Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
+- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile     
+	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
+	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
+	  - get_oc_resources: display the OpenShift current project and existing resources    
+	  - manual_approval: expect the end  user to explicitly approve the build    
 	branch: (optional) git branch to use, eg: master
 	
 `;
@@ -2032,9 +2046,9 @@ function hpe5gDeploymentScript(warningMessage){
 var _shellTemplate=`
 if $_deploy ; then 
 	_ocAction="apply"
-	_helmAction="'{print \\"helm upgrade --install \\" \\$2,\\$3 \\" --values \\" \\$N}'"
+	_helmAction() { helm upgrade --install $_HPE5G_name $_HPE5G_template --values _tmp_$_helmValues $_HPE5G_options; }
 else
-	_helmAction="'{print \\"helm delete \\" \\$2}'"
+	_helmAction() { helm delete $_HPE5G_name ; }
 	_ocAction="delete"
 fi
 
@@ -2083,9 +2097,9 @@ _log_ "$_displayedAction the network functions and Helm instances"
 for _project in $oc_projects; do 
 	oc project $_project &>> $hpe5g_log_file || _fail_ "Cannot switch to project $_project"
 	# File naming convention for Network functions: openshift_project_<project>.yaml
-	# File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
+	# File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
 	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && oc process -f openshift_project_$_project.yaml | oc $_ocAction -f - &>> $hpe5g_log_file && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
-	for _helmValues in $(ls openshift_helm_$\{_project}*.yaml 2> /dev/null) ; do _log_ "$_displayedAction $_helmValues on project $_project" && $(ls $_helmValues | eval awk -F'~' $_helmAction) &>> $hpe5g_log_file && rm -f $_helmValues &>> $hpe5g_log_file || _fail_ "$_displayedAction Helm instance on project $_project" ; done
+	for _helmValues in $(ls openshift_helm_$\{_project}_*.yaml 2> /dev/null) ; do eval $(head -1 $_helmValues) && _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" && tail -n +2 $_helmValues > _tmp_$_helmValues && _helmAction &>> $hpe5g_log_file && rm -f $_helmValues _tmp_$_helmValues &>> $hpe5g_log_file || _fail_ "$_displayedAction Helm instance on project $_project" ; done
 	# Undeployment: wait for pods termination  
 	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $hpe5g_log_file ; do : ; done
 	# Indulge 5 seconds to stabilize, then delete the project if no pods, otherwise log a status
@@ -2108,7 +2122,7 @@ function hpe5gHelmValues(header, footer, tab){
 	hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
 		if(networkFunction.helmChartValues == undefined)return;
 		var helmValues="\n"+networkFunction.helmChartValues.content;
-		if(header != undefined)result+=header(networkFunction.project, networkFunction.name, networkFunction.helmChart);
+		if(header != undefined)result+=header(networkFunction.project, networkFunction.name, networkFunction.helmChart, networkFunction.helmChartOptions);
 		if(tab != undefined)helmValues=helmValues.replace(/\n/g, "\n"+tab);	// indentation of objects compared to the project header
 		result+=helmValues;
 		if(footer != undefined)result+=footer(networkFunction.project, networkFunction.name);
@@ -2158,7 +2172,7 @@ objects:
 			deployment=deployment.replace(/~PERSISTENCE_START~[\s\S]*?~PERSISTENCE_END~/mg,'');
 		}
 		
-		hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
+		if(hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
 			var ereg=new RegExp("~"+requirement+"_NAME~","g");
 			deployment=deployment.replace(ereg, networkFunction.resolve(requirement));
 			});
@@ -2654,10 +2668,12 @@ function buildHeatTemplate(){
     heat+=n0+"    description: set of OpenShift templates ready for deployment";
     heat+=n0+"    value:";
     // OpenShift network functions and Helm instances, per project
-	// File naming convention for Network functions: openshift_project_<project>.yaml
-	// File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
+	// File naming convention for Network functions and services: openshift_project_<project>.yaml
+	// File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
 	function heatHeader(project){return "\nopenshift_project_"+project+":";}
-	function heatHelmValuesHeader(project, name, template){return "\nopenshift_helm_"+project+"~"+name+"~"+template+"~:";}
+	function heatHelmValuesHeader(project, name, template, options){
+		return "\nopenshift_helm_"+project+"_"+name+":\n  _HPE5G_name="+name+" _HPE5G_template="+template+" _HPE5G_options='"+options+"'";
+	}
 	
 	// List of NetworkFunctions deployed on openshift
 	heat+=hpe5gNetworkFunctions(heatHeader,undefined,'  ').replace(/\n/g, "\n"+  
@@ -2850,9 +2866,11 @@ function buildNetworkFunctions(){
 
 	if(Clusters.targeted == undefined || Clusters.targeted.length == 0){
     	// File naming convention for Network functions: openshift_project_<project>.yaml
-    	// File naming convention for Helm instances: openshift_helm_<project>~<name>~<template>~.yaml
+    	// File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
     	function catHeader(project){return "\ncat > openshift_project_"+project+".yaml << 'EOFILE'"};
-    	function catHelmValuesHeader(project, name, template){return "\ncat > openshift_helm_"+project+"~"+name+"~"+template+"~"+".yaml << 'EOFILE'"};
+    	function catHelmValuesHeader(project, name, template, options){
+    		return "\ncat > openshift_helm_"+project+"_"+name+".yaml << 'EOFILE'\n_HPE5G_name="+name+" _HPE5G_template="+template+" _HPE5G_options='"+options+"'";
+    	}
     	function catFooter(project){return "\nEOFILE"};
     	
     	shell=shellHeader('oc');
@@ -3102,6 +3120,7 @@ var defaultCatalog=`
     "IndirectServices": [
       "jenkins",
       "elasticsearch",
+      "telegraf",
       "prometheus-alertmanager",
       "prometheus",
       "kube-state-metrics",
@@ -3122,73 +3141,52 @@ var defaultCatalog=`
       "elasticSearchOperator"
     ],
     "HelmCharts": [
-      "nudm",
-      "nudr",
+      "nudm-chart",
+      "nudr-chart",
+      "telegraf-chart",
       "generic"
     ]
   },
   "dependencies": {
-    "jenkins": [],
-    "elasticsearch": [],
-    "prometheus-alertmanager": [],
-    "prometheus": [],
-    "kube-state-metrics": [],
-    "pushgateway": [],
-    "grafana": [],
     "nudsf-dr": [
       "ignite",
-      "influxdb"
+      "telegraf"
     ],
     "nudr-dr": [
       "ignite",
-      "nudr-prov",
-      "influxdb"
+      "nudr-prov"
     ],
     "nudr-prov": [
-      "ignite",
-      "influxdb"
+      "ignite"
     ],
     "nudr-reg-agent": [
-    	"redis","influxdb"
+    	"redis","telegraf"
     ],
     "nudm-ee": [
-      "influxdb", "nudr-dr"
+      "telegraf", "nudr-dr"
     ],
     "nudm-li-poi": [
-      "redis","kafka","influxdb"
+      "redis","kafka","telegraf"
     ],
     "nudm-li-tf": [
-        "redis","influxdb"
+        "redis","telegraf"
     ],
     "nudm-ueau": [
-        "influxdb", "nudr-dr"
+        "telegraf", "nudr-dr"
     ],
     "nudm-uecm": [
-        "influxdb", "nudr-dr"
+        "telegraf", "nudr-dr"
     ],
     "nudm-sdm": [
-      "influxdb", "nudr-dr"
+      "telegraf", "nudr-dr"
     ],
     "nudm-notify": [
-      "influxdb", "nudr-dr"
+      "telegraf", "nudr-dr"
     ],
-    "sf-cmod": [],
     "nrf-reg-agent": [
-      "influxdb",
+      "telegraf",
       "fluentd"
-    ],
-    "ignite": [],
-    "redis": [],
-    "influxdb": [],
-    "fluentd": [],
-    "jaeger": [],
-    "kiali": [],
-    "svc-mesh-ctlplane": [],
-    "kafka": [],
-    "elasticSearchOperator": [],
-    "nudm": [],
-    "nudr": [],
-    "generic": []
+    ]
   },
   "admin": {
 	    "fluentd": true,
@@ -3206,6 +3204,11 @@ var defaultCatalog=`
       "image": "elasticsearch-oss",
       "tag": "6.7.0",
       "storage": "4Gi"
+    },
+    "telegraf": {
+        "URL": "docker.io",
+        "image": "telegraf",
+        "tag": "1.14-alpine"
     },
     "prometheus-alertmanager": {
       "URL": "docker.io/prom",
@@ -3326,11 +3329,14 @@ var defaultCatalog=`
     "svc-mesh-ctlplane": {},
     "kafka": {},
     "elasticSearchOperator": {},
-    "nudm": {
+    "nudm-chart": {
       "chart": "hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz"
     },
-    "nudr": {
+    "nudr-chart": {
       "chart": "hpe-sde-udr-1.1.0-004136.0166df3.tgz"
+    },
+    "telegraf-chart": {
+      "chart": "influxdata/telegraf"
     },
     "generic": {
     }
@@ -3556,25 +3562,31 @@ hpe5gResources.defaults['nudsf-dr']['template']=
       #
       # Sample Network function configuration.
       #
+  
       logging:
         locale: en-US
         loggers:
-          - name: log4j2
-            factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+      #    - name: log4j2
+      #      factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          - name: fluentd
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
+            properties:
+              host: fluentd
+              port: 24224
       statistics-configuration:
-        id: nudsf-dr-statistics
-        jvm-metrics: false
+        id: hpe-sde-udsf-dr-statistics
         jmx:
-          domain: nudsf-dr
+          domain: hpe-sde-udsf-dr
           enabled: false
           properties:
             com.hpe.imsc.statistics.jmx.descriptors: "false"
             com.hpe.imsc.statistics.jmx.notifications: "false"
+        jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.notifications: "false"
-          com.hpe.imsc.statistics.influxdb.server.database: nudsf-dr
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
-          com.hpe.imsc.statistics.influxdb.server.port: "8086"
+          com.hpe.imsc.statistics.influxdb.server.database: hpe-sde-udsf-dr
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
         enabled: false
@@ -3595,8 +3607,6 @@ hpe5gResources.defaults['nudsf-dr']['template']=
               masterUrl: https://openshift.default.svc.cluster.local:443
               namespace: ~PROJECT~
               serviceName: ~ignite_NAME~
-          properties:
-            enableGridCompute: false
       model:
         realms:
         - id: realm0
@@ -3623,13 +3633,15 @@ hpe5gResources.defaults['nudsf-dr']['template']=
           alias: localhost
           servers:
             default-server:
+  
               https-listeners:
                 default-https:
                   socket-binding: https
                   enable-http2: true
                   ssl-context: sslctx
                   http2-initial-window-size: 32000000
-                  no-request-timeout: 600000            
+                  http2-max-concurrent-streams: 200
+                  no-request-timeout: 600000
         elytron:
           server-ssl-contexts:
             sslctx:
@@ -3694,6 +3706,14 @@ hpe5gResources.defaults['nudsf-dr']['template']=
 hpe5gResources.defaults['nudr-dr']['template']=
 //================================================
 `
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-secret
+    namespace: ~PROJECT~
+  type: Opaque
+  data:
+    keystore.jks: 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
 - kind: ServiceAccount
   apiVersion: v1
   metadata:
@@ -3741,9 +3761,22 @@ hpe5gResources.defaults['nudr-dr']['template']=
       spec:
         containers:
         - name: ~NAME~
+          volumeMounts:
+            - name: ~NAME~-config-volume
+              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/
+            - name: ~NAME~-secrets-volume
+              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/security
+          ports:
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          ports:
+            - name: health
+              containerPort: 8080
+              protocol: TCP
           env:
           - name: JAVA_OPTS
-            value: -Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-dr/nudr-nf-config.yaml
+            value: -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ScavengeBeforeFullGC -XX:+DisableExplicitGC -XX:MaxGCPauseMillis=200 -Xms1g -Djava.net.preferIPv4Stack=true   -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-dr/nudr-nf-config.yaml -Dpaas.service.name=nudr-dr
           - name: SPRING_PROFILES_ACTIVE
             value: ignite
           image: ~IMAGE_STREAM~
@@ -3754,39 +3787,37 @@ hpe5gResources.defaults['nudr-dr']['template']=
           Limits:
             cpu:  8000m
             memory: 4000Mi
-          ports:
-          - containerPort: 8443
-            protocol: TCP
-          volumeMounts:
-            - name: ~NAME~
-              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/
-            - name: ~NAME~-secrets
-              mountPath: /etc/opt/hpe-5g/sde-udr-nudr-dr/security
           livenessProbe:
-            failureThreshold: 3000
             httpGet:
               path: /nudr-dr/v2/probes/healthy
-              port: 8080
-              scheme: HTTP
+              port: health
             initialDelaySeconds: 60
             periodSeconds: 5
-            timeoutSeconds: 15
+            timeoutSeconds: 3
           readinessProbe:
-            failureThreshold: 3000
             httpGet:
               path: /nudr-dr/v2/probes/healthz
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 30
-            periodSeconds: 60
-            timeoutSeconds: 15
+              port: health
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 3
         volumes:
-          - name: ~NAME~
-            configMap:
-              name: ~NAME~
-          - name: ~NAME~-secrets
-            secret:
-              secretName: ~NAME~
+          - name: ~NAME~-config-volume
+            projected:
+              sources:
+              - configMap:
+                  name: ~NAME~-swarm-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap
+              - configMap:
+                  name: ~NAME~-application-configmap-nnrf-registration
+              - configMap:
+                name: nudr-shared-application-configmap-call-tracing-provisioning
+          - name: ~NAME~-secrets-volume
+            projected:
+              sources:
+              - secret:
+                  name: ~NAME~-secret
     selector:
       name: ~NAME~
     replicas: ~REPLICAS~
@@ -3799,11 +3830,12 @@ hpe5gResources.defaults['nudr-dr']['template']=
       name: ~NAME~
       deploymentconfig: ~NAME~
   spec:
-    type: LoadBalancer
+    type: NodePort
     ports:
-    - port: 8443
-      protocol: TCP
-      targetPort: 30043
+      - port: 8443
+        nodePort: 30001
+        protocol: TCP
+        name: https-nudr-dr
     selector:
       name: ~NAME~
       deploymentconfig: ~NAME~
@@ -3822,44 +3854,87 @@ hpe5gResources.defaults['nudr-dr']['template']=
 - kind: ConfigMap
   apiVersion: v1
   metadata:
-    name: ~NAME~
+    name: nudr-shared-application-configmap-call-tracing-provisioning
+    namespace: ~PROJECT~
+  data:
+    call-tracing-provisioning.yaml: |
+      # Copyright (c) 2019-2020 Hewlett-Packard Enterprise Development LP.
+      # All Rights Reserved.
+      #
+      # This software is the confidential and proprietary information of
+      # Hewlett-Packard Enterprise Development LP.
+      #
+      ue-provisioning:
+        - ue-id:
+          - "imsi-0123456789"
+          - "msisdn-9876543210"
+          traced-service:
+            - "UDM"
+            - "UDR"
+          propagate-trace: true
+          trace-depth: "MEDIUM"
+        - ue-id:
+          - "imsi-9999999999"
+          - "msisdn-8888888888"
+          traced-service:
+            - "nudm-uecm"
+            - "nudm-ueau"
+          propagate-trace: true
+          trace-depth: "MEDIUM"
+        - ue-id:
+          - "nai-77777777777"
+          - "msisdn-6666666666666"
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-application-configmap
     namespace: ~PROJECT~
   data:
     nudr-nf-config.yaml: |
       #
+      # Copyright (c) 2019-2020 Hewlett-Packard Enterprise Development LP.
+      # All Rights Reserved.
+      #
+      # This software is the confidential and proprietary information of
+      # Hewlett-Packard Enterprise Development LP.
+      #
+  
+      #
       # Sample Network function configuration.
       #
+  
+      udr:
+        source-conf: "From HELM"
+        udr-root-dir: "/var/opt/hpe-5g/sde-udr-nudr-dr"
+        # nrf:
+        #   hostname: localhost
+        #   port: 5090
+        #   scheme: https
+        #   version: v1
+        #   nrfRegistrationStubMode: true
+        #   nrfDiscoverStubMode: true
+        #   nfRegfile: /etc/opt/hpe-5g/sde-udr-nudr-dr/nnrf-register.config
+        #   udrDescfile: /etc/opt/hpe-5g/sde-udr-nudr-dr/udr-disc.json
+  
       logging:
         locale: en-US
         loggers:
           - name: log4j2
             factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
-      statistics-configuration:
-        id: nudr-prov-statistics
-        jvm-metrics: false
-        jmx:
-          domain: nudr-prov
-          enabled: false
-          properties:
-            com.hpe.imsc.statistics.jmx.descriptors: "false"
-            com.hpe.imsc.statistics.jmx.notifications: "false"
-        properties:
-          com.hpe.imsc.statistics.influxdb.notifications: "false"
-          com.hpe.imsc.statistics.influxdb.server.database: nudr-prov
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
-          com.hpe.imsc.statistics.influxdb.server.port: "8086"
-          com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
         enabled: false
         properties:
-          JAEGER_AGENT_HOST: localhost
-          JAEGER_AGENT_PORT: 6831
-          JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
+          JAEGER_SERVICE_NAME: ~NAME~
           JAEGER_REPORTER_FLUSH_INTERVAL: 100
           JAEGER_REPORTER_LOG_SPANS: true
-          JAEGER_SAMPLER_PARAM: 1
-          JAEGER_SAMPLER_TYPE: probabilistic
-          JAEGER_SERVICE_NAME: ~NAME~
+          JAEGER_SAMPLER_TYPE: "probabilistic"
+          JAEGER_SAMPLER_PARAM: 1.0
+        provisioning-uri: file:/etc/opt/hpe-5g/sde-udr-nudr-dr/call-tracing-provisioning.yaml
+        max-trace-depth: MINIMUM
+        max-body-length: 1200
+        trace-all-ues: false
+        trace-all-operations: true
+        autorefresh-provisioning-period: 30
       datasources:
         - id: ignite
           profile:
@@ -3868,25 +3943,32 @@ hpe5gResources.defaults['nudr-dr']['template']=
               masterUrl: https://openshift.default.svc.cluster.local:443
               namespace: ~PROJECT~
               serviceName: ~ignite_NAME~
-          properties:
-            enableGridCompute: false
       model:
         realms:
         - id: realm0
           properties:
             replicas: 1
       publisher-subscriber:
-          enable: false
-          parameters:
-            topic: UDRNotifier
-            application-kind: UDR
-          pubsub:
-            brokers:
-             - localhost:9092
-            properties:
-              group.id: group1
-              reconnect.backoff.ms: 7200000
-              reconnect.backoff.max.ms: 14400000 
+        enable: false
+        parameters:
+          application-kind: UDR
+          topic: UDRNotifier
+        pubsub:
+          brokers:
+          - localhost:9092
+          properties:
+            group.id: group1
+            reconnect.backoff.max.ms: 14400000
+            reconnect.backoff.ms: 7200000
+      # TEMPORARY WORKAROUND FOR PAAS 0.14.0, EMPTY CLIENT DEFINITION
+      rest-client:
+        id:
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-swarm-configmap
+    namespace: ~PROJECT~
+  data:
     project-nudr-dr.yml: |+
       #
       # Sample Thorntail global configuration.
@@ -3968,14 +4050,47 @@ hpe5gResources.defaults['nudr-dr']['template']=
             CONSOLE:
               named-formatter: null
               formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"
-- kind: Secret
+- kind: ConfigMap
   apiVersion: v1
   metadata:
-    name: ~NAME~
+    name: ~NAME~-application-configmap-nnrf-registration
     namespace: ~PROJECT~
-  type: Opaque
   data:
-    keystore.jks: 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
+    nnrf-register.config: |
+      {
+      	  "nfInstanceId": "0777E150-4D00-4d86-A49C-8BADF00D0000",
+      	  "nfType":"UDR",
+      	  "nfStatus":"REGISTERED",
+      	  "heartBeatTimer": "45",
+      	  "fqdn": "localhost",
+      	  "ipv4Addresses":["localhost"],
+      	  "udrInfo":{
+      	    "groupId":"udrgroup01",
+      	    "supiRanges":[{"start":"200000000000000","end":"399999999999999"}],
+      	    "supportedDataSets":["SUBSCRIPTION","POLICY","EXPOSURE","APPLICATION"]
+      	  },
+      	  "nfServices" : [ {
+      	      "serviceInstanceId" : "0777E150-4D00-4d86-A49C-8BADF00D0000",
+      	      "serviceName" : "nudr-dr",
+      	      "versions" : [ {
+      	        "apiVersionInUri" : "v2",
+      	        "apiFullVersion" : "2.1.0"
+      	      } ],
+      
+      	      "scheme" : "https",
+      
+      	      "nfServiceStatus" : "REGISTERED",
+      	      "fqdn": "localhost",
+      	      "ipEndPoints" : [ {
+      	        "ipv4Address" : "localhost",
+      	        "transport" : "TCP",
+      
+      	        "port" : "30001"
+      
+      	      } ]
+      	    } ]
+      	}
+
 `;
 
 //================================================
@@ -4031,7 +4146,7 @@ hpe5gResources.defaults['nudr-prov']['template']=
         - name: ~NAME~
           env:
           - name: JAVA_OPTS
-            value: -Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-prov/nudr-nf-config.yaml
+            value: -Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dgeneric.configuration.uri=file:/etc/opt/hpe-5g/sde-udr-nudr-prov/nudr-nf-config.yaml -Dpaas.service.name=nudr-prov
           - name: SPRING_PROFILES_ACTIVE
             value: ignite
           image: ~IMAGE_STREAM~
@@ -4115,39 +4230,36 @@ hpe5gResources.defaults['nudr-prov']['template']=
   data:
     nudr-nf-config.yaml: |
       #
+      # Copyright (c) 2019-2020 Hewlett-Packard Enterprise Development LP.
+      # All Rights Reserved.
+      #
+      # This software is the confidential and proprietary information of
+      # Hewlett-Packard Enterprise Development LP.
+      #
+      #
       # Sample Network function configuration.
       #
+      udr:
+        source-conf: "From HELM"
       logging:
         locale: en-US
         loggers:
           - name: log4j2
             factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
-      statistics-configuration:
-        id: nudr-prov-statistics
-        jvm-metrics: false
-        jmx:
-          domain: nudr-prov
-          enabled: false
-          properties:
-            com.hpe.imsc.statistics.jmx.descriptors: "false"
-            com.hpe.imsc.statistics.jmx.notifications: "false"
-        properties:
-          com.hpe.imsc.statistics.influxdb.notifications: "false"
-          com.hpe.imsc.statistics.influxdb.server.database: nudr-prov
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
-          com.hpe.imsc.statistics.influxdb.server.port: "8086"
-          com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
         enabled: false
         properties:
-          JAEGER_AGENT_HOST: localhost
-          JAEGER_AGENT_PORT: 6831
-          JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
+          JAEGER_SERVICE_NAME: ~NAME~
           JAEGER_REPORTER_FLUSH_INTERVAL: 100
           JAEGER_REPORTER_LOG_SPANS: true
-          JAEGER_SAMPLER_PARAM: 1
-          JAEGER_SAMPLER_TYPE: probabilistic
-          JAEGER_SERVICE_NAME: ~NAME~
+          JAEGER_SAMPLER_TYPE: "probabilistic"
+          JAEGER_SAMPLER_PARAM: 1.0
+        provisioning-uri: file:/etc/opt/hpe-5g/sde-udr-nudr-prov/call-tracing-provisioning.yaml
+        max-trace-depth: MINIMUM
+        max-body-length: 1200
+        trace-all-ues: false
+        trace-all-operations: true
+        autorefresh-provisioning-period: 30
       datasources:
         - id: ignite
           profile:
@@ -4156,13 +4268,26 @@ hpe5gResources.defaults['nudr-prov']['template']=
               masterUrl: https://openshift.default.svc.cluster.local:443
               namespace: ~PROJECT~
               serviceName: ~ignite_NAME~
-          properties:
-            enableGridCompute: false
       model:
         realms:
         - id: realm0
           properties:
             replicas: 1
+      publisher-subscriber:
+        enable: false
+        parameters:
+          application-kind: UDR
+          topic: UDRNotifier
+        pubsub:
+          brokers:
+          - localhost:9092
+          properties:
+            group.id: group1
+            reconnect.backoff.max.ms: 14400000
+            reconnect.backoff.ms: 7200000
+      # TEMPORARY WORKAROUND FOR PAAS 0.14.0, EMPTY CLIENT DEFINITION
+      rest-client:
+        id:
     project-nudr-prov.yml: |+
       #
       # Sample Thorntail global configuration.
@@ -4387,10 +4512,13 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
     namespace: ~PROJECT~
   data:
     nnrf-reg-agent-config.yaml: |
+      #
       # Network function NNRF Client MicroService configuration.
       #
       # The parameters below can be overridden by an external configuration.
       #
+  
+  
       # HTTP/2 REST client subsystem
       ---
       rest-client:
@@ -4421,9 +4549,14 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
         loggers:
           - name: log4j2
             factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          - name: fluentd
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
+            properties:
+              host: fluentd.logging
+              port: 24224
+  
       statistics-configuration:
-        id: nudr-reg-agent-statistics
-        default-group: nnrf
+        id: hpe-nf-nrf-reg-agent-statistics
         jmx:
           domain: nnrf-reg-agent
           enabled: false
@@ -4431,54 +4564,19 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
             com.hpe.imsc.statistics.jmx.descriptors: "false"
             com.hpe.imsc.statistics.jmx.notifications: "false"
         jvm-metrics: true
-        period: 5
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nnrf-reg-agent
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
-      
-      caching-providers:
-        - uri: "paas://redis-caching-manager"
-          classloader: "#notused"
-          properties:
-            caching.provider.class.name: "com.hpe.paas.middleware.sdk.impl.cache.redis.RedisCachingProvider"
-          cache-managers:
-            - uri: "paas://redis-cache-manager" 
-              classloader: "#notused"
-              properties:
-              caches:
-                - name: "nnrf-client-cache"
-                  keyType: "java.lang.String"
-                  valueType: "java.lang.String"
-                  eternal: "true"
-                  writeThrough: "false"
-                  readThrough: "false"
-                  timeToLiveSeconds: "3600"
-                  properties:
-                    cache.uri: redis://~redis_NAME~.~PROJECT~.svc.cluster.local:6379?database=0
-                    cache.codec: "io.lettuce.core.codec.StringCodec"
-      call-tracing:
-        properties:
-          JAEGER_SERVICE_NAME: ~NAME~
-          JAEGER_AGENT_HOST: localhost
-          JAEGER_AGENT_PORT: 6831
-          JAEGER_ENDPOINT: http://localhost:14268/api/traces
-          JAEGER_REPORTER_FLUSH_INTERVAL: 100
-          JAEGER_REPORTER_LOG_SPANS: true
-          JAEGER_SAMPLER_TYPE: probabilistic
-          JAEGER_SAMPLER_PARAM: 1
-        enabled: true
-        trace-all-operations: true
-        trace-all-ues: true
-        provisioning-uri: file:/etc/opt/hpe-5g/hpe-nnrf-reg-agent/call-tracing-provisioning.yaml
+  
       nnrf-client:
         discover-stub-mode: false
         # json file containing remote NF profile to be discovered in stub-mode
         stub-remote-nf-profile: 
         server-scheme: https
-        server-fqdn: ghost41.gre.hpecorp.net
+        server-fqdn: nrf.server.hpecorp.net
         server-port: 8443
         server-version: v1
         retry-limit: -1
@@ -4487,11 +4585,11 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
         disable-deregister: false
         opentracing-enabled: false
         enable-cache: false
-        default-cache-validity-period-secs: 
-        self-service-name: nudr-reg-agent
-        monitor-service-name: nudr-dr
+        default-cache-validity-period-secs: 3600
+        self-service-name: hpe-nf-nrf-reg-agent
+        monitor-service-name: 
         monitor-interval: 15000
-        kubernetes-namespace: 3gpp-nf-all
+        kubernetes-namespace: default
     project-nnrf-reg-agent.yml: |+
       #
       # Sample Thorntail global configuration.
@@ -4881,7 +4979,7 @@ hpe5gResources.defaults['nrf-reg-agent']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nnrf-reg-agent
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -5226,7 +5324,7 @@ hpe5gResources.defaults['nudm-ee']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -5621,7 +5719,7 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nflipoi
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -5865,7 +5963,7 @@ hpe5gResources.defaults['nudm-li-tf']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nflitf
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -6313,7 +6411,7 @@ hpe5gResources.defaults['nudm-ueau']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -6748,7 +6846,7 @@ hpe5gResources.defaults['nudm-uecm']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -7249,7 +7347,7 @@ hpe5gResources.defaults['nudm-sdm']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -7746,7 +7844,7 @@ hpe5gResources.defaults['nudm-notify']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -8780,6 +8878,139 @@ hpe5gResources.defaults['elasticsearch']['template']=
       kind: Service
       name: ~NAME~
 `;
+//================================================
+hpe5gResources.defaults['telegraf']['template']=
+//================================================
+`
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: RoleBinding
+  apiVersion: authorization.openshift.io/v1
+  metadata:
+    name: ~NAME~-view
+    namespace: ~PROJECT~
+  roleRef:
+    kind: Role
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source        
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    template: 
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        serviceAccountName: ~NAME~
+        containers:
+        - name: ~NAME~
+          namespace: ~PROJECT~
+          image: ~IMAGE_STREAM~
+          env:
+          - name: HOSTNAME
+            value: telegraf-polling-service
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/telegraf
+        volumes:
+          - name: config-volume
+            configMap:
+              name: ~NAME~
+    selector:
+      name: ~NAME~
+    replicas: ~REPLICAS~
+- kind: Service
+  apiVersion: v1
+  metadata: 
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    type: ClusterIP
+    ports:
+    - port: 8888
+      targetPort: 8888
+      name: "health"
+    - port: 8125
+      targetPort: 8125
+      protocol: "UDP"
+      name: "statsd"
+    selector:
+      name: ~NAME~
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    to:
+      kind: Service
+      name: ~NAME~
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  data:
+    telegraf.conf: |+    
+      [agent]
+        collection_jitter = "0s"
+        debug = false
+        flush_interval = "10s"
+        flush_jitter = "0s"
+        hostname = "$HOSTNAME"
+        interval = "10s"
+        logfile = ""
+        metric_batch_size = 1000
+        metric_buffer_limit = 10000
+        omit_hostname = false
+        precision = ""
+        quiet = false
+        round_interval = true
+      [[processors.enum]]
+        [[processors.enum.mapping]]
+          dest = "status_code"
+          field = "status"
+          [processors.enum.mapping.value_mappings]
+              critical = 3
+              healthy = 1
+              problem = 2
+      [[outputs.prometheus_client]]
+        listen = ":9273"
+        path = "/metrics"
+      [[inputs.internal]]
+        collect_memstats = false
+      [[inputs.influxdb_listener]]
+        service_address = ":8888"
+`;
+
 //================================================
 hpe5gResources.defaults['prometheus-alertmanager']['template']=
 //================================================
@@ -10181,7 +10412,7 @@ hpe5gResources.defaults['kafka']['template']=
   spec:
     kafka:
       version: 2.4.0
-      replicas: 3
+      replicas: ~REPLICAS~
       listeners:
         plain: {}
         tls: {}
@@ -10193,7 +10424,7 @@ hpe5gResources.defaults['kafka']['template']=
       storage:
         type: ephemeral
     zookeeper:
-      replicas: 3
+      replicas: ~REPLICAS~
       storage:
         type: ephemeral
     entityOperator:
