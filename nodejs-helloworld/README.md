@@ -201,7 +201,7 @@ Where udsf_bs.json defines one udsf network function with its backing services:
       {
         "Type": "nudsf-dr",
         "Name": "myudsf",
-        "Dependencies": "udsf-db,udsf-flux"
+        "Dependencies": "udsf-db,mygraf"
       }
     ]
   }
