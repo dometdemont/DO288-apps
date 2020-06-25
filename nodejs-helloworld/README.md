@@ -49,7 +49,16 @@ oc new-project assistant
 oc new-app --name automated-deployer https://github.hpe.com/CMS-5GCS/automated-deployer 
 oc expose svc/automated-deployer
 ```
+### Optional arguments
+This application supports three optional arguments:
+- --port (alias -p): listening port, default 8080
+- --privateKey (alias -k): the name of the file on the server delivering the private key used for https encryption
+- --certificate (alias -c): the name of the file on the server delivering the server certificate used for https encryption
 
+The https encryption is enabled if both the key and certificate parameters are provided. Example:
+```
+node hpe5g.js --port 8473 --privateKey headless.pem --certificate headless.cert.pem   
+```
 ## Operations <a name="Operations"></a>
 ### Target cluster(s) connection
 The installer can connect to the target cluster(s) either using the OpenShift command line (oc) or the OpenShift REST interface (curl).

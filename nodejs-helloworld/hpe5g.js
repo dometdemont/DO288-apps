@@ -2,17 +2,49 @@
 const
 	fs = require('fs'),
 	express = require('express'),
+	minimist = require('minimist'),
+	https = require('https'),
     app = express(),
 	exec = require('child_process').exec,
 	bodyParser = require('body-parser'),
 	showdown  = require('showdown'),
 	converter = new showdown.Converter({disableForced4SpacesIndentedSublists: 'true'});
 
+let args = minimist(process.argv.slice(2), {
+    default: {
+        port: 8080,
+        privateKey: '',
+        certificate: ''
+    },
+    alias: {
+        p: 'port',
+        k: 'privateKey',
+        c: 'certificate'
+    }
+});
+
 // support parsing of application/json type post data
 app.use(bodyParser.json());
 
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+
+if(args.privateKey && args.certificate){
+	// 1. Load certificates and create options
+	var privateKey = fs.readFileSync(args.privateKey).toString();
+	var certificate = fs.readFileSync(args.certificate).toString();
+	var options = {
+	key : privateKey,
+	cert : certificate
+	}
+	// 2. start https server with options and express app.
+	https.createServer(options, app).listen(args.port, function () {console.log("CMS5G Core Stack automated deployer listening SSL-encrypted HTTPS traffic on port " + args.port);});
+}else{
+	app.listen(args.port, function () {
+	  console.log('CMS5G Core Stack automated deployer listening unencrypted traffic on port '+args.port);
+	  if(args.privateKey || args.certificate)console.log('HTTPS encryption requires both privateKey and certificate arguments: ignoring '+args.privateKey + args.certificate)
+	});
+}
 
 // Get the default catalog, or the one passed as parameter or the session dump or the session HTML document
 app.get(['/:session', '/:session/:target'], function (req, res, next) {
@@ -120,8 +152,3 @@ app.all('/*', function (req, res, next) {
     res.send(converter.makeHtml(data));
 	});
 });
-
-app.listen(8080, function () {
-  console.log('Application listening on port 8080');
-});
-

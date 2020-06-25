@@ -13,6 +13,8 @@
     "body-parser": "latest",
     "jsdom": "latest",
     "child-process": "latest",
-    "showdown": "latest"
+    "showdown": "latest",
+    "https": "latest",
+    "minimist": "latest"
   }
 }
