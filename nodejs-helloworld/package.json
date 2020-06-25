@@ -4,7 +4,7 @@
   "description": "CMS5G Core Stack automated deployer",
   "main": "hpe5g.js",
   "scripts": {
-    "start": "node hpe5g.js --port 8473 --privateKey headless.pem --certificate headless.cert.pem"
+    "start": "node hpe5g.js"
   },
   "author": "Hewlett Packard Enterprise",
   "license": "ASL",
