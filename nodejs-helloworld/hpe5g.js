@@ -29,6 +29,15 @@ app.use(bodyParser.json());
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
+//Get rid of jsdom css interpreter errors: https://github.com/jsdom/jsdom/issues/2177
+const _ = require('lodash')
+const originalConsoleError = console.error
+console.error = function(msg) {
+  if(_.startsWith(msg, '[vuex] unknown')) return
+  if(_.startsWith(msg, 'Error: Could not parse CSS stylesheet')) return
+  originalConsoleError(msg)
+}
+
 if(args.privateKey && args.certificate){
 	// 1. Load certificates and create options
 	var privateKey = fs.readFileSync(args.privateKey).toString();
