@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-06-24 Version 0.73</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-07-02 Version 0.74</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
@@ -114,6 +114,8 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-07-02 0.74	Dependencies management: support aliases, eg influxdb can be implemented either as influxdb or telegraf or telegraf-chart; revert dependency to telegraf towards influxdb
+	Catalog: support import of incremental catalog to extend the current catalog (GUI only) 
 2020-06-24 0.73	Helm based deployments: optional version and extra options attributes; Operators deployment: optional replicas attribute; 
 	Add telegraf in the default catalog as IndirectService and HelmChart; use it as influxdb resource for all Network Functions  
 2020-06-18 0.72	nudsf and nudr OpenShift templates refresh. Markdown doc cosmetic fixes.
@@ -1560,7 +1562,7 @@ hpe5gResource.prototype.build = function(target){
 		if(!replicas)replicas="1";
 		var dependenciesList=this.getAndSetValue(row, nameIndexes, 'Dependencies');
 		var dependencies=undefined;
-		if(dependenciesList)dependencies=dependenciesList.split(',');
+		if(dependenciesList)dependencies=dependenciesList.split(/[\s,]+/);
 		if(name.search(/[A-Z]/g) >= 0){this.check += "\n"+this.title+" "+name+" : upper cases are not supported";}
 		if(project == undefined || project == ''){this.check += "\n"+this.title+" "+name+" : project is required";}
 		var displayImage="";
@@ -1630,13 +1632,24 @@ var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVol
 	}
 }
 
-//Resolve dependency of a given resource on a specific type: accept multiple candidates silentlty, just take the first one
-openshiftFunction.prototype.resolve = function(type){
+// Resolve dependency of a given resource on a specific type: accept multiple candidates silentlty, just take the first one
+// The required type can be a simple string or a table of aliases 
+openshiftFunction.prototype.resolve = function(requirement){
 	var candidates, result;
-	if(hpe5gResources.provides[type])candidates=hpe5gResources.provides[type][this.project];
-	if(candidates)
-		if(this.dependency)result=candidates.filter(value => -1 !== this.dependency.indexOf(value))[0];
-		else result=candidates[0];
+	var types = new Array();
+	var self = this;
+	if(typeof requirement == "string"){types.push(requirement);}else{types=requirement;}
+	types.some(function(type){
+      candidates=undefined;
+      if(hpe5gResources.provides[type])candidates=hpe5gResources.provides[type][self.project];
+      if(candidates)
+      	// If the user has listed preferred resources resolving dependencies, use the first of those preferred names
+      	if(self.dependency)result=candidates.filter(value => -1 !== self.dependency.indexOf(value))[0];
+      	// otherwise, use the first candidate
+      	else result=candidates[0];
+      // Stop there if resolved
+      return result;
+	});
 	return result
 }
 
@@ -1942,9 +1955,10 @@ The first master public IP address is available as $openshift_ip
  `
 );}
 
-// Compile the Help text of a selection of sections in a markdown document 
+// Compile the Help text of a selection of sections and catalog in a markdown document 
 function deploymentDoc(){
 	var result=`
+<a name="SectionsDetails"></a>
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 `;
@@ -1952,6 +1966,11 @@ This chapter is a compilation of the detailed sections specifications.
 		result+="\n### "+section+"\n"+window[section].help();
 		if(hpe5gResources.resources[section])result+="\n"+section+" supported types: "+hpe5gResources.resources[section]+"\n";
 	});
+	
+	result+=`
+<a name="CatalogSpecification"></a>
+## Catalog specification\n`+catalogDoc;
+
 	userOutput(result);
 }
 
@@ -2159,7 +2178,10 @@ objects:
 		}
 		
 		if(hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
-			var ereg=new RegExp("~"+requirement+"_NAME~","g");
+			// The required type can be a simple string or a table of aliases, the first element being the actual required type
+			var actualRequirement=requirement;
+			if(typeof requirement != "string")actualRequirement=requirement[0];
+			var ereg=new RegExp("~"+actualRequirement+"_NAME~","g");
 			deployment=deployment.replace(ereg, networkFunction.resolve(requirement));
 			});
 		result+=deployment;
@@ -2687,7 +2709,7 @@ function buildHeatTemplate(){
 //=================================
 //Catalog of resources
 //=================================
-function catalogHelp(){userOutput(
+var catalogDoc=
 `The catalog is an internal object defining the types and attributes of the CMS5G Core Stack resources deployable from the assistant on an OpenShift cluster.
 It consists in four sections:
   - types
@@ -2695,11 +2717,17 @@ It consists in four sections:
   - values
   - admin
 
-1.types:
+1. types:
   Define the name of each type of resource managed by the assistant.
   Each name must fall in one of those categories: `+hpe5gResources.names.join()+`
 2. dependencies:
-  Define for each type the list of required resources by their type names.
+  Define for each type the list of required resources by their type names.   
+  If a dependency can be resolved by different types, a list can be provided as a json table.    
+  The placeholder used in templates is the first element in this list.    
+  Example: telegraf can play an influxdb type, and can be deployed as an indirect service or a helm chart.    
+    The udsf resource requiring both ignite and influxdb resources can specify this dependencies list:   
+	"nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
+    The udsf template has to use the placeholders ~ignite_NAME~ and ~influxdb_NAME~ to enable the dependencies resolution at deployment time.    
 3. values:
   Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
     - IndirectServices,NetworkFunctions,DirectServices: URL, image, tag, template
@@ -2707,27 +2735,30 @@ It consists in four sections:
     - HelmCharts: chart
   The template attribute is a YAML description of the OpenShift template used for deploying the resource. It must/may include those placeholders:
     - must: 
-    	~NAME~ is the name of the resource
-    	~PROJECT~ is the name of the OpenShift project (namespace)
+      - ~NAME~ is the name of the resource
+      - ~PROJECT~ is the name of the OpenShift project (namespace)
     - may:
-    	~IMAGE~ is the name of the docker image
-    	~REPLICAS~ is the number of replicas
-    	~<dependency>_NAME~ is a reference to the actual name of a dependency for this resource.
-    	~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: <the volume name>" at build time
-    	~PERSISTENCE_START~<conditional sequence>~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
-    		the conditional sequence is removed when no persistent storage is defined by the user for this resource
+      - ~IMAGE~ is the name of the docker image
+      - ~REPLICAS~ is the number of replicas
+      - ~<dependency>_NAME~ is a reference to the actual name of a dependency for this resource.
+      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: <the volume name>" at build time
+      - ~PERSISTENCE_START~<conditional sequence>~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
+    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
   Those placeholders are processed at build time with the actual values defined by the user in the assistant.
 4. admin:
-  Define for each type if it requires special privileges for deployment (optional, default to false)
-  If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.
-  
+  Define for each type if it requires special privileges for deployment (optional, default to false)    
+  If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.    
+`;
+function catalogHelp(){userOutput(catalogDoc+`
+User interface buttons:
 Display:
   Output a human readable view of the current catalog. The depth and length of the view can be tuned with the 'depth' and 'ellipsis' drop down boxes.
 Export:
   Output the current catalog in JSON format and save the same as a file in the download folder of the browser named: hpe5g.catalog.json
 Import: 
-  Loads a custom catalog from a user provided JSON file; the current catalog is overridden by the new one.
-`)}
+  Loads a custom catalog from a user provided JSON file; the user is prompted to either override or extend the current catalog.
+`)};
+
 var catalogImport = new userLoadedFile("catalogImport", "Import Json...", importCatalog);
 if(!catalogImport.isDefined())document.getElementById("catalogArea").appendChild(catalogImport.getDomElement());
 function exportCatalog(){
@@ -2774,13 +2805,19 @@ function importCatalog(jsonCatalog = catalogImport.content, silent = false){
     	}
 	});
     if(check.length>0)userOutput("Inconsistent imported catalog:"+check);
-    else if (silent || confirm("You are about to override the current catalog")) {
-  	  hpe5gResources.resources=catalog.types; hpe5gResources.depends=catalog.dependencies; hpe5gResources.defaults=catalog.values; hpe5gResources.admin=catalog.admin;
-  	  if(!silent)userOutput(objToString(catalog));
-	  result=true;
+    else if (silent || confirm("You are about to override the current catalog with imported data. Click Cancel to merge both instead.")) {
+  	  hpe5gResources.resources=catalog.types; 
+  	  hpe5gResources.depends=catalog.dependencies; 
+  	  hpe5gResources.defaults=catalog.values; 
+  	  hpe5gResources.admin=catalog.admin;
   	} else {
-  	  userOutput("Catalog import cancelled");
+  	  Object.keys(hpe5gResources.resources).forEach(function(section) {hpe5gResources.resources[section]=hpe5gResources.resources[section].concat(catalog.types[section]);});
+  	  hpe5gResources.depends=hpe5gResources.depends?Object.assign(hpe5gResources.depends, catalog.dependencies):catalog.dependencies; 
+      hpe5gResources.defaults=hpe5gResources.defaults?Object.assign(hpe5gResources.defaults, catalog.values):catalog.values; 
+      hpe5gResources.admin=hpe5gResources.admin?Object.assign(hpe5gResources.admin, catalog.admin):catalog.admin;
   	}
+    if(!silent)userOutput(objToString(catalog));
+    result=true;
   } catch (ex) {
   	userOutput("JSON parser exception received:\n"+ex);
   }
@@ -3136,7 +3173,7 @@ var defaultCatalog=`
   "dependencies": {
     "nudsf-dr": [
       "ignite",
-      "telegraf"
+      ["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudr-dr": [
       "ignite",
@@ -3146,31 +3183,31 @@ var defaultCatalog=`
       "ignite"
     ],
     "nudr-reg-agent": [
-    	"redis","telegraf"
+    	"redis",["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudm-ee": [
-      "telegraf", "nudr-dr"
+      ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
     ],
     "nudm-li-poi": [
-      "redis","kafka","telegraf"
+      "redis","kafka",["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudm-li-tf": [
-        "redis","telegraf"
+        "redis",["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudm-ueau": [
-        "telegraf", "nudr-dr"
+        ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
     ],
     "nudm-uecm": [
-        "telegraf", "nudr-dr"
+        ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
     ],
     "nudm-sdm": [
-      "telegraf", "nudr-dr"
+      ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
     ],
     "nudm-notify": [
-      "telegraf", "nudr-dr"
+      ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
     ],
     "nrf-reg-agent": [
-      "telegraf",
+      ["influxdb","telegraf", "telegraf-chart"],
       "fluentd"
     ]
   },
@@ -3571,7 +3608,7 @@ hpe5gResources.defaults['nudsf-dr']['template']=
         properties:
           com.hpe.imsc.statistics.influxdb.notifications: "false"
           com.hpe.imsc.statistics.influxdb.server.database: hpe-sde-udsf-dr
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
       call-tracing:
@@ -4552,7 +4589,7 @@ hpe5gResources.defaults['nudr-reg-agent']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nnrf-reg-agent
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -4965,7 +5002,7 @@ hpe5gResources.defaults['nrf-reg-agent']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nnrf-reg-agent
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -5310,7 +5347,7 @@ hpe5gResources.defaults['nudm-ee']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -5705,7 +5742,7 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nflipoi
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -5949,7 +5986,7 @@ hpe5gResources.defaults['nudm-li-tf']['template']=
         jvm-metrics: true
         properties:
           com.hpe.imsc.statistics.influxdb.server.database: nflitf
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.polling.interval: 10
           com.hpe.imsc.statistics.influxdb.server.port: "8086"
           com.hpe.imsc.statistics.influxdb.server.protocol: http
@@ -6397,7 +6434,7 @@ hpe5gResources.defaults['nudm-ueau']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -6832,7 +6869,7 @@ hpe5gResources.defaults['nudm-uecm']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -7333,7 +7370,7 @@ hpe5gResources.defaults['nudm-sdm']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf
@@ -7830,7 +7867,7 @@ hpe5gResources.defaults['nudm-notify']['template']=
         enabled: true
         jvm-metrics: true
         properties:
-          com.hpe.imsc.statistics.influxdb.server.host: ~telegraf_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
           com.hpe.imsc.statistics.influxdb.server.port: 8086
           com.hpe.imsc.statistics.influxdb.server.protocol: http
           com.hpe.imsc.statistics.influxdb.server.database: nudm-nf

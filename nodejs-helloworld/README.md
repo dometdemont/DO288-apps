@@ -4,6 +4,7 @@
 3. [Operations](#Operations)
 4. [Examples](#Examples)
 5. [Sections detailed specifications](#SectionsDetails)
+6. [Catalog specification](#CatalogSpecification)
 
 This tool builds and run an installer deploying user defined HPE5G resources on OpenShift clusters.  
 It can also build a Heat stack template deploying on OpenStack an OpenShift cluster including HPE5G resources.  
@@ -37,7 +38,7 @@ can be used as a starting point for a deployment; typically, a set of backing se
 The headless automated deployer is a nodejs application deployed as per the [package.json](package.json) specification from [hpe5g.js](hpe5g.js) file.   
 It can be deployed on any nodejs server:  
 ```
-git clone https://github.hpe.com/CMS-5GCS/automated-deployer
+git clone git@github.hpe.com:CMS-5GCS/automated-deployer.git
 cd automated-deployer
 npm install
 node hpe5g.js
@@ -46,7 +47,8 @@ However, taking advantage of the OpenShift Source-to-Image capability to deploy 
 Example deploying the tool as the pod 'automated-deployer' in the OpenShift project 'assistant':
 ```
 oc new-project assistant
-oc new-app --name automated-deployer https://github.hpe.com/CMS-5GCS/automated-deployer 
+oc create secret generic s2i --type=kubernetes.io/ssh-auth --from-file=ssh-privatekey=.ssh/id_rsa
+oc new-app --name automated-deployer --source-secret=s2i git@github.hpe.com:CMS-5GCS/automated-deployer.git    
 oc expose svc/automated-deployer
 ```
 ### Optional arguments
@@ -473,3 +475,44 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 	
 
 HelmCharts supported types: nudm-chart,nudr-chart,telegraf-chart,generic
+
+<a name="CatalogSpecification"></a>
+## Catalog specification
+The catalog is an internal object defining the types and attributes of the CMS5G Core Stack resources deployable from the assistant on an OpenShift cluster.
+It consists in four sections:
+  - types
+  - dependencies
+  - values
+  - admin
+
+1. types:
+  Define the name of each type of resource managed by the assistant.
+  Each name must fall in one of those categories: DirectServices,IndirectServices,Operators,NetworkFunctions,HelmCharts
+2. dependencies:
+  Define for each type the list of required resources by their type names.   
+  If a dependency can be resolved by different types, a list can be provided as a json table.    
+  The placeholder used in templates is the first element in this list.    
+  Example: telegraf can play an influxdb type, and can be deployed as an indirect service or a helm chart.    
+    The udsf resource requiring both ignite and influxdb resources can specify this dependencies list:   
+	"nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
+    The udsf template has to use the placeholders ~ignite_NAME~ and ~influxdb_NAME~ to enable the dependencies resolution at deployment time.    
+3. values:
+  Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
+    - IndirectServices,NetworkFunctions,DirectServices: URL, image, tag, template
+    - Operators: template
+    - HelmCharts: chart
+  The template attribute is a YAML description of the OpenShift template used for deploying the resource. It must/may include those placeholders:
+    - must: 
+      - ~NAME~ is the name of the resource
+      - ~PROJECT~ is the name of the OpenShift project (namespace)
+    - may:
+      - ~IMAGE~ is the name of the docker image
+      - ~REPLICAS~ is the number of replicas
+      - ~<dependency>_NAME~ is a reference to the actual name of a dependency for this resource.
+      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: <the volume name>" at build time
+      - ~PERSISTENCE_START~<conditional sequence>~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
+    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
+  Those placeholders are processed at build time with the actual values defined by the user in the assistant.
+4. admin:
+  Define for each type if it requires special privileges for deployment (optional, default to false)    
+  If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.    

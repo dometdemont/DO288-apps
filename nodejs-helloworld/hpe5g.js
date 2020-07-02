@@ -8,7 +8,7 @@ const
 	exec = require('child_process').exec,
 	bodyParser = require('body-parser'),
 	showdown  = require('showdown'),
-	converter = new showdown.Converter({disableForced4SpacesIndentedSublists: 'true'});
+	converter = new showdown.Converter({disableForced4SpacesIndentedSublists: 'true', literalMidWordUnderscores: 'true'});
 
 let args = minimist(process.argv.slice(2), {
     default: {
