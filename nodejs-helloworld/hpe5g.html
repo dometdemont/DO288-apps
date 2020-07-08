@@ -1596,11 +1596,14 @@ hpe5gResource.prototype.build = function(target){
 		if(!hpe5gResources.provides[type][project])hpe5gResources.provides[type][project]=new Array();
 		hpe5gResources.provides[type][project].push(name);
 		
-		hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)));
+		hpe5gResources.openshiftFunctions.push(
+  		new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, 
+  			hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)
+  		));
 		
 		if(insecure && hpe5gResources.insecureRegistries.indexOf(URL) < 0)hpe5gResources.insecureRegistries.push(URL);
 		
-		if(hpe5gResources.admin[type] != undefined && hpe5gResources.admin[type])hpe5gResources.adminList+="\n- "+name+":\tsection: "+this.title+"\tproject: "+project+"\ttype: "+type;
+		if(hpe5gResources.admin[type])hpe5gResources.adminList+="\n- "+name+":\tsection: "+this.title+"\tproject: "+project+"\ttype: "+type;
 		
 		result+="\n#- "+name+": "+displayReplicas+type+" on project: "+project+displayImage+displayVolume+displayChart;
 	}
@@ -1984,9 +1987,13 @@ var result=`#! /bin/bash
 switch(target){
 case 'oc': result+=`
 # - OpenShift command line interface installed (oc)
+if ! which oc  > /dev/null ; then  echo Please install oc utility to submit OpenShift requests ; exit 1 ; fi
 # - current user logged in the target OpenShift cluster: oc login -u <user> -p <password>`; break;
 case 'curl': result+=`
-# - curl utility installed 
+# - curl and jq utilities installed
+PATH=$PATH:.
+if ! which jq  > /dev/null ; then  echo Please install jq utility to inspect OpenShift REST API responses ; exit 1 ; fi
+if ! which curl  > /dev/null ; then  echo Please install curl utility to submit OpenShift REST API requests ; exit 1 ; fi
 # - network configured to reach all the targeted OpenShift clusters`; break;
 default: result+= 'unsupported'; break;
 }
@@ -2030,6 +2037,47 @@ _warn_() {
 _fail_() {
     _log_ "FATAL ERROR: $*.  Now exiting... Check $hpe5g_log_file"
     exit 1
+}
+
+_getTemplateInstanceStatus() {
+	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3
+	curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$NAMESPACE | jq -e '.status.conditions[] | select(.status == "True") | .type'
+	return $?
+}
+_getTemplateInstanceMessage() {
+	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3
+	local status=$(curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$NAMESPACE)
+	echo $status >> $hpe5g_log_file
+	echo $status | jq -e '.status.conditions[] | select(.status == "True") | .message'
+}
+
+# Submit a command until success or timeout, log a current status after each retry
+# Parameters:
+# $1: the command
+# $2: (optional) the command description, displayed at each retried iteration, appended to the command output, defaults to the command
+# $3: (optional) the timeout in seconds
+# $4: (optional) the retry period in seconds
+_cmd_with_retry() {
+	local _cmd="$1"
+	local _cmdDescription="$\{2:-$_cmd}"
+	local _timeout=$\{3:-60}
+	local _retryPeriod=$\{4:-10}
+	
+	[ "$_cmd" = "" ] && echo "_cmd_with_retry <command> <description> <timeout[$_timeout]> <retry period[$_retryPeriod]>" && return 1
+	 
+	local _countMax=$(( $_timeout/$_retryPeriod + 1 ))
+	local _count=0
+    until _cmdOutput=$(eval "$_cmd" 2>> $hpe5g_log_file) || (( $_count >= $_countMax )) ; do
+    	((_count++))
+    	_log_ "$_cmdDescription: attempt $_count of $_countMax, retrying in $_retryPeriod seconds"
+        sleep $_retryPeriod
+    done
+   if (( $_count >= $_countMax )) ; then
+   	_fail_ "$_cmdDescription failed after $_timeout seconds"
+   else
+   	test -n "$_cmdOutput" && echo $_cmdOutput >> $hpe5g_log_file
+   fi
+   return 0
 }
 
 # Default parameters values
@@ -2103,12 +2151,12 @@ for _project in $oc_projects; do
 	oc project $_project &>> $hpe5g_log_file || _fail_ "Cannot switch to project $_project"
 	# File naming convention for Network functions: openshift_project_<project>.yaml
 	# File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
-	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && oc process -f openshift_project_$_project.yaml | oc $_ocAction -f - &>> $hpe5g_log_file && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
+	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && _cmd_with_retry "oc process -f openshift_project_$_project.yaml | oc $_ocAction -f -" "Processing" && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
 	for _helmValues in $(ls openshift_helm_$\{_project}_*.yaml 2> /dev/null) ; do eval $(head -1 $_helmValues) && _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" && tail -n +2 $_helmValues > _tmp_$_helmValues && _helmAction &>> $hpe5g_log_file && rm -f $_helmValues _tmp_$_helmValues &>> $hpe5g_log_file || _fail_ "$_displayedAction Helm instance on project $_project" ; done
 	# Undeployment: wait for pods termination  
 	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $hpe5g_log_file ; do : ; done
-	# Indulge 5 seconds to stabilize, then delete the project if no pods, otherwise log a status
-	sleep 5s && test -n "$(oc get pods --namespace $_project 2>&1 >/dev/null)" && _log_ "No remaining pods in project $_project: deleting" && oc delete project $_project &>> $hpe5g_log_file || oc get all --namespace $_project &>> $hpe5g_log_file 
+	# If undeployment, indulge 5 seconds to stabilize, then delete the project if no pods, otherwise log a status
+	[[ "$_ocAction" == "delete" ]] && sleep 5s && test -n "$(oc get pods --namespace $_project 2>&1 >/dev/null)" && _log_ "No remaining pods in project $_project: deleting" && oc delete project $_project &>> $hpe5g_log_file || oc get all --namespace $_project &>> $hpe5g_log_file 
 done
 oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
 _log_ "$_displayedAction completed: check $hpe5g_log_file"
@@ -2148,7 +2196,7 @@ objects:
 `;
 	var result="";
 	hpe5gResources.projects.forEach(function(project){
-		if(singleProject != undefined && project != singleProject)return;
+		if(singleProject && project != singleProject)return;
 		// List of NetworkFunctions deployed on openshift 
 		// Replace in the provided template:
 		// - name, image, project, volume and replicas with the actual values for this function
@@ -2156,9 +2204,9 @@ objects:
 		var _header=templateHeader;
 		hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
 		var deployment=hpe5gResources.defaults[networkFunction.type]['template'];
-		if(networkFunction.project != project || deployment == undefined)return;
-		if(networkFunction.pipeline != undefined)deployment+=networkFunction.pipeline;
-		if(header != undefined && _header.length>0)result+=header(project);
+		if(networkFunction.project != project || !deployment)return;
+		if(networkFunction.pipeline)deployment+=networkFunction.pipeline;
+		if(header && _header.length>0)result+=header(project);
 		deployment=_header+deployment.replace(/\n/g, "\n  ");	// indentation of objects compared to the header
 		if(tab != undefined)deployment=deployment.replace(/\n/g, "\n"+tab);	// indentation of objects compared to the project header
 		_header=''; // only one header per project
@@ -2740,9 +2788,9 @@ It consists in four sections:
     - may:
       - ~IMAGE~ is the name of the docker image
       - ~REPLICAS~ is the number of replicas
-      - ~<dependency>_NAME~ is a reference to the actual name of a dependency for this resource.
-      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: <the volume name>" at build time
-      - ~PERSISTENCE_START~<conditional sequence>~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
+      - ~dependency_NAME~ is a reference to the actual name of a dependency for this resource.
+      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
+      - ~PERSISTENCE_START~conditional_sequence~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
     		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
   Those placeholders are processed at build time with the actual values defined by the user in the assistant.
 4. admin:
@@ -2947,9 +2995,10 @@ HPE_EOF`;
                 shell+='\nif [ $? != 0 ] ; then _fail_ "Cannot create secret '+secretName+' for project '+project+' on cluster '+cluster.name+'" ; fi';
                 shell+='\nsleep 2 ; done';
                 
-                // Deploy/undeploy the template instance
+                // Deploy/undeploy the template instance: help idempotence by deleting the template instance first, ignoring failure in case of deployment
                 shell+='\n_log_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'"';
-                shell+='\nif $_deploy ; then curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances &>> $hpe5g_log_file <<'HPE_EOF'";
+                shell+='\ncurl -f -k -X DELETE -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+'/templateinstances/'+project+' &>> $hpe5g_log_file || $_deploy || _fail_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'" ';
+				shell+='\nif $_deploy ; then curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances &>> $hpe5g_log_file <<'HPE_EOF'";
                 shell+=`
 {
   "kind": "TemplateInstance",
@@ -2965,9 +3014,12 @@ HPE_EOF`;
   }
 }
 HPE_EOF`;
-				shell+='\nelse curl -f -k -X DELETE -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+'/templateinstances/'+project+' &>> $hpe5g_log_file';
-				shell+='\nfi';
 				shell+='\nif [ $? != 0 ] ; then _fail_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'" ; fi';
+				
+				// Poll the TemplateInstance or watch the TemplateInstance until either the Ready or InstantiateFailure condition types report status True.
+				shell+='\n_cmd_with_retry "_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+'" Processing';
+				shell+='\nif [[ "$(_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+')" != \'"Ready"\' ]] ; then _fail_ $(_getTemplateInstanceMessage '+cluster.token+' '+cluster.endpoint+' '+project+') ; fi';
+				shell+='\nfi';
 				shell+='\n_log_ "$_displayedAction resources for project '+project+' successfully completed on cluster '+cluster.name+'"';
 
 			});
@@ -3156,12 +3208,14 @@ var defaultCatalog=`
       "influxdb",
       "fluentd"
     ],
-    "Operators": [
-      "jaeger",
-      "kiali",
-      "svc-mesh-ctlplane",
-      "kafka",
-      "elasticSearchOperator"
+    "Operators": [	
+      "jaeger-product",
+      "servicemeshoperator",
+      "amq-streams",
+      "elasticsearch-operator",
+      "kiali-ossm",
+      "grafana-operator",
+      "prometheus-operator"
     ],
     "HelmCharts": [
       "nudm-chart",
@@ -3189,7 +3243,7 @@ var defaultCatalog=`
       ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
     ],
     "nudm-li-poi": [
-      "redis","kafka",["influxdb","telegraf", "telegraf-chart"]
+      "redis","amq-streams",["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudm-li-tf": [
         "redis",["influxdb","telegraf", "telegraf-chart"]
@@ -3214,7 +3268,9 @@ var defaultCatalog=`
   "admin": {
 	    "fluentd": true,
 	    "grafana": true,
-	    "kube-state-metrics": true
+	    "kube-state-metrics": true,
+	    "grafana-operator": true,
+	    "prometheus-operator": true
   },
   "values": {
     "jenkins": {
@@ -3347,11 +3403,13 @@ var defaultCatalog=`
       "image": "fluentd-elasticsearch",
       "tag": "v2.4.0"
     },
-    "jaeger": {},
-    "kiali": {},
-    "svc-mesh-ctlplane": {},
-    "kafka": {},
-    "elasticSearchOperator": {},
+    "jaeger-product": {},
+    "servicemeshoperator": {},
+    "amq-streams": {},
+    "elasticsearch-operator": {},
+    "kiali-ossm": {},
+    "grafana-operator": {},
+    "prometheus-operator": {},
     "nudm-chart": {
       "chart": "hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz"
     },
@@ -5709,7 +5767,7 @@ hpe5gResources.defaults['nudm-li-poi']['template']=
       # Kafka configuration 
       pubsub:
         brokers:
-         - ~kafka_NAME~-kafka-brokers.~PROJECT~.svc.cluster.local:9092
+         - ~amq-streams_NAME~-kafka-brokers.~PROJECT~.svc.cluster.local:9092
         properties:
           group.id:  UDMMsgConsumerGroup
         udmEventReportQueue: UDMServingSystem
@@ -10359,7 +10417,7 @@ hpe5gResources.defaults['grafana']['template']=
       provisioning = /etc/grafana/provisioning
 `;
 //================================================
-hpe5gResources.defaults['jaeger']['template']=
+hpe5gResources.defaults['jaeger-product']['template']=
 //================================================
 `
 - kind: Jaeger
@@ -10369,7 +10427,7 @@ hpe5gResources.defaults['jaeger']['template']=
     namespace: ~PROJECT~
 `;
 //================================================
-hpe5gResources.defaults['kiali']['template']=
+hpe5gResources.defaults['kiali-ossm']['template']=
 //================================================
 `
 - kind: MonitoringDashboard
@@ -10391,7 +10449,7 @@ hpe5gResources.defaults['kiali']['template']=
             displayName: ID
 `;
 //================================================
-hpe5gResources.defaults['svc-mesh-ctlplane']['template']=
+hpe5gResources.defaults['servicemeshoperator']['template']=
 //================================================
 `
 - kind: ServiceMeshControlPlane
@@ -10424,7 +10482,7 @@ hpe5gResources.defaults['svc-mesh-ctlplane']['template']=
           template: all-in-one
 `;
 //================================================
-hpe5gResources.defaults['kafka']['template']=
+hpe5gResources.defaults['amq-streams']['template']=
 //================================================
 `
 - kind: Kafka
@@ -10455,7 +10513,7 @@ hpe5gResources.defaults['kafka']['template']=
       userOperator: {}
 `;
 //================================================
-hpe5gResources.defaults['elasticSearchOperator']['template']=
+hpe5gResources.defaults['elasticsearch-operator']['template']=
 //================================================
 `
 - kind: Elasticsearch
@@ -10480,6 +10538,202 @@ hpe5gResources.defaults['elasticSearchOperator']['template']=
           - client
           - data
           - master
+`;
+//================================================
+hpe5gResources.defaults['prometheus-operator']['template']=
+//================================================
+`
+- kind: OperatorGroup
+  apiVersion: operators.coreos.com/v1
+  metadata:
+    name: prometheus-operator-~PROJECT~
+    namespace: ~PROJECT~
+  spec:
+    targetNamespaces:
+    - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
+  metadata:
+    name: prometheus-~PROJECT~
+    namespace: ~PROJECT~
+  spec:
+    channel: beta
+    installPlanApproval: Automatic
+    name: prometheus
+    source: community-operators
+    sourceNamespace: openshift-marketplace
+- kind: Prometheus
+  apiVersion: monitoring.coreos.com/v1
+  metadata:
+    name: ~NAME~-prometheus
+    labels:
+      prometheus: k8s
+    namespace: ~PROJECT~
+  spec:
+    replicas: ~REPLICAS~
+    serviceAccountName: prometheus-k8s
+    securityContext: {}
+    serviceMonitorSelector:
+      matchExpressions:
+      - key: k8s-app
+        operator: Exists
+    ruleSelector:
+      matchLabels:
+        role: prometheus-rulefiles
+        prometheus: k8s
+    alerting:
+      alertmanagers:
+      - namespace: ~PROJECT~
+        name: ~NAME~-alertmanager
+        port: web
+- kind: ServiceMonitor
+  apiVersion: monitoring.coreos.com/v1
+  metadata:
+    name: ~NAME~-servicemonitor
+    labels:
+      k8s-app: prometheus
+    namespace: ~PROJECT~
+  spec:
+    namespaceSelector:
+      matchNames:
+      - ~PROJECT~
+    selector:
+      matchLabels:
+        team: telegraf
+    endpoints:
+    - interval: 15s
+      path: /metrics
+      port: prometheus-client
+- kind: Alertmanager
+  apiVersion: monitoring.coreos.com/v1
+  metadata:
+    name: ~NAME~-alertmanager
+    namespace: ~PROJECT~
+  spec:
+    replicas: ~REPLICAS~
+    securityContext: {}
+- kind: PrometheusRule
+  apiVersion: monitoring.coreos.com/v1
+  metadata:
+    labels:
+      role: prometheus-rulefiles
+      prometheus: k8s
+    name: ~NAME~-prometheusrule
+    namespace: ~PROJECT~
+  spec:
+    groups:
+    - name: general.rules
+      rules:
+      - alert: DeadMansSwitch-serviceprom
+        annotations:
+          description: This is a DeadMansSwitch meant to ensure that the entire Alerting pipeline is functional.
+          summary: Alerting DeadMansSwitch
+        expr: vector(1)
+        labels:
+          severity: none
+`;
+//================================================
+hpe5gResources.defaults['grafana-operator']['template']=
+//================================================
+`
+- kind: OperatorGroup
+  apiVersion: operators.coreos.com/v1
+  metadata:
+    name: grafana-operator-~PROJECT~
+    namespace: ~PROJECT~
+  spec:
+    targetNamespaces:
+    - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
+  metadata:
+    name: grafana-operator-~PROJECT~
+    namespace: ~PROJECT~
+  spec:
+    channel: alpha
+    installPlanApproval: Automatic
+    name: grafana-operator
+    source: community-operators
+    sourceNamespace: openshift-marketplace
+- kind: Grafana
+  apiVersion: integreatly.org/v1alpha1
+  metadata:
+    name: ~NAME~-grafana
+    namespace: ~PROJECT~
+  spec:
+    ingress:
+      enabled: true
+    config:
+      auth:
+        disable_signout_menu: true
+      auth.anonymous:
+        enabled: true
+      log:
+        level: warn
+        mode: console
+      security:
+        admin_password: secret
+        admin_user: root
+      dashboardLabelSelector:
+        - matchExpressions:
+          - key: app
+            operator: In
+            values:
+              - grafana
+- kind: GrafanaDataSource
+  apiVersion: integreatly.org/v1alpha1
+  metadata:
+    name: ~NAME~-grafanadatasource
+    namespace: ~PROJECT~
+  spec:
+    datasources:
+      - access: proxy
+        editable: true
+        isDefault: true
+        jsonData:
+          timeInterval: 5s
+        name: Prometheus
+        type: prometheus
+        url: 'http://prometheus-operated.~PROJECT~.svc.cluster.local:9090'
+        version: 1
+    name: example-datasources.yaml
+- kind: GrafanaDashboard
+  apiVersion: integreatly.org/v1alpha1
+  metadata:
+    name: ~NAME~-grafanadashboard
+    namespace: ~PROJECT~
+  spec:
+    json: |
+      {
+        "id": null,
+        "title": "grafana CMS5G core stack Dashboard",
+        "tags": [],
+        "style": "dark",
+        "timezone": "browser",
+        "editable": true,
+        "hideControls": false,
+        "graphTooltip": 1,
+        "panels": [],
+        "time": {
+          "from": "now-6h",
+          "to": "now"
+        },
+        "timepicker": {
+          "time_options": [],
+          "refresh_intervals": []
+        },
+        "templating": {
+          "list": []
+        },
+        "annotations": {
+          "list": []
+        },
+        "refresh": "5s",
+        "schemaVersion": 17,
+        "version": 0,
+        "links": []
+      }
+    name: simple-dashboard.json
 `;
 </script>
 </body>
