@@ -5,9 +5,10 @@
 4. [Examples](#Examples)
 5. [Sections detailed specifications](#SectionsDetails)
 6. [Catalog specification](#CatalogSpecification)
+7. [OpenStack deployment help](#OpenStackHelp)
 
 This tool builds and run an installer deploying user defined HPE5G resources on OpenShift clusters.  
-It can also build a Heat stack template deploying on OpenStack an OpenShift cluster including HPE5G resources.  
+It can also build a Heat stack template deploying on OpenStack an OpenShift cluster including HPE5G resources and/or additional instances.  
 It operates in two modes: interactive or headless.
 
 For the interactive mode, open the [hpe5g.html](hpe5g.html) file in a browser and click the Help buttons for more information.
@@ -93,7 +94,23 @@ Any resource is deployed in an OpenShift project: this project name is defined a
 If this attribute is missing:
 -	In the GUI, the user is prompted to provide a project name,
 -	Through the REST interface, the project passed as parameter is used as a default.
--	If the project parameter is not provided in the REST request, the default hpe5g value is used.
+-	If the project parameter is not provided in the REST request, the default hpe5g project name is used.
+
+### OpenStack deployment<a name="OpenStack"></a>
+The automated deployer can deploy a full OpenShift cluster, HPE5G resources, and/or additional instances made available to run custom tools.
+#### OpenStack resources
+The resources deployed are defined in three sections:
+- Networks: list of private networks and public interface,
+- Nodes: list of instances, their roles, flavors and images,
+- Flavors: list of actual infrastructure flavors.    
+Refer to the [Sections detailed specifications](#SectionsDetails) for a detailed description of each section attributes.    
+
+#### Deployment
+The deployment is driven from an ansible playbook delivered with the automated deployer project. This playbook is invoked by the installer built by the automated deployer, either in direct or local mode. Specific prerequisites apply for OpenStack deployments to the installer execution environment:
+- ansible and OpenStack client installation
+- target OpenStack project definition in an file setting environment variables: OpenStack project, credentials, URLs, etc...     
+Refer to the [OpenStack deployment help](#OpenStackHelp) for installing the prerequisites and writing the environment file.  
+See also an [example of OpenStack resources deployment](#ExampleOpenStack)
 
 ### REST operations
 The RESTful interface is exposing three verbs:
@@ -118,23 +135,47 @@ Where:
 #### PUT<a name="PUT"></a>
 Build and retrieve or run an installer or a Heat template from an HTML session available on the application server, or build a new session:
 
-`curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
+`curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>&OSenv=<OpenStack environment file>&OSnetwork=<OpenStack private network CIDR>] --data <resources>`
 
 Where:
 - session is the HTML session file to start from on the application server, typically hpe5g.html delivered as an empty session by the github project. This session can be user defined and dropped on the application server, for instance to start from a known set of backing services.
 - target is either:
-    - deploy: to deploy resources on targeted OpenShift clusters from the application server. Prerequisites on this server:
+    - deploy: to deploy resources on targeted OpenStack and/or OpenShift clusters from the application server. Prerequisites on this server:
       - bash is the default shell interpreter 
       - curl or oc (OpenShift command line) or helm commands available, 
       - network connectivity to reach the target clusters
-      - the generated installer does not exceed Linux MAX\_ARG\_STRLEN (usually 128kB); beyond this limit, the E2BIG error is returned, and the 'hpe5g.sh' target has to be used instead. 
-    - hpe5g.sh: to retrieve an installer deploying resources; this installer has to be invoked by the user to actually perform the deployment.
+      - for OpenStack resources: 
+        - ansible and OpenStack client installed, 
+        - OpenStack environment file available
+    - hpe5g.sh: to retrieve an installer deploying resources; this installer has to be invoked by the user to actually perform the deployment. It supports the options:
+      - for OpenShift resources:
+	      - --deploy | -d: to deploy the resources
+	      - --undeploy | -u: to undeploy the same
+	      - --log | -l file: to set the log file
+	      - --help | -h for more help
+      - for OpenStack resources:
+	      - --deploy | -d stack: to deploy the stack and resources
+	      - --undeploy | -u stack: to undeploy the same
+	      - --log | -l file: to set the log file
+	      - --help | -h for more help
+	      - --OSenv | -e file: to define the OpenStack environment file
+	      - --OSnetwork | -n network-root: to define the 3 first digits of the OpenStack private network    
+	      Returned data: the list of deployed nodes is returned for user reference as a json table with four attributes per element:
+	      - ipaddress: the public IP address of the node
+	      - name: the node name in OpenStack
+	      - groups: the ansible list of groups this node belongs to
+	      - fqdn: the fully qualified domain name of this node
+  },
+	       
     - dump: to retrieve the concatenation of resources passed as payload with the resources defined in the session; the returned json is a merge of both set of resources, ready for a single shot deployment
     - save: similar to dump, but resulting in an HTML session ready to use as a starting point for other deployments  
-    - hpe5g.yaml: to retrieve an OpenStack Heat template deploying a full OpenShift cluster and HPE5G resources
+    - hpe5g.yaml: to retrieve an OpenStack Heat template deploying a full OpenShift cluster, HPE5G resources, and/or additional instances made available to run custom tools.       
+    
 - Optional parameters:
     - project is the default OpenShift project (namespace) in which resources not specifically attatched to a project are to be deployed; default: hpe5g
     - catalog is the catalog to use as a json file available on the application server. For the catalog specification, refer to the online help in the interactive tool, field set 'catalog'.
+    - OSenv is the file defining the OpenStack target. This file must be available in the installer execution environment at deployment time. Refer to the [Nodes section detailed specifications](#SectionsDetails) for writing this environment file.
+    - OSnetwork defines the 3 first numbers of the CIDR used to name the private networks, like 192.168.55
 - resources is the json payload depicting the resources to deploy as:
     - a table of sections: DirectServices, IndirectServices, Operators...
     - each section's value being a table of lines
@@ -149,6 +190,11 @@ Build and retrieve or run an undeployer from an HTML session available on the ap
 Where all PUT parameters apply, except the target 'deploy' changed to 'undeploy'.
  
 ## Examples <a name="Examples"></a>
+### Access the GUI
+Navigate to:
+- Empty session [http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html](http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html)
+- Backing service set example session [http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html](http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html)
+
 ### Dump the services defined in the backing services set bs-set.html  
 ```
 curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/dump
@@ -163,7 +209,20 @@ Output: (ellipsized)
 {"types":{"NetworkFunctions":[],"IndirectServices":["jenkins","elasticsearch","prometheus-alertmanager","prometheus","kube-state-metrics","pushgateway","grafana"],"DirectServices":["ignite","redis","influxdb","fluentd"],"Operators":["jaeger","kiali","svc-mesh-ctlplane","kafka","elasticSearchOperator"],"HelmCharts":[]},"dependencies":{"jenkins":[],"elasticsearch":[],"prometheus-alertmanager":[],"prometheus":[],"kube-state-metrics":[],"pushgateway":[],"grafana":[],"ignite":[],"redis":[],"influxdb":[],"fluentd":[],"jaeger":[],"kiali":[],"svc-mesh-ctlplane":[],"kafka":[],"elasticSearchOperator":[]},"values":{"jenkins":{"URL":"quay.io/openshift","image":"origin-jenkins","tag":"latest","template":...
 ### Deploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data '[{"Clusters":[{"Name":"ocp1","Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443","Token":"lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY","Targeted":true}]}]'
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data @- <<'EOF' 
+[
+  {
+    "Clusters": [
+      {
+        "Name": "ocp1",
+        "Endpoint": "api.openshift1.ocp0.gre.hpecorp.net:6443",
+        "Token": "lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY",
+        "Targeted": true
+      }
+    ]
+  }
+]
+EOF
 ```
 ### Undeploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
 ```
@@ -185,17 +244,13 @@ Build, retrieve then copy this new backing services set to the application serve
 ```
 curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/save?project=alif --data '[{"DirectServices": [{"Type": "ignite","Name": "udsf-db","URL": "docker.io/apacheignite","Image": "ignite","Tag": "2.7.5"}]}]' > bs-set-udsf.html
 assistant_pod=$(oc get pods -n assistant  | grep Running | awk '{print $1}')
-oc cp -n assistant bs-set-udsf.html $assistant_pod:/tmp/bs-set-udsf.html
-oc exec -n assistant -it $assistant_pod -- bash -c "mv -f /tmp/bs-set-udsf.html ."
+oc cp -n assistant bs-set-udsf.html $assistant_pod:/opt/app-root/src/
 ```
 Check the new session at http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html
 ### Deploy a udsf network function using this new backing services set
 Deploy a udsf function and related services ignite, influxdb in the alif project using the bs-set-udsf backing services set deploying ignite with a specific image compatible with udsf:
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html/deploy?project=alif --data "@udsf_bs.json"
-```
-Where udsf_bs.json defines one udsf network function with its backing services:
-```
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html/deploy?project=alif --data @- <<'EOF' 
 [
   {
     "Clusters": [
@@ -217,9 +272,10 @@ Where udsf_bs.json defines one udsf network function with its backing services:
     ]
   }
 ]
+EOF
 ```
 ### Deploy from Helm charts udm and a specific version of telegraf 
-Save in tmp.sh the installer deploying udm in the project alpha:
+Save in tmp.sh the installer deploying udm in the project alif:
 ```
 curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json" > tmp.sh
 ```
@@ -254,10 +310,81 @@ chmod a+x tmp.sh
 ./tmp.sh
 ./tmp.sh --undeploy
 ```
+### Deploy/undeploy three instances on OpenStack running various images <a name="ExampleOpenStack"></a>
+Deploy a stack named alif hosting three instances named alpha, beta and gamma connected to the public network with floating IPs and running Centos 7, 7.5 and 7.6 respectively, the latter using a redefined performance flavor as v4.m16    
+The environment configuring the OpenStack access is defined in RHOS12.env
+```
+curl --connect-timeout 300 --max-time 300 -X PUT -H "Content-Type: application/json" 'http://localhost:8080/hpe5g.html/deploy?OSenv=/home/centos/automated-deployer/RHOS12.env&project=alif' --data @- <<'EOF' 
+[
+  {
+    "Networks": [
+      {"network": "MGMT", "interface": "eth0", "mask": "255.255.255.224"},
+      {"network": "PUBLIC"}
+    ]
+  },
+  {
+    "Nodes": [
+      {"MGMT fqdn": "alpha.localdomain", "MGMT IP addr": "?", "PUBLIC IP addr": "?", "Image": "Centos 7"},
+      {"MGMT fqdn": "beta.localdomain", "MGMT IP addr": "?", "PUBLIC IP addr": "?", "Image": "Centos 7.5"},
+      {"MGMT fqdn": "gamma.localdomain", "MGMT IP addr": "?", "PUBLIC IP addr": "?", "Flavor": "flavorPerformance", "Image": "Centos 7.6"}
+    ]
+  },
+  {
+    "Flavors": [
+      {"Infrastructure": "openstack", "Flavor": "flavorPerformance", "name": "v4.m16"}
+    ]
+  }
+]
+EOF
+
+[
+  {
+    "ipaddress": "30.117.0.29",
+    "name": "alpha",
+    "groups": "base",
+    "fqdn": "alpha.localdomain"
+  },
+  {
+    "ipaddress": "30.117.0.11",
+    "name": "beta",
+    "groups": "base",
+    "fqdn": "beta.localdomain"
+  },
+  {
+    "ipaddress": "30.117.0.34",
+    "name": "gamma",
+    "groups": "base",
+    "fqdn": "gamma.localdomain"
+  }
+]
+
+```
+Undeployment is performed by turning the PUT verb to DELETE and the deploy action to undeploy.
+### Deploy/undeploy one Centos 7.6 instance named delta on OpenStack and two ignite resources on two projects on an existing OpenShift cluster
+```
+curl -X PUT -H "Content-Type: application/json" 'http://localhost:8080/hpe5g.html/deploy?OSenv=/home/centos/automated-deployer/RHOS12.env&project=alif' --data @- <<'EOF' 
+[
+  {
+    "Networks": [
+      {"network": "MGMT", "interface": "eth0", "mask": "255.255.255.224"},
+      {"network": "PUBLIC"}
+    ]
+  },
+  {"Nodes": [{"MGMT fqdn": "delta.localdomain", "MGMT IP addr": "?", "PUBLIC IP addr": "?", "Image": "Centos 7.6"}]},
+  {"Clusters": [{"Name": "single", "Endpoint": "30.117.0.13:8443", "Token": "09XkIfb1mKnpkID8qxw8Qg3t9PGVnz3ZWIKC7u6_VUc", "Targeted": true}]},
+  {"DirectServices": [
+    {"Type": "ignite", "Name": "uselessdb", "Project": "first", "URL": "docker.io/gridgain", "Image": "community", "Tag": "8.7.14"},
+    {"Type": "ignite", "Name": "unuseddb", "Project": "second", "URL": "docker.io/gridgain", "Image": "community", "Tag": "8.7.14"}
+    ]}
+]
+EOF
+```
+Undeployment is performed by turning the PUT verb to DELETE and the deploy action to undeploy.
 ### Failure examples
 ##### Deploy an invalid set of resources
-Attempt to deploy resources using an unknown type or unknown attributes: wrong.json defines one unknown network function and backing services with unknown attributes:
+Attempt to deploy resources using an unknown type or unknown attributes: backing services with unknown attributes:
 ```
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data @- <<'EOF'
 [
   {
     "NetworkFunctions": [
@@ -285,8 +412,8 @@ Attempt to deploy resources using an unknown type or unknown attributes: wrong.j
     ]
   }
 ]
+EOF
 
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@wrong.json"
 JSON parser exception received:
 Unknown selection wild-network-function for attribute Type in section NetworkFunctions
         Expecting one of: nudsf-dr,nudr-dr,nudr-prov,nudr-reg-agent,nudm-ee,nudm-li-poi,nudm-li-tf,nudm-ueau,nudm-uecm,nudm-sdm,nudm-notify,sf-cmod,nrf-reg-agent
@@ -297,10 +424,7 @@ Unknown attribute Wild attribute in section DirectServices ignored.
 ##### Deploy a network function missing dependencies
 Attempt to deploy a udsf function from an empty session not providing the ignite and influxdb required services.   
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data "@udsf.json"
-```
-Where udsf.json contains:
-```
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data @- <<'EOF'
 [
   {
     "Clusters": [
@@ -321,6 +445,7 @@ Where udsf.json contains:
     ]
   }
 ]
+EOF
 
 NetworkFunctions: myudsf missing dependency ignite on project hpe5g
 NetworkFunctions: myudsf missing dependency influxdb on project hpe5g
@@ -328,13 +453,74 @@ NetworkFunctions: myudsf missing dependency influxdb on project hpe5g
 ##### Deploy an incompatible udsf function on top of the backing services set defined in bs-set.html  
 The ignite version configured in the bs-set session is not compatible with the udsf deployed version, thus preventing udsf to start.   
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy --data "@udsf.json"
+curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=alif --data @- <<'EOF'
+[
+  {
+    "Clusters": [
+      {
+        "Name": "ocp",
+        "Endpoint": "api.openshift1.ocp0.gre.hpecorp.net:6443",
+        "Token": "lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY",
+        "Targeted": true
+      }
+    ]
+  },
+  {
+    "NetworkFunctions": [
+      {
+        "Type": "nudsf-dr",
+        "Name": "myudsf"
+      }
+    ]
+  }
+]
+EOF
 ```
 The installer is not able to detect this incompatibility. The client has to check the application status from the standard OpenShift API/CLI.   
 
 <a name="SectionsDetails"></a>
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
+
+### Networks
+Network interfaces names and associated masks and resources 
+- network:
+    - MGMT is mandatory: all nodes should be connected to the MGMT interface
+    - PUBLIC: optional external IP address of nodes visible through an address translation (mandatory for OpenStack nodes)
+- interface: name of the network interface on the target
+- mask: Netmasks should be consistent across networks    
+  The first netmask in the table sets the network width for all networks.     
+  This width defines the maximum number of nodes and networks; it should be in the range 0 to 8, ie:    
+    - from mask 255.255.255.0: width: 8, 1 network, 256 nodes
+    - to mask 255.255.255.255: width: 1, 256 networks, 1 node
+    - recommended: 255.255.255.224: width: 5, 8 networks, 32 nodes
+- portgroup: VMware specific; unused on OpenStack
+
+### Nodes
+Nodes and roles definition and assignment
+- MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
+- MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
+- PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
+- Master/Etcd/Worker: the role(s) played by this node in the OpenShift cluster    
+  If no box is checked, the node is instantiated but not part of the OpenShift cluster, available for any specific usage.
+- Tester: node hosting the nodejs application used as HPE network functions tester    
+  This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
+- Flavor: shortcut defining the resources allocated for this node; mapping to the actual flavor for the target infrastructure is based on the Flavors section
+- Image: the name of the qcow2 image used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
+
+### Flavors
+Infrastructure flavors:
+Default flavor of a node is defined by the roles played on this node:
+- Small: Etcd
+- Standard: Worker
+- Performance: Master    
+Those default values can be overriden at the node level in the Nodes section.    
+Flavors are identified by name, made available by the infrastructure administrator    
+Examples:    
+      Infrastructure              Flavor                Name    
+           openstack      flavorStandard               v2.m8    
+           openstack         flavorSmall               v2.m2    
+           openstack   flavorPerformance               v4.m8    
 
 ### Clusters
 OpenShift clusters candidate for deployment through OpenShift RESTful API:
@@ -392,18 +578,20 @@ Attributes:
 	  - manual_approval: expect the end  user to explicitly approve the build        
 	branch: (optional) git branch to use, eg: master
 	
-NOTES: 
+NOTES:
+- redis default admin password is the name of the instance.
+  redis-nopwd deploys a redis instance without password 
 - ignite on persistent storage deploys three volumes:
-  - <name>-work
-  - <name>-wal
-  - <name>-walarchive   
+  - work
+  - wal
+  - walarchive   
 As a consequence, the total claimed storage size is 3x the user defined size.
 - ignite recommended values for udsf legacy versions are: 
   - URL: docker.io/apacheignite
   - Image: ignite
   - tag: 2.7.5
 
-DirectServices supported types: ignite,redis,influxdb,fluentd
+DirectServices supported types: ignite,redis,redis-nopwd,influxdb,fluentd
 
 ### IndirectServices
 Attributes:
@@ -433,7 +621,6 @@ NOTES:
   . Image: jenkins-2-centos7
   . tag:latest 
 - grafana default admin password is the name of the instance.
-- redis default admin password is the name of the instance.
  
 IndirectServices supported types: jenkins,elasticsearch,telegraf,prometheus-alertmanager,prometheus,kube-state-metrics,pushgateway,grafana
 
@@ -453,7 +640,7 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 	branch: (optional) git branch to use, eg: master
 	
 
-Operators supported types: jaeger,kiali,svc-mesh-ctlplane,kafka,elasticSearchOperator
+Operators supported types: jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,prometheus-operator
 
 ### HelmCharts
 HelmCharts
@@ -508,11 +695,89 @@ It consists in four sections:
     - may:
       - ~IMAGE~ is the name of the docker image
       - ~REPLICAS~ is the number of replicas
-      - ~<dependency>_NAME~ is a reference to the actual name of a dependency for this resource.
-      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: <the volume name>" at build time
-      - ~PERSISTENCE_START~<conditional sequence>~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
+      - ~dependency_NAME~ is a reference to the actual name of a dependency for this resource.
+      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
+      - ~PERSISTENCE_START~conditional_sequence~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
     		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
   Those placeholders are processed at build time with the actual values defined by the user in the assistant.
 4. admin:
   Define for each type if it requires special privileges for deployment (optional, default to false)    
   If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.    
+
+<a name="OpenStackHelp"></a>
+## OpenStack deployment help
+
+Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab infrastructure using ansible: 
+
+- OpenStack tenant
+    - Get a tenant on RHOS13 from infra team at https://cmsgvm42.gre.hpecorp.net/hos    
+     Typical quota: 25 vCPUs, 50Gb RAM, 100Gb disk
+    - Install and configure the infrastructure VPN as per    https://github.hpe.com/OTC-Foundation/sandboxes_user_doc/blob/master/docs/vpn.md
+    - Connect to your tenant at https://30.118.132.11/dashboard/auth/login
+    - in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
+    - create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
+    - save the private key, eg mykey.pem
+    - retrieve the infrastructure certificate:    
+    From https://cmsgvm42.gre.hpecorp.net/hos/ click the info button on your request and download the certificate
+
+- Ansible controller
+    - create a network and a router connected to the external network
+    - create an instance connected to this network: Compute/Instances/Launch Instance    
+     from image CentOS 8.x,   
+      with 20 Gb disk,   
+       4 vCPUs,   
+       8Gb RAM   
+       embedding this ssh key,   
+       and associated with a floating (public) IP, eg 30.118.0.26
+    - connect to this VM as user centos with the saved ssh key eg:   
+    ssh -i mykey.pem centos@30.118.0.26
+    - install git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository:     
+     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y epel-release     
+     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
+    - install openstack client, ansible, shade, passlib, decorator and cryptography:    
+     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
+    - clone the CMS5G Core Stack automated deployer from git:     
+     http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone git@10.74.128.22:CMS-5GCS/automated-deployer.git
+    - move to this directory    
+     cd automated-deployer
+    - retrieve in this directory from step 1 the infrastructure certificate and the private ssh key file and set ssh compliant access rights eg :    
+     chmod 0600 *.pem 
+ 
+- OpenStack target definition
+    - get your tenant and project information from OpenStack portal: project/API access/view credentials
+    - copy and update an example of environment definition file provided with the project, eg OKDRHOS13.env: 
+      - export OS_IDENTITY_API_VERSION=3
+      - export OS_AUTH_URL="https://30.118.132.11:13000/v3"
+      - export OS_PASSWORD="xxxx"
+      - export OS_PROJECT_ID="b5f5a70ae58d4405a780aac02094a264"
+      - export OS_PROJECT_NAME="d3mRHOS13"
+      - export OS_USERNAME="d3m"
+      - export OS_CACERT="grenoble-infra-root-ca_gs118.crt"
+    - set the ssh key to use:
+      - export CLOUD_SSH_KEY_PAIR="mykey"
+      - export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
+    - set the name of the external network offering public access
+  	  - export CLOUD_EXTERNAL_NETWORK=ext-net
+    - set the default image to used:
+      - export CLOUD_IMAGE="Cent OS 7"
+    - retrieve the infrastructure certificate: e.g. grenoble-infra-root-ca_gs118.crt 
+
+- Define the resources to deploy and build the installer
+    - retrieve and open in a browser the assistant hpe5g.html or start from an example file provided by the git project like five.html
+    - define the nodes, roles and resources, 
+    - click the Installer button: the installer is downloaded, 
+    - retrieve and run the installer on the ansible console. 
+
+- Enjoy OpenShift     
+The first master public IP address is available as $openshift_ip: eg 30.118.0.24
+    - Connect to OpenShift GUI on this master node port 8443, eg: Browse https://$openshift_ip:8443
+    - accept the security warning and log on with any name and password
+    - approve the self signed certificate for the metrics display engine Hawkular by clicking the warning link in another tab
+    - connect to the master, connect with the user name used in the GUI
+     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip	
+     - oc login -u <user>
+    - invoke the deployment script: ./hpe5g.sh
+
+- Undeploy
+     - run the same installer with the --undeploy option
+ 

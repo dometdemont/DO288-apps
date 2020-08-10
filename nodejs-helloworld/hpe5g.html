@@ -8,10 +8,10 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-07-02 Version 0.74</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-08-10 Version 0.77</a></p>
 <p>
 <label for="quickDescription">Description :</label>
-<input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack stack description"/>
+<input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
 </p>
 </td>
 <td valign="top" align="right">
@@ -32,14 +32,13 @@
     <legend>Build</legend>
 <table>
 <tr><td valign="top">Get help on the environment setup and topology definition</td><td valign="top"><input class="helpButton" type="button" value="Help" onclick="deploymentHelp()"></td>
-<tr><td valign="top">Build the markdown documentation</td><td valign="top"><input class="helpButton" type="button" value="Doc" onclick="deploymentDoc()"></td>
-</tr></tr>
-<tr><td valign="top">Build the installer deploying HPE5G resources on OpenShift clusters</td><td valign="top"><input class="buildButton" type="button" value="Resources" onclick="buildNetworkFunctions()"></td></tr>
-<td valign="top">Build the OpenStack Heat template deploying OpenShift version<select id="oc_version">
+<tr><td valign="top">Build the installer</td><td valign="top"><input class="buildButton" type="button" value="Installer" onclick="ouputInstallerShell()"></td></tr>
+<td valign="top">Build the OpenStack Heat template</td><td valign="top"><input class="buildButton" type="button" value="Stack" onclick="outputHeatTemplate()"></td></tr>
+<tr><td valign="top">OpenShift target version<td valign="top"><select id="oc_version">
 <option name="3.11">3.11</option>
-<option name="3.9" selected>3.9</option></select> and the HPE5G resources</td>
-<td valign="top"><input class="buildButton" type="button" value="Full Stack" onclick="buildHeatTemplate()"></td> 
-</tr>
+<option name="3.9" selected>3.9</option></select> 
+</td></tr>
+<tr><td valign="top">Build the markdown documentation</td><td valign="top"><input class="helpButton" type="button" value="Doc" onclick="deploymentDoc()"></td></tr></tr>
 </table>
 </fieldset></td>
 <td valign="top"><fieldset>
@@ -66,7 +65,7 @@
 <option>1000</option>
 <option selected>none</option>
 </select></td><td valign="top"><input class="helpButton" type="button" value="Display" onclick="displayCatalog()"></td>
-<tr><td valign="top" colspan=2>Export Json</td><td valign="top"><input class="buildButton" type="button" value="Export" onclick="exportCatalog()"></td></tr>
+<tr><td valign="top" colspan=2>Export Json catalog</td><td valign="top"><input class="buildButton" type="button" value="Export" onclick="exportCatalog()"></td></tr>
 </table>
 </fieldset></td>
 </table>
@@ -114,30 +113,36 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
-2020-07-02 0.74	Dependencies management: support aliases, eg influxdb can be implemented either as influxdb or telegraf or telegraf-chart; revert dependency to telegraf towards influxdb
-	Catalog: support import of incremental catalog to extend the current catalog (GUI only) 
+2020-08-10 0.77	Support template import in the catalog as yaml files; remove dependency on logger not supported in basic docker containers; robustness on missing sections in imported catalog. 
+2020-08-03 0.76	Adding redis-nopwd and cert-manager in default catalog; robustness on admin and dependencies sections free catalog and error reporting on REST API
+2020-07-28 0.75	Support OpenStack instances deployment alone without OpenShift, with specific image and flavor; support tester git clone with deploy key; 
+	build installer for OpenStack resources as well; support subsequent REST deployments on the same OpenShift project  	
+2020-07-10 0.74	Dependencies management: support aliases, eg influxdb can be implemented either as influxdb or telegraf or telegraf-chart; revert dependency to telegraf towards influxdb
+	Catalog: support import of incremental catalog to extend the current catalog (GUI only)
+	Robustness and diagnostic improvments
+	Default catalog: namespaced operators grafana-operator and prometheus-operator with self subscription and installation 
 2020-06-24 0.73	Helm based deployments: optional version and extra options attributes; Operators deployment: optional replicas attribute; 
 	Add telegraf in the default catalog as IndirectService and HelmChart; use it as influxdb resource for all Network Functions  
 2020-06-18 0.72	nudsf and nudr OpenShift templates refresh. Markdown doc cosmetic fixes.
 2020-06-12 0.71	Json session format: move to a list of attribute:value {a:x, b:y, ...} instead of a table of the same [{a:x},{b:y},...]
-    Add a Build Doc button compiling the Help text of a selection of sections in a markdown document 
+	Add a Build Doc button compiling the Help text of a selection of sections in a markdown document 
 2020-06-11 0.70	Allow multiple instances of the same type in one project: add a new optional attribute in resources, Dependencies, to resolve ambiguity in dependencies
-    More nudm stuff in the default catalog: nudm-li-tf, nudm-ueau, nudm-uecm
+	More nudm stuff in the default catalog: nudm-li-tf, nudm-ueau, nudm-uecm
 2020-06-09 0.69	Undeploy feature for interactive and headless modes; improve idempotence for udsf, udr, udm
 2020-06-04 0.68	Remove admin privilege requirements when possible (nudsf-dr sde-udr-nudr-dr sde-udr-nudr-prov hpe-nnrf-reg-agent udm prometheus influxdb ignite)
 2020-06-02 0.67	headless mode for RESTful invocation, including json dump and import; file type: init properly during import
-    Misc section: headless and default project variables, with override capability from a headless invocation
-    Manage admin privileges requirement for some types by warning the user at build and deployment time; make this information part of the catalog
-    In the built installer: cleanup tempoary files if successful, and skip security relaxation if system:admin is not loggable
+	Misc section: headless and default project variables, with override capability from a headless invocation
+	Manage admin privileges requirement for some types by warning the user at build and deployment time; make this information part of the catalog
+	In the built installer: cleanup tempoary files if successful, and skip security relaxation if system:admin is not loggable
 2020-05-07 0.65	Disable shell parameters expansion in templates deployed over REST API to support pods configuration files using shell parameters
 2020-05-06 0.64	Full stack deployment: update the ansible controller setup procedure to CenOS8/Python3
-    New section 'Clusters' defining on which OpenShift clusters the resources are to be deployed over REST API
-    Default catalog cleanup of privileged resources like ClusterRole and ClusterRoleBinding, demoted as RoleBinding to 'view' default role for REST API deployment
+	New section 'Clusters' defining on which OpenShift clusters the resources are to be deployed over REST API
+	Default catalog cleanup of privileged resources like ClusterRole and ClusterRoleBinding, demoted as RoleBinding to 'view' default role for REST API deployment
 2020-04-22 0.63	support optional persistent storage for ignite
 2020-04-21 0.62	5G catalog management: offer display/import/export catalog of deployable resources in a dedicated fieldset.
-    Offer nudm-sdm and nudm-notify deployment from native OpenShift templates.
+	Offer nudm-sdm and nudm-notify deployment from native OpenShift templates.
 2020-04-15 0.61	Welcome message cleanup; new section for Helm charts deployments; elasticSearch operator added
-    deployment script logs cleanup; colors update for HPE compliance; group common actions in fieldsets.
+	deployment script logs cleanup; colors update for HPE compliance; group common actions in fieldsets.
 2020-04-07 0.60	redis and influxdb deployment; nudm network function preview; start with an empty set of resources but welcome and help display
 2020-03-31 0.59	add Operators section to deploy services from available operators.
 2020-03-30 0.58	split the NetworkFunctions section in three categories: NetworkFunctions, DirectServices, IndirectServices
@@ -147,9 +152,9 @@ function versionHistory(){userOutput(`Version history:
 2020-03-12 0.54	udr and udr-prov deployment with traffic from tester. Jenkins pipelines deployment. ElasticSearch preview. Default images updated.
 2020-03-06 0.53	In addition to full stack deployment, support network functions only deployment, with idempotence. More nudr stuff (still preview)
 2020-03-06 0.52	CMS5G Core Stack automated deployer moved to https://github.hpe.com/CMS-5GCS/automated-deployer.git; manage multiple openshift versions (3.9, 3.11)
-    nudr preview (missing dependencies)
+	nudr preview (missing dependencies)
 2020-02-25 0.5	CMS5G Core Stack automated deployer hosted on github.hpe.com:cms5g/Carrier-Stack; Switch to OpenShift v3.11 with automated git clone
-    CMS5G Core Stack tester automated deployment; OpenShift internal registry population and projects creation automated. 
+	CMS5G Core Stack tester automated deployment; OpenShift internal registry population and projects creation automated. 
 2020-01-28 0.4	Add the NetworkFunctions section to deploy ignite and nudsf-dr, supporting multiple OpenShift projects
 2020-01-10 0.3	Fix the generated ansible inventory by removing labels on non master nodes; Help button beside the Build button delivering the user guide.
 2020-01-09 0.2	Cinder and OpenShift volumes management, output in a dedicated section ready for OpenShift template creation
@@ -854,19 +859,17 @@ var Networks = new vnfResource("Networks", [
 	
 Networks.help = function(){
 	return `Network interfaces names and associated masks and resources 
-network:
- - MGMT is mandatory: all nodes should be connected to the MGMT interface
- - PUBLIC: optional external IP address of nodes visible through an address translation (mandatory for OpenStack nodes)
-interface: 
-  name of the network interface on the target
-mask: Netmasks should be consistent across networks
-  The first netmask in the table sets the network width for all networks.
-  This width defines the maximum number of nodes and networks; it should be in the range 0 to 8, ie:
-  - from mask 255.255.255.0: width: 8, 1 network, 256 nodes
-  - to mask 255.255.255.255: width: 1, 256 networks, 1 node
-  - recommended: 255.255.255.224: width: 5, 8 networks, 32 nodes
-portgroup: 
-  VMware specific; unused on OpenStack
+- network:
+    - MGMT is mandatory: all nodes should be connected to the MGMT interface
+    - PUBLIC: optional external IP address of nodes visible through an address translation (mandatory for OpenStack nodes)
+- interface: name of the network interface on the target
+- mask: Netmasks should be consistent across networks    
+  The first netmask in the table sets the network width for all networks.     
+  This width defines the maximum number of nodes and networks; it should be in the range 0 to 8, ie:    
+    - from mask 255.255.255.0: width: 8, 1 network, 256 nodes
+    - to mask 255.255.255.255: width: 1, 256 networks, 1 node
+    - recommended: 255.255.255.224: width: 5, 8 networks, 32 nodes
+- portgroup: VMware specific; unused on OpenStack
 `
 }
 	
@@ -962,10 +965,13 @@ Networks.build = function(target, engine){
 //===========================
 var MiscItems = [
 	{name: 'tester_nodejs_version', value: 'v11.10.1', comment: "Nodejs version used to run the CMS5G Core Stack tester tool"},
-	{name: 'tester_git_url', value: 'https://github.hpe.com/cms5g/E2E-Testing.git', comment: "Git project URL delivering the CMS5G Core Stack tester tool"},
+	{name: 'tester_git_url', value: 'git@10.74.128.22:cms5g/E2E-Testing.git', comment: "Git project URL delivering the CMS5G Core Stack tester tool"},
+	{name: 'tester_deploy_key', value: '/home/centos/automated-deployer/tester/id_rsa', comment: "Optional git deploy key to clone the project delivering the CMS5G Core Stack tester tool"},
 	{name: 'headless', value: '', comment: "if not empty: do not assume a user for answering prompts and downloading files: use default values without prompting and do not save any file."},
 	{name: 'default_project', value: 'hpe5g', comment: "The default OpenShift project/namespace for deploying resources"},
-	{name: 'default_action', value: 'deploy', comment: "The default installer action: deploy or undeploy"}
+	{name: 'default_action', value: 'deploy', comment: "The default installer action: deploy or undeploy"},
+	{name: 'default_openstack_env', value: 'RHOS12.env', comment: "The default OpenStack environment file name"},
+	{name: 'default_openstack_network_root', value: '192.168.199', comment: "The default OpenStack network root as 3 unique digits like 192.168.199"}
 	];
 
 var Misc = new vnfResource("Misc", [
@@ -1028,18 +1034,23 @@ var Nodes= new vnfResource("Nodes", [
 	{name:'Master', type:'bool'},
 	{name:'Etcd', type:'bool'},
 	{name:'Worker', type:'bool'},
-	{name:'Tester', type:'bool'}
+	{name:'Tester', type:'bool'},
+	{name:'Flavor', width:'120px', type:'choice', choices:['','flavorSmall', 'flavorStandard', 'flavorPerformance']},
+	{name:'Image', type:'text', width: '120px'}
 	]
 	);
 	
 Nodes.help = function(){
 	return `Nodes and roles definition and assignment
-MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
-MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
-PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
-Master/Etcd/Worker: the role(s) played by this node in the OpenShift cluster
-Tester: node hosting the nodejs application used as HPE network functions tester.
+- MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
+- MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
+- PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
+- Master/Etcd/Worker: the role(s) played by this node in the OpenShift cluster    
   If no box is checked, the node is instantiated but not part of the OpenShift cluster, available for any specific usage.
+- Tester: node hosting the nodejs application used as HPE network functions tester    
+  This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
+- Flavor: shortcut defining the resources allocated for this node; mapping to the actual flavor for the target infrastructure is based on the Flavors section
+- Image: the name of the qcow2 image used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
 `;
 }
 
@@ -1087,6 +1098,10 @@ Nodes.build = function(target, engine){
 		var isWorker	=	Nodes.getAndSetChecked(row, nameIndexes, 'Worker');
 		var isEtcd		=	Nodes.getAndSetChecked(row, nameIndexes, 'Etcd');
 		var isTester	=	Nodes.getAndSetChecked(row, nameIndexes, 'Tester');
+		
+		// Read the preferred image and flavor
+		var image=Nodes.getAndSetValue(row, nameIndexes, 'Image');
+		var flavor=Nodes.getAndSetValue(row, nameIndexes, 'Flavor');
 
 		// co-location checks
 		Nodes.check += checkDependency(isEtcd, [isWorker && isMaster, !isWorker ],  "Nodes: on node "+nodeName,", etcd and worker roles colocation requires a master role as well.");
@@ -1149,6 +1164,13 @@ Nodes.build = function(target, engine){
 		}
 		theCloudNode.isTester=isTester;
 		
+		// Default image from the user environment
+		theCloudNode.image="{ get_param: Image }";
+		
+		// Force the preferred image and flavor if defined
+		if(flavor)theCloudNode.flavor=flavor;
+		if(image)theCloudNode.image=image;
+		
 		// For infrastructure where IP addresses are statically allocated (vmware, static)
 		theCloudNode.ipAddresses = nodeIpAddresses;
 		
@@ -1158,6 +1180,8 @@ Nodes.build = function(target, engine){
 	}
 	// End of for loop on the list of nodes
 	
+	// Allow non OpenShift deployment, instances only
+	if(masterNodes.length+workerNodes.length+etcdNodes.length > 0){
 	if(masterNodes.length < 1)Nodes.check += "\nNodes section: missing at least one master node";
 	if(workerNodes.length < 1)Nodes.check += "\nNodes section: missing at least one worker node";
 	if(etcdNodes.length < 1)Nodes.check += "\nNodes section: missing at least one etcd node";
@@ -1187,6 +1211,7 @@ Nodes.build = function(target, engine){
 	result += "\nmasters";
 	result += "\nnodes";
 	result += "\netcd";
+	}
 
 	// Make the list of nodes for availableHeat template  
 	Nodes.cloudNodes = cloudNodes.slice();
@@ -1231,26 +1256,30 @@ Flavors['openstack']['flavorStandard'] = {name: 'v2.m8'};
 Flavors['openstack']['flavorSmall'] = {name: 'v2.m2'};
 Flavors['openstack']['flavorPerformance'] = {name: 'v4.m8'};
 
-Flavors.help = function(){var help="Infrastructure flavors:"+
-	"\nFlavor of a node is defined by the roles played on this node:"+
-	"\n\t- Small: Etcd"+
-	"\n\t- Standard: Worker"+
-	"\n\t- Performance: Master"+
-	"\n\tFlavors are identified by name, made available by the infrastructure administrator"+
-	"\nExamples:\n";
+Flavors.help = function(){
+var help=`Infrastructure flavors:
+Default flavor of a node is defined by the roles played on this node:
+- Small: Etcd
+- Standard: Worker
+- Performance: Master    
+Those default values can be overriden at the node level in the Nodes section.    
+Flavors are identified by name, made available by the infrastructure administrator    
+Examples:    
+`;
 	// Table built with spaces for alignment, thanks to padStart
 	var colLength=20;
 	['Infrastructure', 'Flavor', 'Name'].forEach(function(column){
 		help+=column.padStart(colLength);
 	});
+	help+="    ";
 	['openstack'].forEach(function(infrastructure){
 		['flavorStandard', 'flavorSmall','flavorPerformance'].forEach(function(flavor){
 		help+="\n"+infrastructure.padStart(colLength);
 		help+=flavor.padStart(colLength);
-		help+=Flavors[infrastructure][flavor].name.padStart(colLength);
+		help+=Flavors[infrastructure][flavor].name.padStart(colLength)+"    ";
 		});	
 	});
-	
+	help+="\n";
 	return help;
 }
 
@@ -1603,7 +1632,7 @@ hpe5gResource.prototype.build = function(target){
 		
 		if(insecure && hpe5gResources.insecureRegistries.indexOf(URL) < 0)hpe5gResources.insecureRegistries.push(URL);
 		
-		if(hpe5gResources.admin[type])hpe5gResources.adminList+="\n- "+name+":\tsection: "+this.title+"\tproject: "+project+"\ttype: "+type;
+		if(hpe5gResources.admin && hpe5gResources.admin[type])hpe5gResources.adminList+="\n- "+name+":\tsection: "+this.title+"\tproject: "+project+"\ttype: "+type;
 		
 		result+="\n#- "+name+": "+displayReplicas+type+" on project: "+project+displayImage+displayVolume+displayChart;
 	}
@@ -1682,7 +1711,7 @@ hpe5gResources.compile = function(){
 	var check="";
 	hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
 		// Check if all dependencies for this network function type are satisfied on this project
-		if(hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
+		if(hpe5gResources.depends && hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
 			if(networkFunction.resolve(requirement))return;
 			check += "\nNetworkFunctions: "+networkFunction.name+" missing dependency "+requirement+" on project "+networkFunction.project;
 			if(networkFunction.dependency)check+=" in the provided list: "+networkFunction.dependency;
@@ -1732,11 +1761,13 @@ var DirectServices = new hpe5gResource("DirectServices", [
 	]
 	);
 DirectServices.help = function(){return hpe5gResource.prototype.help()+
-`NOTES: 
+`NOTES:
+- redis default admin password is the name of the instance.
+  redis-nopwd deploys a redis instance without password 
 - ignite on persistent storage deploys three volumes:
-  - <name>-work
-  - <name>-wal
-  - <name>-walarchive   
+  - work
+  - wal
+  - walarchive   
 As a consequence, the total claimed storage size is 3x the user defined size.
 - ignite recommended values for udsf legacy versions are: 
   - URL: docker.io/apacheignite
@@ -1770,7 +1801,6 @@ IndirectServices.help = function(){return hpe5gResource.prototype.help()+
   . Image: jenkins-2-centos7
   . tag:latest 
 - grafana default admin password is the name of the instance.
-- redis default admin password is the name of the instance.
  `;}
  
 //===========================
@@ -1868,96 +1898,84 @@ result+=`
 return result;
 };
 
-function deploymentHelp(){userOutput(welcomeMsg+
+function deploymentHelp(){userOutput(welcomeMsg+OpenStackHelp);}
+var OpenStackHelp=
 `
-Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack infrastructure using ansible: 
+Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab infrastructure using ansible: 
 
-0. OpenStack tenant
-- Get a tenant on RHOS13 from infra team at https://cmsgvm42.gre.hpecorp.net/hos
- Typical quota: 25 vCPUs, 50Gb RAM, 100Gb disk
-- Install and configure the infrastructure VPN as per https://github.hpe.com/OTC-Foundation/sandboxes_user_doc/blob/master/docs/vpn.md
-- Connect to your tenant at https://30.118.132.11/dashboard/auth/login
-- in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
-- create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
-- save the private key, eg mykey.pem
-- retrieve the infrastructure certificate: 
- From https://cmsgvm42.gre.hpecorp.net/hos/ click the info button on your request and download the certificate grenoble-infra-root-ca_gs118.crt
-(this might fail for RHOS13, please contact the infra team to get a copy of this certificate)
+- OpenStack tenant
+    - Get a tenant on RHOS13 from infra team at https://cmsgvm42.gre.hpecorp.net/hos    
+     Typical quota: 25 vCPUs, 50Gb RAM, 100Gb disk
+    - Install and configure the infrastructure VPN as per    https://github.hpe.com/OTC-Foundation/sandboxes_user_doc/blob/master/docs/vpn.md
+    - Connect to your tenant at https://30.118.132.11/dashboard/auth/login
+    - in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
+    - create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
+    - save the private key, eg mykey.pem
+    - retrieve the infrastructure certificate:    
+    From https://cmsgvm42.gre.hpecorp.net/hos/ click the info button on your request and download the certificate
 
-1. Ansible controller
-- create a network and a router connected to the external network
-- create an instance connected to this network: Compute/Instances/Launch Instance
- from image CentOS 8.x, 
-  with 20 Gb disk, 
-   4 vCPUs, 
-   8Gb RAM 
-   embedding this ssh key, 
-   and associated with a floating (public) IP, eg 30.118.0.26
-- connect to this VM as user centos with the saved ssh key eg: ssh -i mykey.pem centos@30.118.0.26
-- install ansible, git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository: 
- sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y epel-release 
- sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y ansible git httpd-tools java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
-- install shade, passlib, fix decorator and ansible versions: 
- sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4
-- clone the CMS5G Core Stack automated deployer from git: 
- http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone https://github.hpe.com/CMS-5GCS/automated-deployer.git
-- move to this directory 
- cd automated-deployer
-- retrieve in this directory from step 0 the infrastructure certificate and the private ssh key file and set ssh compliant access rights eg :
- chmod 0600 *.pem 
-- update the environment definition file: OKDRHOS13.env with your credentials according to your tenant as per the OpenStack information: project/API access/view credentials
-export OS_IDENTITY_API_VERSION=3
-export OS_AUTH_URL="https://30.118.132.11:13000/v3"
-export OS_PASSWORD="HP1nvent"
-export OS_PROJECT_ID="b5f5a70ae58d4405a780aac02094a264"
-export OS_PROJECT_NAME="d3mRHOS13"
-export OS_USERNAME="d3m"
-export OS_CACERT="grenoble-infra-root-ca_gs118.crt"
-- set the ssh key to use:
-export CLOUD_SSH_KEY_PAIR="mykey"
-export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
-- update the image name as needed:
-export CLOUD_IMAGE="Cent OS 7"
-- retrieve the infrastructure certificate: grenoble-infra-root-ca_gs118.crt 
+- Ansible controller
+    - create a network and a router connected to the external network
+    - create an instance connected to this network: Compute/Instances/Launch Instance    
+     from image CentOS 8.x,   
+      with 20 Gb disk,   
+       4 vCPUs,   
+       8Gb RAM   
+       embedding this ssh key,   
+       and associated with a floating (public) IP, eg 30.118.0.26
+    - connect to this VM as user centos with the saved ssh key eg:   
+    ssh -i mykey.pem centos@30.118.0.26
+    - install git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository:     
+     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y epel-release     
+     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
+    - install openstack client, ansible, shade, passlib, decorator and cryptography:    
+     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
+    - clone the CMS5G Core Stack automated deployer from git:     
+     http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone git@10.74.128.22:CMS-5GCS/automated-deployer.git
+    - move to this directory    
+     cd automated-deployer
+    - retrieve in this directory from step 1 the infrastructure certificate and the private ssh key file and set ssh compliant access rights eg :    
+     chmod 0600 *.pem 
+ 
+- OpenStack target definition
+    - get your tenant and project information from OpenStack portal: project/API access/view credentials
+    - copy and update an example of environment definition file provided with the project, eg OKDRHOS13.env: 
+      - export OS_IDENTITY_API_VERSION=3
+      - export OS_AUTH_URL="https://30.118.132.11:13000/v3"
+      - export OS_PASSWORD="xxxx"
+      - export OS_PROJECT_ID="b5f5a70ae58d4405a780aac02094a264"
+      - export OS_PROJECT_NAME="d3mRHOS13"
+      - export OS_USERNAME="d3m"
+      - export OS_CACERT="grenoble-infra-root-ca_gs118.crt"
+    - set the ssh key to use:
+      - export CLOUD_SSH_KEY_PAIR="mykey"
+      - export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
+    - set the name of the external network offering public access
+  	  - export CLOUD_EXTERNAL_NETWORK=ext-net
+    - set the default image to used:
+      - export CLOUD_IMAGE="Cent OS 7"
+    - retrieve the infrastructure certificate: e.g. grenoble-infra-root-ca_gs118.crt 
 
-2. Define the OpenShift cluster topology including storage and network functions
-- retrieve and open in a browser the topology assistant hpe5g.html or start from the example file: five.html
-- define the nodes and roles, 
-EITHER
-- click the Full Stack button, 
-- retrieve the Heat template and name it: five.yaml
-OR
-- click the Resources button, 
-- retrieve the shell script deploying the network functions 
-- run this script on the first master node 
+- Define the resources to deploy and build the installer
+    - retrieve and open in a browser the assistant hpe5g.html or start from an example file provided by the git project like five.html
+    - define the nodes, roles and resources, 
+    - click the Installer button: the installer is downloaded, 
+    - retrieve and run the installer on the ansible console. 
 
-3. Deploy OpenShift on OpenStack
-- set the target environment and credentials, then check ssh key and infrastructure certificate
-  source OKDRHOS13.env && ls -l $OS_CACERT $CLOUD_SSH_KEY
-- choose a cluster name and the private network root in the OpenStack infra: 3 unique digits like 192.168.55 and launch the script invoking ansible
-  ./hpe5g.sh --deploy five --network 192.168.55
+- Enjoy OpenShift     
+The first master public IP address is available as $openshift_ip: eg 30.118.0.24
+    - Connect to OpenShift GUI on this master node port 8443, eg: Browse https://$openshift_ip:8443
+    - accept the security warning and log on with any name and password
+    - approve the self signed certificate for the metrics display engine Hawkular by clicking the warning link in another tab
+    - connect to the master, connect with the user name used in the GUI
+     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip	
+     - oc login -u <user>
+    - invoke the deployment script: ./hpe5g.sh
 
-4. Enjoy OpenShift 
-The first master public IP address is available as $openshift_ip
- 30.118.0.24
-- Connect to OpenShift GUI on this master node port 8443, eg:
- Browse https://$openshift_ip:8443
-- accept the security warning and log on with any name and password
-- approve the self signed certificate for the metrics display engine Hawkular by clicking the warning link in another tab
-- connect to the master, connect with the user name used in the GUI
- ssh -i $CLOUD_SSH_KEY centos@$openshift_ip	
- oc login -u <user>
-- invoke the deployment script
- ./hpe5g.sh
-
-5. Delete the cluster
- - define the target environment and credentials
-  source OKDRHOS13.env
-- undeploy :
-	./hpe5g.sh --remove five
- `
-);}
-
+- Undeploy
+     - run the same installer with the --undeploy option
+ `;
+ 
 // Compile the Help text of a selection of sections and catalog in a markdown document 
 function deploymentDoc(){
 	var result=`
@@ -1965,23 +1983,31 @@ function deploymentDoc(){
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 `;
-	['Clusters','NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
+	['Networks','Nodes','Flavors','Clusters','NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
 		result+="\n### "+section+"\n"+window[section].help();
 		if(hpe5gResources.resources[section])result+="\n"+section+" supported types: "+hpe5gResources.resources[section]+"\n";
 	});
 	
 	result+=`
 <a name="CatalogSpecification"></a>
-## Catalog specification\n`+catalogDoc;
+## Catalog specification\n`+catalogDoc+`
+<a name="OpenStackHelp"></a>
+## OpenStack deployment help\n`+OpenStackHelp;
 
 	userOutput(result);
+	var blobDesc = new Blob([result], {type: "text/plain;charset=utf-8"});
+	var a = document.createElement('a');
+	a.href = window.URL.createObjectURL(blobDesc);
+    a.download = "hpe5g.md";
+    document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
 }
 
 // Shell script dropped on the ems node ready to deploy the volumes, projects, and hpe5g network functions 
 // Prerequisites depend on the target: oc/curl
-function shellHeader(target){  
-var result=`#! /bin/bash
-
+function shellBody(target){  
+var result=`
 # HPE 5G resources automated deployer: `+document.getElementById("vnfDescriptorWizardVersion").innerHTML+`
 # Prerequisites:`;
 switch(target){
@@ -1998,18 +2024,8 @@ if ! which curl  > /dev/null ; then  echo Please install curl utility to submit 
 default: result+= 'unsupported'; break;
 }
 result+=`
-# Usage: 
-# - make this file executable: chmod a+x hpe5g.sh 
-# - ./hpe5g.sh --deploy --log hpe5g.log
-# Outcome:
-# - stdout
-# - logs in log_file (default hpe5g.log)
-
-_usage() {
-	echo "This client helps you deploy and undeploy HPE 5g resources on OpenShift clusters" 
-	echo "Usage: $0 [-d|--deploy|-c|--create | -u|--undeploy|-r|--remove] [-l|--log logfile]"
-	echo "Default options: --`+Misc.getValue('default_action')+` --log hpe5g.log"
-}
+# Force a real file for logging
+test -f $logfile || logfile=$oc_stack.log
 
 # Cosmetic: ellipsize too long strings to keep cute logs: keep _max characters
 _cutTooLong() {
@@ -2024,7 +2040,7 @@ _cutTooLong() {
 
 _log_() {
     echo -e $(date) $(_cutTooLong $*)
-    echo -e $(date) $* &>> $hpe5g_log_file
+    echo -e $(date) $* &>> $logfile
     return 0
 }
 
@@ -2035,19 +2051,21 @@ _warn_() {
 }
 
 _fail_() {
-    _log_ "FATAL ERROR: $*.  Now exiting... Check $hpe5g_log_file"
+	echo Last lines of $logfile >&2
+	tail $logfile >&2
+	_log_ "FATAL ERROR: $*.  Now exiting... Check $logfile"
     exit 1
 }
 
 _getTemplateInstanceStatus() {
-	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3
-	curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$NAMESPACE | jq -e '.status.conditions[] | select(.status == "True") | .type'
+	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3 TEMPLATEINSTANCE=$4
+	curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$TEMPLATEINSTANCE | jq -e '.status.conditions[] | select(.status == "True") | .type'
 	return $?
 }
 _getTemplateInstanceMessage() {
-	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3
-	local status=$(curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$NAMESPACE)
-	echo $status >> $hpe5g_log_file
+	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3 TEMPLATEINSTANCE=$4
+	local status=$(curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$TEMPLATEINSTANCE )
+	echo $status >> $logfile
 	echo $status | jq -e '.status.conditions[] | select(.status == "True") | .message'
 }
 
@@ -2067,31 +2085,18 @@ _cmd_with_retry() {
 	 
 	local _countMax=$(( $_timeout/$_retryPeriod + 1 ))
 	local _count=0
-    until _cmdOutput=$(eval "$_cmd" 2>> $hpe5g_log_file) || (( $_count >= $_countMax )) ; do
+    until _cmdOutput=$(eval "$_cmd" 2>> $logfile) || (( $_count >= $_countMax )) ; do
     	((_count++))
     	_log_ "$_cmdDescription: attempt $_count of $_countMax, retrying in $_retryPeriod seconds"
         sleep $_retryPeriod
     done
    if (( $_count >= $_countMax )) ; then
-   	_fail_ "$_cmdDescription failed after $_timeout seconds"
+   	return 1
    else
-   	test -n "$_cmdOutput" && echo $_cmdOutput >> $hpe5g_log_file
+   	test -n "$_cmdOutput" && echo $_cmdOutput >> $logfile
    fi
    return 0
 }
-
-# Default parameters values
-hpe5g_log_file="hpe5g.log"
-_deploy=$([[ "`+Misc.getValue('default_action')+`" != "undeploy" ]] && echo true || echo false);
-_displayedAction=$($_deploy && echo Deploying || echo Undeploying)
-
-while [[ "$#" -gt 0 ]]; do case $1 in
-  -d|--deploy|-c|--create) _deploy=true ; _displayedAction="Deploying";;
-  -u|--undeploy|-r|--remove) _deploy=false ; _displayedAction="Undeploying";;
-  -l|--log) hpe5g_log_file="$2"; shift;;
-  -h|--help) _usage ; exit 0;;
-  *) echo "Unsupported parameter: $1 ; try $0 --help"; exit 1;;
-esac; shift; done
 `;
 return result;};
 
@@ -2111,11 +2116,11 @@ test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user i
 _log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="~PROJECTS~"
-for _project in $oc_projects ; do oc project $_project &>> $hpe5g_log_file || oc new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $hpe5g_log_file || _fail_ "Cannot find or create project $_project missing" ; done
-if echo guess | oc login -u system:admin &>> $hpe5g_log_file ; then
+for _project in $oc_projects ; do oc project $_project &>> $logfile || oc new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+if echo guess | oc login -u system:admin &>> $logfile ; then
 _log_ "Listing nodes as system:admin"
-oc get nodes -o wide &>> $hpe5g_log_file
-oc login -u $oc_user &>> $hpe5g_log_file
+oc get nodes -o wide &>> $logfile
+oc login -u $oc_user &>> $logfile
 `;
 if(warningMessage){
 	_shellTemplate+="else";
@@ -2125,41 +2130,41 @@ _shellTemplate+=
 `
 fi
 _log_ "Listing pods as $oc_user"
-oc get pods -o wide  -n default  &>> $hpe5g_log_file
+oc get pods -o wide  -n default  &>> $logfile
 oc_image_projects=(~IMAGES_INSECURE_PROJECTS~)
 oc_image_urls=(~IMAGES_INSECURE_URLS~)
 oc_images=(~IMAGES_INSECURE~)
 [[ $\{#oc_images[@]} != 0 ]] && _log_ "Populating the docker registry with services images: pull, tag and push"
   for _iImage in $\{!oc_images[@]} ; do
-    sudo docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry.default.svc:5000 &>> $hpe5g_log_file || _fail_ "Cannot connect to the internal docker registry as user $oc_user"
+    sudo docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry.default.svc:5000 &>> $logfile || _fail_ "Cannot connect to the internal docker registry as user $oc_user"
     sudo docker pull $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot pull $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]}"
     sudo docker tag $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]} docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot tag $\{oc_image_urls[$_iImage]}/$\{oc_images[$_iImage]}"
 	sudo docker push docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]} || _fail_ "Cannot push docker-registry.default.svc:5000/$\{oc_image_projects[$_iImage]}/$\{oc_images[$_iImage]}"
   done
-if echo guess | oc login -u system:admin &>> $hpe5g_log_file ; then
+if echo guess | oc login -u system:admin &>> $logfile ; then
 _log_ "Relaxing security policy to match network functions requirements, approving pending certificates"
-oc adm policy add-scc-to-user anyuid system:serviceaccount  &>> $hpe5g_log_file &&
-oc adm policy add-scc-to-user privileged system:serviceaccount  &>> $hpe5g_log_file &&
-oc adm policy add-scc-to-group anyuid system:authenticated  &>> $hpe5g_log_file &&
-oc adm policy add-role-to-group view system:serviceaccounts &>> $hpe5g_log_file &&
-oc policy add-role-to-user view system:serviceaccount &>> $hpe5g_log_file || _fail_ "Cannot relax security settings"
-if test -n "$(oc get csr -o name)" ; then oc get csr -o name | xargs oc adm certificate approve &>> $hpe5g_log_file || _fail_ "Cannot approve pending certificates" ; fi
-if test -f openshift_volumes.yaml ; then _log_ "$_displayedAction the persistent volumes with idempotence" && oc process -f openshift_volumes.yaml | oc $_ocAction -f - &>> $hpe5g_log_file && oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes" ; fi
+oc adm policy add-scc-to-user anyuid system:serviceaccount  &>> $logfile &&
+oc adm policy add-scc-to-user privileged system:serviceaccount  &>> $logfile &&
+oc adm policy add-scc-to-group anyuid system:authenticated  &>> $logfile &&
+oc adm policy add-role-to-group view system:serviceaccounts &>> $logfile &&
+oc policy add-role-to-user view system:serviceaccount &>> $logfile || _fail_ "Cannot relax security settings"
+if test -n "$(oc get csr -o name)" ; then oc get csr -o name | xargs oc adm certificate approve &>> $logfile || _fail_ "Cannot approve pending certificates" ; fi
+if test -f openshift_volumes.yaml ; then _log_ "$_displayedAction the persistent volumes with idempotence" && oc process -f openshift_volumes.yaml | oc $_ocAction -f - &>> $logfile && oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes" ; fi
 fi
 _log_ "$_displayedAction the network functions and Helm instances"
 for _project in $oc_projects; do 
-	oc project $_project &>> $hpe5g_log_file || _fail_ "Cannot switch to project $_project"
+	oc project $_project &>> $logfile || _fail_ "Cannot switch to project $_project"
 	# File naming convention for Network functions: openshift_project_<project>.yaml
 	# File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
-	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && _cmd_with_retry "oc process -f openshift_project_$_project.yaml | oc $_ocAction -f -" "Processing" && rm -f openshift_project_$_project.yaml &>> $hpe5g_log_file || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
-	for _helmValues in $(ls openshift_helm_$\{_project}_*.yaml 2> /dev/null) ; do eval $(head -1 $_helmValues) && _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" && tail -n +2 $_helmValues > _tmp_$_helmValues && _helmAction &>> $hpe5g_log_file && rm -f $_helmValues _tmp_$_helmValues &>> $hpe5g_log_file || _fail_ "$_displayedAction Helm instance on project $_project" ; done
+	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && _cmd_with_retry "oc process -f openshift_project_$_project.yaml | oc $_ocAction -f -" "Processing" && rm -f openshift_project_$_project.yaml &>> $logfile || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
+	for _helmValues in $(ls openshift_helm_$\{_project}_*.yaml 2> /dev/null) ; do eval $(head -1 $_helmValues) && _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" && tail -n +2 $_helmValues > _tmp_$_helmValues && _helmAction &>> $logfile && rm -f $_helmValues _tmp_$_helmValues &>> $logfile || _fail_ "$_displayedAction Helm instance on project $_project" ; done
 	# Undeployment: wait for pods termination  
-	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $hpe5g_log_file ; do : ; done
+	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $logfile ; do : ; done
 	# If undeployment, indulge 5 seconds to stabilize, then delete the project if no pods, otherwise log a status
-	[[ "$_ocAction" == "delete" ]] && sleep 5s && test -n "$(oc get pods --namespace $_project 2>&1 >/dev/null)" && _log_ "No remaining pods in project $_project: deleting" && oc delete project $_project &>> $hpe5g_log_file || oc get all --namespace $_project &>> $hpe5g_log_file 
+	[[ "$_ocAction" == "delete" ]] && sleep 5s && test -n "$(oc get pods --namespace $_project 2>&1 >/dev/null)" && _log_ "No remaining pods in project $_project: deleting" && oc delete project $_project &>> $logfile || oc get all --namespace $_project &>> $logfile 
 done
-oc login -u $oc_user &>> $hpe5g_log_file || _fail_ "Cannot log as $oc_user"
-_log_ "$_displayedAction completed: check $hpe5g_log_file"
+oc login -u $oc_user &>> $logfile || _fail_ "Cannot log as $oc_user"
+_log_ "$_displayedAction completed: check $logfile"
 `;
 return _shellTemplate
 	.replace(/~PROJECT_DESCRIPTION~/g,document.getElementById("quickDescription").value+". Built from HPE5g assistant on: "+Date())
@@ -2225,7 +2230,7 @@ objects:
 			deployment=deployment.replace(/~PERSISTENCE_START~[\s\S]*?~PERSISTENCE_END~/mg,'');
 		}
 		
-		if(hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
+		if(hpe5gResources.depends && hpe5gResources.depends[networkFunction.type])hpe5gResources.depends[networkFunction.type].forEach(function(requirement){
 			// The required type can be a simple string or a table of aliases, the first element being the actual required type
 			var actualRequirement=requirement;
 			if(typeof requirement != "string")actualRequirement=requirement[0];
@@ -2438,7 +2443,7 @@ function buildHeatTemplate(){
 	// Build the inventory for Heat (or get the errors) and do not publish
 	// Required soon enough to get Heat specific variables properly setup
     var openshift = buildInventory('Heat');
-	if(openshift.length == 0)return false;
+	if(openshift.length == 0)return '';
     
 	var n0="\n";
 	var quickDescription = document.getElementById("quickDescription");
@@ -2607,7 +2612,7 @@ function buildHeatTemplate(){
       	if(useHeatVolumes != 'none'){
       	heat+=n0+"      block_device_mapping: [{ device_name: 'vda', volume_id : { get_resource: "+name+"-Volume } }]";
       	}else{
-      	heat+=n0+"      image: { get_param: Image }"; 
+      	heat+=n0+"      image: "+Nodes.cloudNodes[indexNode].image; 
       	}
       	heat+=n0+"      flavor: { get_param: "+Nodes.cloudNodes[indexNode].flavor+" }";
       	heat+=n0+"      availability_zone: { get_param: AvailabilityZone }";
@@ -2657,7 +2662,7 @@ function buildHeatTemplate(){
 
 		// Shell script dropped on the ems node ready to deploy the volumes, projects, and hpe5g network functions 
 		heat+=n0+"            cat > /home/centos/hpe5g.sh << 'EOFILE'";
-		heat+=n0.concat(shellHeader('oc'),hpe5gDeploymentScript())
+		heat+=n0.concat(shellHeader(),shellBody('oc'),hpe5gDeploymentScript())
 		.replace(/\n/g, "\n"+  
 	             '            ');	// fix the descriptor indentation as expected by Heat
 		heat+=n0+"            EOFILE";
@@ -2685,7 +2690,8 @@ function buildHeatTemplate(){
 	
     // Add outputs:
     heat+=n0+"outputs:";
-	
+	// if an ems exists, publish the ansible inventory
+	if(Nodes.cloudNodes.some(function(e){return e.isEms;})){
     heat+=n0+"  openshift_inventory:";
     heat+=n0+"    description: the ansible inventory deploying the openshift cluster";
     heat+=n0+"    value:";
@@ -2695,7 +2701,8 @@ function buildHeatTemplate(){
 		            "            ");	// fix the descriptor indentation as expected by tosca
 	// Resolve ip addresses parameters 
     heat+=n0+"        params:"+addr.replace(/\n/g, "\n"+  
-		     "          ");	// fix the descriptor indentation as expected by Heat;;
+		     "          ");	// fix the descriptor indentation as expected by Heat
+	}
     //  list of public nodes
     heat+=n0+"  public_nodes:";
     heat+=n0+"    description: List of hosts as a name, fqdn, public ip address and groups membership";
@@ -2737,7 +2744,13 @@ function buildHeatTemplate(){
     // List of HelmCharts deployed on openshift
     heat+=hpe5gHelmValues(heatHelmValuesHeader,undefined,'  ').replace(/\n/g, "\n"+  
     	     '      ');	// fix the descriptor indentation as expected by Heat
-       
+    return heat;
+}
+
+function outputHeatTemplate(){
+ 	var heat=buildHeatTemplate();
+ 	if(!heat)return false;
+ 	
  	// Show to the user and save to hpe5g.yaml
     userOutput(heat);
 	
@@ -2752,6 +2765,64 @@ function buildHeatTemplate(){
 	a.click();
 	document.body.removeChild(a);
 	return true;
+}
+
+//=================================
+//Heat Stack deployer
+//=================================
+//Return a shell script deploying the Heat stack
+function buildHeatStackDeployer(){
+var heatTemplate=buildHeatTemplate();
+if(!heatTemplate)return '';
+var shell=`
+_fail_() {
+	test -f $logfile && echo Last lines of $logfile >&2 && tail $logfile >&2
+    echo $(date) FATAL ERROR: $*.  Now exiting...
+    exit 1
+}
+_success_() {
+	test -f $oc_stack.json && cat $oc_stack.json
+}
+
+# Clean log file
+> $logfile
+# Ensure ansible availability and OpenStack environment setting
+which ansible-playbook > /dev/null || _fail_ Missing ansible-playbook: please install ansible-playbook before deploying on OpenStack
+test -f $OS_env && source $OS_env &>> $logfile || _fail_ Missing or failing OpenStack environment file $OS_env 
+test -f $OS_CACERT || _fail_ Missing $OS_CACERT file: please review OS_CACERT environment variables in the OpenStack environment definition file $OS_env
+test -f $CLOUD_SSH_KEY || _fail_ Missing $CLOUD_SSH_KEY file: please review CLOUD_SSH_KEY environment variables in the OpenStack environment definition file $OS_env
+
+# Create the Heat stack file
+cat > $oc_stack.yaml << 'EOFTEMPLATE' 2>> $logfile || _fail_ Cannot create $oc_stack.yaml
+`+heatTemplate+`
+EOFTEMPLATE
+
+echo $(date) Setting HPE5G stack $oc_stack to state $state on OpenStack with network root $oc_network &>> $logfile
+test -f $oc_stack.yaml || _fail_ "Missing Heat template $oc_stack.yaml"
+
+# Clear the ssh known hosts cache
+> ~/.ssh/known_hosts
+
+# Clean the openshift ansible inventory to make sure it is not reused when missing in the current deployment
+rm -f openshift-ansible/inventory/$oc_stack.yaml 2> /dev/null
+> $oc_stack.json
+ansible-playbook  hpe5g.ansible.yml --extra-vars "stack_name=$oc_stack the_template=$oc_stack.yaml the_network=$oc_network cachePatch=$PWD/ the_state=$state" &>> $logfile || _fail_ "OpenStack deployment of $oc_stack"
+if [ $state == "present" ] && test -f openshift-ansible/inventory/$oc_stack.yaml ; then
+  ansible-playbook -b -i openshift-ansible/inventory/$oc_stack.yaml openshift-ansible/playbooks/prerequisites.yml &>> $logfile && 
+  ansible-playbook -b -i openshift-ansible/inventory/$oc_stack.yaml openshift-ansible/playbooks/deploy_cluster.yml &>> $logfile && 
+  eval $(grep ^openshift_ip openshift-ansible/inventory/$oc_stack.yaml) &>> $logfile || _fail_ "OpenShift cluster deployment" 
+  echo "- Connect to OpenShift GUI as a user with any password" &>> $logfile
+  echo "https://$openshift_ip:8443" &>> $logfile
+  echo "- Connect to the first master" &>> $logfile
+  echo "ssh -i $CLOUD_SSH_KEY centos@$openshift_ip" &>> $logfile
+  echo "Login as user: " &>> $logfile
+  echo "oc login -u <user>" &>> $logfile
+  echo "Deploy HPE network functions:" &>> $logfile
+  echo "./hpe5g.sh" &>> $logfile
+fi
+_success_
+`;
+return shell;
 }
 
 //=================================
@@ -2793,6 +2864,7 @@ It consists in four sections:
       - ~PERSISTENCE_START~conditional_sequence~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
     		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
   Those placeholders are processed at build time with the actual values defined by the user in the assistant.
+  Templates can also be loaded as files from the GUI using the Import Yaml template button in the Catalog fieldset. See the online help for more details.
 4. admin:
   Define for each type if it requires special privileges for deployment (optional, default to false)    
   If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.    
@@ -2801,13 +2873,41 @@ function catalogHelp(){userOutput(catalogDoc+`
 User interface buttons:
 Display:
   Output a human readable view of the current catalog. The depth and length of the view can be tuned with the 'depth' and 'ellipsis' drop down boxes.
-Export:
+Export Json catalog:
   Output the current catalog in JSON format and save the same as a file in the download folder of the browser named: hpe5g.catalog.json
-Import: 
+Import Json catalog: 
   Loads a custom catalog from a user provided JSON file; the user is prompted to either override or extend the current catalog.
+Import Yaml template
+  Loads a custom yaml file to override the template attribute of a type existing in the catalog; the user is prompted to provide the name of the type to override.
+  This feature is useful for loading very long or complex yaml templates compared to providing the same as json payload in the catalog.
+  This yaml file must be formatted as the body of an OpenShift template, ie a table of resources definitions like:
+- kind: ServiceAccount
+	apiVersion: v1
+	metadata:
+	  name: ~NAME~
+	  namespace: ~PROJECT~
+- kind: RoleBinding
+  apiVersion: v1
+  ....
+- kind: xxx
+  ...
 `)};
 
-var catalogImport = new userLoadedFile("catalogImport", "Import Json...", importCatalog);
+var yamlImport = new userLoadedFile("yamlImport", "Import Yaml template...", importYaml);
+if(!yamlImport.isDefined())document.getElementById("catalogArea").appendChild(yamlImport.getDomElement());
+function importYaml(){
+	var userYaml;
+	var check="";
+	var type=prompt("To which type this template applies?");
+	if(!hpe5gResources.defaults[type])check+="Type "+type+" not found in the current catalog; please update the catalog beforehand";
+	else try{
+		userYaml=YAML.parse(yamlImport.content);
+  		hpe5gResources.defaults[type]['template']=yamlImport.content;
+	}catch(e){check+="Parsing exception received: "+e; }
+	userOutput(check ? check : objToString(userYaml));
+}
+
+var catalogImport = new userLoadedFile("catalogImport", "Import Json catalog...", importCatalog);
 if(!catalogImport.isDefined())document.getElementById("catalogArea").appendChild(catalogImport.getDomElement());
 function exportCatalog(){
 	var catalog=JSON.stringify({types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults, admin: hpe5gResources.admin});
@@ -2855,6 +2955,8 @@ function importCatalog(jsonCatalog = catalogImport.content, silent = false){
     if(check.length>0)userOutput("Inconsistent imported catalog:"+check);
     else if (silent || confirm("You are about to override the current catalog with imported data. Click Cancel to merge both instead.")) {
   	  hpe5gResources.resources=catalog.types; 
+  	  // Init sections missing in the imported catalog with an empty table
+  	  hpe5gResources.names.forEach(function(section){if(!hpe5gResources.resources[section])hpe5gResources.resources[section]=new Array;});
   	  hpe5gResources.depends=catalog.dependencies; 
   	  hpe5gResources.defaults=catalog.values; 
   	  hpe5gResources.admin=catalog.admin;
@@ -2922,17 +3024,16 @@ function buildNetworkFunctions(){
 	hpe5gResources.init();
 
 	// Check the NetworkFunctions section (or get the errors)
-	var openshift = NetworkFunctions.build()+DirectServices.build()+IndirectServices.build()+Operators.build()+HelmCharts.build()+Clusters.build();
+	NetworkFunctions.build(); DirectServices.build(); IndirectServices.build(); Operators.build(); HelmCharts.build(); Clusters.build();
 	var check = NetworkFunctions.check+DirectServices.check+IndirectServices.check+Operators.check+HelmCharts.check+hpe5gResources.compile();
-	if(check.length != 0){userOutput(check); return false;}
-	if(openshift.length == 0){userOutput('Nothing to do'); return false;}
+	if(check.length != 0){userOutput(check); return '';}
 	
 	var shell='';
 	var warningMessage='';
 	
 	if(hpe5gResources.adminList.length > 0){
 		warningMessage='Resource(s) requiring special privileges might jeopardize the deployment:'+hpe5gResources.adminList;
-		if(!Misc.getValue('headless') && !confirm(warningMessage)){userOutput(warningMessage); return false;}
+		if(!Misc.getValue('headless') && !confirm(warningMessage)){userOutput(warningMessage); return '';}
 	}
 
 	if(Clusters.targeted == undefined || Clusters.targeted.length == 0){
@@ -2944,23 +3045,28 @@ function buildNetworkFunctions(){
     	}
     	function catFooter(project){return "\nEOFILE"};
     	
-    	shell=shellHeader('oc');
+    	shell+=shellBody('oc');
     	shell+=hpe5gNetworkFunctions(catHeader, catFooter);
     	shell+=hpe5gHelmValues(catHelmValuesHeader, catFooter);
     	shell+=hpe5gDeploymentScript(warningMessage);
 	}else{
 		var quickDescription=document.getElementById("quickDescription").value+". Built from HPE5g assistant on: "+Date();
-		shell=shellHeader('curl');
+		shell+=shellBody('curl');
 		
-		if(hpe5gHelmValues().length > 0){userOutput('Helm based deployments not supported on REST API'); return false;}
+		if(hpe5gHelmValues().length > 0){check+='Helm based deployments not supported on REST API' ;}
 
 		Clusters.targeted.forEach(function(cluster){
 			hpe5gResources.projects.forEach(function(project){
+				// Get the resources to deploy as a Json string
+				var jsonPayload=undefined;
+				try{
+					jsonPayload=JSON.stringify(YAML.parse(hpe5gNetworkFunctions(undefined,undefined,undefined,project)));
+				}catch(e){check+="Parsing exception received on project "+project+": "+e;  return;}
 				// Create the project if it does not exist or fail in case of deletion
 				shell+='\n_log_ "Checking project '+project+' on cluster '+cluster.name+'"';
-				shell+='\nuntil curl -f -k -X GET -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projects/'+project+'  &>> $hpe5g_log_file ; do ';
+				shell+='\nuntil curl -f -v -k -X GET -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projects/'+project+'  &>> $logfile ; do ';
 				shell+='\n$_deploy || _fail_ "Missing project '+project+' on cluster '+cluster.name+'"';
-				shell+='\n_log_ "Creating project '+project+' on cluster '+cluster.name+'" && curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projectrequests  &>> $hpe5g_log_file <<HPE_EOF';
+				shell+='\n_log_ "Creating project '+project+' on cluster '+cluster.name+'" && curl -f -v -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projectrequests  &>> $logfile <<HPE_EOF';
 				shell+=`
 {
   "apiVersion": "project.openshift.io/v1",
@@ -2978,8 +3084,8 @@ HPE_EOF`;
                 // Create the REST API secret for this project if it does not exist
                 var secretName=project+'-restapi';
                 shell+='\n_log_ "Checking secret '+secretName+' for project '+project+' on cluster '+cluster.name+'"';
-                shell+='\nuntil curl -f -k -X GET -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/api/v1/namespaces/'+project+'/secrets/'+secretName+' &>> $hpe5g_log_file ; do ';
-                shell+='\n_log_ "Creating secret '+secretName+' for project '+project+' on cluster '+cluster.name+'" && curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/api/v1/namespaces/'+project+'/secrets &>> $hpe5g_log_file <<HPE_EOF';
+                shell+='\nuntil curl -f -v -k -X GET -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/api/v1/namespaces/'+project+'/secrets/'+secretName+' &>> $logfile ; do ';
+                shell+='\n_log_ "Creating secret '+secretName+' for project '+project+' on cluster '+cluster.name+'" && curl -f -v -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/api/v1/namespaces/'+project+'/secrets &>> $logfile <<HPE_EOF';
                 shell+=`
 {
   "kind": "Secret",
@@ -2995,36 +3101,88 @@ HPE_EOF`;
                 shell+='\nif [ $? != 0 ] ; then _fail_ "Cannot create secret '+secretName+' for project '+project+' on cluster '+cluster.name+'" ; fi';
                 shell+='\nsleep 2 ; done';
                 
-                // Deploy/undeploy the template instance: help idempotence by deleting the template instance first, ignoring failure in case of deployment
+                // Deploy/undeploy the template instance: use the first resource name in this project as the template name to allow subsequent deployment in the same project without duplicating the template name
+                var templateInstanceName=hpe5gResources.openshiftFunctions.find(function(f){return f.project == project;}).name;
                 shell+='\n_log_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'"';
-                shell+='\ncurl -f -k -X DELETE -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+'/templateinstances/'+project+' &>> $hpe5g_log_file || $_deploy || _fail_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'" ';
-				shell+='\nif $_deploy ; then curl -f -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances &>> $hpe5g_log_file <<'HPE_EOF'";
+                shell+='\nif $_deploy ; then curl -f -v -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances &>> $logfile <<'HPE_EOF'";
                 shell+=`
 {
   "kind": "TemplateInstance",
   "apiVersion": "template.openshift.io/v1",
   "metadata": {
-    "name": "`+project+`"
+    "name": "`+templateInstanceName+`"
   },
   "spec": {
     "secret": {
       "name": "`+secretName+`"
     },
-    "template":`+JSON.stringify(YAML.parse(hpe5gNetworkFunctions(undefined,undefined,undefined,project)))+`
+    "template":`+jsonPayload+`
   }
 }
 HPE_EOF`;
 				shell+='\nif [ $? != 0 ] ; then _fail_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'" ; fi';
 				
-				// Poll the TemplateInstance or watch the TemplateInstance until either the Ready or InstantiateFailure condition types report status True.
-				shell+='\n_cmd_with_retry "_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+'" Processing';
-				shell+='\nif [[ "$(_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+')" != \'"Ready"\' ]] ; then _fail_ $(_getTemplateInstanceMessage '+cluster.token+' '+cluster.endpoint+' '+project+') ; fi';
+				shell+='\n# Poll the TemplateInstance until the condition types report status True at a 2 seconds period limited to 10 seconds, delay compatible with a REST request.';
+				shell+='\n_cmd_with_retry "_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+' '+templateInstanceName+'" Processing 10 2';
+				shell+='\n# If the TemplateInstance status is true, but not Ready, fail with the error message; otherwise report success';
+				shell+='\nif [ $? == 0 ] && [[ "$(_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+' '+templateInstanceName+')" != \'"Ready"\' ]] ; then _fail_ $(_getTemplateInstanceMessage '+cluster.token+' '+cluster.endpoint+' '+project+' '+templateInstanceName+') ; fi';
+				shell+='\nelse curl -f -v -k -X DELETE -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+'/templateinstances/'+templateInstanceName+' &>> $logfile';
+				shell+='\nif [ $? != 0 ] ; then _fail_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'" ; fi';
 				shell+='\nfi';
 				shell+='\n_log_ "$_displayedAction resources for project '+project+' successfully completed on cluster '+cluster.name+'"';
 
 			});
 		});
 	}
+	if(check.length != 0){userOutput(check); return '';}
+	return shell;
+}
+
+// Build a shell script named hpe5g.sh and drop it in the Download directory
+function shellHeader(){return `#! /bin/bash
+_usage() {
+  	echo "This client helps you deploy and undeploy HPE 5g resources on OpenStack and OpenShift clusters" 
+  	echo "Usage: $0 [-d|--deploy|-c|--create project [-n network root] [-e|--OSenv OpenStackEnvironmentFile] | -l|--log logfile | -u|--undeploy|-r|--remove|--delete project ]"
+  	echo "Default options: $0 --`+Misc.getValue('default_action')+` hpe5g -n 192.168.199 -e RHOS12.env"
+}
+
+# Default parameters
+default_stack=`+Misc.getValue('default_project')+`
+oc_stack=$default_stack
+oc_network=`+Misc.getValue('default_openstack_network_root')+`
+OS_env=`+Misc.getValue('default_openstack_env')+`
+_deploy=$([[ "`+Misc.getValue('default_action')+`" != "undeploy" ]] && echo true || echo false)
+_displayedAction=$($_deploy && echo Deploying || echo Undeploying)
+state=$($_deploy && echo present || echo absent)
+logfile=$([[ "`+Misc.getValue('headless')+`" != "" ]] && echo $oc_stack.log || echo /dev/stdout )
+
+while [[ "$#" -gt 0 ]]; do case $1 in
+  -d|--deploy|-c|--create) _deploy=true ; _displayedAction="Deploying"; state=present; oc_stack="$\{2:-$default_stack}"; shift;;
+  -u|--undeploy|-r|--remove|--delete) _deploy=false ; _displayedAction="Undeploying"; state=absent; oc_stack="$\{2:-$default_stack}"; shift;;
+  -e|--OSenv) OS_env="$2"; shift;;
+  -n|--OSnetwork) oc_network="$2"; shift;;
+  -l|--log) logfile="$2"; shift;;
+  -h|--help) _usage; exit 0 ;;
+  *) echo "Unknown parameter passed: $1." $_usage; exit 1;;
+esac; shift; done
+`;}
+
+function ouputInstallerShell(){
+	var shellOpenStack='';
+	var shellOpenShift='';
+
+	// Start with OpenStack resources if any
+	if(!Nodes.isEmpty()){
+		shellOpenStack=buildHeatStackDeployer();
+		if(!shellOpenStack)return false;
+	}
+	// Add OpenShift resources if not included in a deployed OpenShift cluster part of the OpenStack resources and actually existing
+	if(!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}) && hpe5gResources.projects.length){
+		shellOpenShift=buildNetworkFunctions();
+		if(!shellOpenShift)return false;
+	}
+	var shell=shellHeader()+shellOpenStack+shellOpenShift+"\nexit 0";
+	
 	// Show to the user and save to hpe5g.sh
     userOutput(shell);
 	// Stop there if headless, ie no user interface
@@ -3046,7 +3204,7 @@ HPE_EOF`;
 //=================================
 // Warning on page reload
 window.onbeforeunload = function() {
-  return "Unsaved session data will be lost if you leave the page, are you sure?";
+  return "Unsaved session data will be lost if you leave this page, are you sure?";
 };
 
 // if a is true, check that at least one element of x is true
@@ -3205,11 +3363,13 @@ var defaultCatalog=`
     "DirectServices": [
       "ignite",
       "redis",
+      "redis-nopwd",
       "influxdb",
       "fluentd"
     ],
     "Operators": [	
       "jaeger-product",
+      "cert-manager",
       "servicemeshoperator",
       "amq-streams",
       "elasticsearch-operator",
@@ -3237,16 +3397,16 @@ var defaultCatalog=`
       "ignite"
     ],
     "nudr-reg-agent": [
-    	"redis",["influxdb","telegraf", "telegraf-chart"]
+    	["redis","redis-nopwd"],["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudm-ee": [
       ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
     ],
     "nudm-li-poi": [
-      "redis","amq-streams",["influxdb","telegraf", "telegraf-chart"]
+      ["redis","redis-nopwd"],"amq-streams",["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudm-li-tf": [
-        "redis",["influxdb","telegraf", "telegraf-chart"]
+        ["redis","redis-nopwd"],["influxdb","telegraf", "telegraf-chart"]
     ],
     "nudm-ueau": [
         ["influxdb","telegraf", "telegraf-chart"], "nudr-dr"
@@ -3392,6 +3552,12 @@ var defaultCatalog=`
       "tag": "latest",
       "storage": "100Mi"
     },
+    "redis-nopwd": {
+        "URL": "docker.io/bitnami",
+        "image": "redis",
+        "tag": "latest",
+        "storage": "100Mi"
+      },
     "influxdb": {
       "URL": "docker.io/bitnami",
       "image": "influxdb",
@@ -3404,6 +3570,7 @@ var defaultCatalog=`
       "tag": "v2.4.0"
     },
     "jaeger-product": {},
+    "cert-manager": {},
     "servicemeshoperator": {},
     "amq-streams": {},
     "elasticsearch-operator": {},
@@ -3505,7 +3672,6 @@ var log4j2xml=`
           </Loggers>
       </Configuration>
 `;
-
 //================================================
 hpe5gResources.defaults['nudsf-dr']['template']=
 //================================================
@@ -3739,6 +3905,347 @@ hpe5gResources.defaults['nudsf-dr']['template']=
               credential-reference:
                 clear-text: hwroot
               type: JKS
+        logging:
+          root-logger:
+            level: INFO
+            handlers:
+            - CONSOLE
+          loggers:
+            "stdout":
+               level: INFO
+               handlers:
+               - STDOUT
+            "com.hpe.cms5g.nudsf":
+               level: INFO
+            "com.hpe.cms.sde.udsf":
+               level: INFO
+            "com.hpe.cms.sde.dao":
+               level: INFO
+            "com.hpe":
+               level: INFO
+            "io.jaegertracing":
+              level: WARN
+            "io.undertow":
+               level: INFO
+            "io.netty":
+               level: INFO
+            "org.jboss.as":
+              level: INFO
+            "org.glassfish.jersey":
+              level: INFO
+          console-handlers:
+            STDOUT:
+              named-formatter: null
+              formatter: "%s%e%n"
+            CONSOLE:
+              named-formatter: null
+              formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  type: Opaque
+  data:
+    keystore.jks: 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
+`;
+//================================================
+hpe5gResources.defaults['nudsf-dr']['template-1.8.0']=
+//================================================
+`
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: RoleBinding
+  apiVersion: authorization.openshift.io/v1
+  metadata:
+    name: ~NAME~-view
+    namespace: ~PROJECT~
+  roleRef:
+    kind: Role
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: ~NAME~
+    namespace: ~PROJECT~
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: ~IMAGE_STREAM~
+      generation: 1
+      importPolicy: {}
+      name: ""
+      referencePolicy:
+        type: Source
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    template: 
+      metadata:
+        labels: 
+          name: ~NAME~
+        name: ~NAME~
+      spec:
+        containers:
+        - name: ~NAME~
+          env:
+          - name: JAVA_OPTS
+            value: -Dpaas.service.name=RELEASE-NAME-nudsf-dr   -Djava.net.preferIPv4Stack=true  -XX:InitialRAMPercentage=40 -XX:MaxRAMPercentage=40 -XX:+AlwaysPreTouch -XX:MaxGCPauseMillis=100 -XX:+UseConcMarkSweepGC -XX:InitiatingHeapOccupancyPercent=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ScavengeBeforeFullGC -XX:+DisableExplicitGC -Dio.undertow.ssl.max-read-listener-invocations=1000 -Dgeneric.configuration.uri=file://///etc/opt/hpe/sde/udsf//nudsf-dr-config.yaml 
+          image: ~IMAGE_STREAM~
+          imagePullPolicy: IfNotPresent
+          Requests:
+            cpu:    1000m
+            memory:   2000Mi
+          Limits:
+            cpu:  8000m
+            memory: 4000Mi
+          ports:
+          - containerPort: 8443
+            protocol: TCP
+          volumeMounts:
+            - name: ~NAME~
+              mountPath: /etc/opt/hpe/sde/udsf/
+            - name: ~NAME~-secrets
+              mountPath: /etc/opt/hpe/sde/udsf/security
+          livenessProbe:
+            httpGet:
+              path: /nudsf-dr/v1/probes/healthy
+              port: health
+            initialDelaySeconds:   120 
+            periodSeconds: 3
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /nudsf-dr/v1/probes/healthz
+              port: health
+            initialDelaySeconds: 15
+            periodSeconds: 3
+            timeoutSeconds: 3
+            successThreshold: 2
+            failureThreshold: 1
+        volumes:
+          - name: ~NAME~
+            configMap:
+              name: ~NAME~
+          - name: ~NAME~-secrets
+            secret:
+              secretName: ~NAME~
+    selector:
+      name: ~NAME~
+    replicas: ~REPLICAS~
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+    labels:
+      name: ~NAME~
+      deploymentconfig: ~NAME~
+  spec:
+    type: LoadBalancer
+    ports:
+    - port: 8443
+      protocol: TCP
+      targetPort: 30043
+    selector:
+      name: ~NAME~
+      deploymentconfig: ~NAME~
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec:
+    tls:
+      termination: passthrough
+    to:
+      kind: Service
+      name: ~NAME~
+      namespace: ~PROJECT~
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  data:
+    nnrf-register.config: |
+      {
+        "nfInstanceId": "C750A1C5-4897-4389-A4C7-D0133FC9CADB",
+        "nfType":"UDSF",
+        "nfStatus":"REGISTERED",
+        "heartBeatTimer": "45",
+        "fqdn": "",
+        "ipv4Addresses":[""],
+        "nfServices" : [ {
+            "serviceInstanceId" : "UDSF",
+            "serviceName" : "nudsf-dr",
+            "versions" : [ {
+              "apiVersionInUri" : "v1",
+              "apiFullVersion" : "1.0.0.alpha-1"
+            } ],
+      
+            "scheme" : "https",
+      
+            "nfServiceStatus" : "REGISTERED",
+            "fqdn": "hpe-sde-udsf-nudsf-dr.3gpp-nf-all.svc.cluster.local",
+            "ipEndPoints" : [ {
+              "ipv4Address" : "hpe-sde-udsf-nudsf-dr.3gpp-nf-all.svc.cluster.local",
+              "transport" : "TCP",
+      
+              "port" : "30043"
+      
+            } ]
+          } ]
+      }
+    nudsf-dr-config.yaml: |
+      # nUDSF function configuration.
+      #
+  
+      logging:
+        locale: en-US
+        loggers:
+          - name: log4j2
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
+          - name: fluentd
+            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
+            properties:
+              host: fluentd
+              port: 24224
+      statistics-configuration:
+        id: hpe-sde-udsf-nudsf-dr-statistics
+        enabled: true
+        jvm-metrics: true
+        properties:
+          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
+          com.hpe.imsc.statistics.influxdb.server.port: 8086
+          com.hpe.imsc.statistics.influxdb.server.protocol: http
+          com.hpe.imsc.statistics.influxdb.server.database: hpe-sde-udsf-nudsf-dr
+          com.hpe.imsc.statistics.influxdb.server.polling.interval: 5
+        jmx:
+          enabled: false
+  
+      # Empty rest-client for paas 0.14.0, remove later
+      rest-client:
+        id:
+  
+      call-tracing:
+        enabled: false
+        properties:
+            JAEGER_SERVICE_NAME: ~NAME~
+            JAEGER_AGENT_HOST: localhost
+            JAEGER_AGENT_PORT: 6831
+            JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
+            JAEGER_REPORTER_FLUSH_INTERVAL: 100
+            JAEGER_REPORTER_LOG_SPANS: true
+            JAEGER_SAMPLER_TYPE: "probabilistic"
+            JAEGER_SAMPLER_PARAM: 1.0
+  
+      datasources:
+        - id: ignite
+          profile:
+            name: kubernetes
+            properties:
+              masterUrl: https://openshift.default.svc.cluster.local:443
+              namespace: ~PROJECT~
+              serviceName: ~ignite_NAME~
+      model:
+        realms:
+        - id: realm0
+          properties:
+            replicas: 1
+          storages:
+          - id: space0
+            properties:
+              replicas: 1
+    project-nudsf-dr.yml: |+
+      # Thorntail global configuration for nUDSF.
+      #
+  
+      thorntail:
+        https:
+          only: true
+          port: 8443
+          keystore:
+            embedded: true
+          certificate:
+            generate: true
+            host: localhost
+        io:
+          workers:
+            default:
+              io-threads: 4
+              task-max-threads: 110
+        undertow:
+          alias: localhost
+          filter-configuration:
+            request-limits:
+              requests-limiter-filter:
+                queue-size: 1500
+                max-concurrent-requests: 100
+          servers:
+            default-server:
+              hosts:
+                default-host:
+                  filter-refs:
+                    requests-limiter-filter:
+                      predicate: not path-suffix(ΓÇ¥/probes/healthyΓÇ¥)
+                      priority: 1
+              https-listeners:
+                default-https:
+                  socket-binding: https
+                  enable-http2: true
+                  ssl-context: sslctx
+                  http2-initial-window-size: 32000000
+                  http2-max-concurrent-streams: 200
+                  no-request-timeout: 600000
+                  http2-max-frame-size: 
+                  max-connections: 2000
+                  http2-max-header-list-size:
+                  max-buffered-request-size:
+                  max-header-size:
+                  max-headers:
+                  max-processing-time:
+                  read-timeout:
+                  receive-buffer:
+                  send-buffer: 
+                  ssl-session-cache-size:
+                  ssl-session-timeout:
+                  url-charset:
+                  verify-client:
+        elytron:
+          server-ssl-contexts:
+            sslctx:
+              protocols: TLSv1.2
+              key-manager: km
+              cipher-suite-filter: DEFAULT
+          key-managers:
+            km:
+              key-store: ks
+              credential-reference:
+                clear-text: password
+          key-stores:
+            ks:
+              path: "/etc/opt/hpe/sde/udsf/security/keystore.p12"
+              credential-reference:
+                clear-text: password
+              type: 
+          file-audit-logs:
+            local-audit:
+              path: /var/log/hpe/sde/udsf/audit.log
         logging:
           root-logger:
             level: INFO
@@ -8389,8 +8896,11 @@ hpe5gResources.defaults['ignite']['template']=
        </beans>
 `;
 //================================================
-hpe5gResources.defaults['redis']['template']=
+hpe5gResources.defaults['redis']['template']=redis_template(true);
+hpe5gResources.defaults['redis-nopwd']['template']=redis_template(false);
 //================================================
+function redis_template(setPassword){
+	var result=
 `
 - kind: Secret
   apiVersion: v1
@@ -8479,11 +8989,16 @@ hpe5gResources.defaults['redis']['template']=
           env:
           - name: REDIS_PORT
             value: "6379"
+`;
+result+=setPassword?`
           - name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: ~NAME~
+                name: ~NAME~`:`
+          - name: ALLOW_EMPTY_PASSWORD
+            value: "true"`;
+result+=`
           image: ~IMAGE_STREAM~
           livenessProbe:
             initialDelaySeconds: 30
@@ -8521,6 +9036,8 @@ hpe5gResources.defaults['redis']['template']=
             claimName: ~NAME~
   status: {}
 `;
+return result;
+}
 //================================================
 hpe5gResources.defaults['influxdb']['template']=
 //================================================
@@ -10427,6 +10944,17 @@ hpe5gResources.defaults['jaeger-product']['template']=
     namespace: ~PROJECT~
 `;
 //================================================
+hpe5gResources.defaults['cert-manager']['template']=
+//================================================
+`
+- kind: CertManager
+  apiVersion: operator.cert-manager.io/v1alpha1
+  metadata:
+    name: ~NAME~
+    namespace: ~PROJECT~
+  spec: {}
+`;
+//================================================
 hpe5gResources.defaults['kiali-ossm']['template']=
 //================================================
 `
@@ -10624,6 +11152,15 @@ hpe5gResources.defaults['prometheus-operator']['template']=
     groups:
     - name: general.rules
       rules:
+      - alert: TargetDown-serviceprom
+        annotations:
+          description: '{{ $value }}% of {{ $labels.job }} targets are down.'
+          summary: Targets are down
+          expr: 100 * (count(up == 0) BY (job) / count(up) BY (job)) > 10
+          for: 10m
+          labels:
+            severity: warning
+        expr: vector(1)
       - alert: DeadMansSwitch-serviceprom
         annotations:
           description: This is a DeadMansSwitch meant to ensure that the entire Alerting pipeline is functional.

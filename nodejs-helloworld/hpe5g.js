@@ -47,16 +47,17 @@ if(args.privateKey && args.certificate){
 	cert : certificate
 	}
 	// 2. start https server with options and express app.
-	https.createServer(options, app).listen(args.port, function () {console.log("CMS5G Core Stack automated deployer listening SSL-encrypted HTTPS traffic on port " + args.port);});
+	https.createServer(options, app).listen(args.port, function () {console.log(new Date().toISOString()+'\tCMS5G Core Stack automated deployer listening SSL-encrypted HTTPS traffic on port ' + args.port);});
 }else{
 	app.listen(args.port, function () {
-	  console.log('CMS5G Core Stack automated deployer listening unencrypted traffic on port '+args.port);
-	  if(args.privateKey || args.certificate)console.log('HTTPS encryption requires both privateKey and certificate arguments: ignoring '+args.privateKey + args.certificate)
+	  console.log(new Date().toISOString()+'\tCMS5G Core Stack automated deployer listening unencrypted traffic on port '+args.port);
+	  if(args.privateKey || args.certificate)console.log(new Date().toISOString()+'\tHTTPS encryption requires both privateKey and certificate arguments: ignoring '+args.privateKey + args.certificate)
 	});
 }
 
 // Get the default catalog, or the one passed as parameter or the session dump or the session HTML document
 app.get(['/:session', '/:session/:target'], function (req, res, next) {
+	console.log(new Date().toISOString()+'\t'+req.method+' '+req.params.target+' catalog:'+req.query.catalog+' project:'+req.query.project+' OSenv:'+req.query.OSenv+' OSnetwork:'+req.query.OSnetwork);
 	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
 	  var mywin=dom.window;
 	  mywin.headless=true;
@@ -96,6 +97,7 @@ app.get(['/:session', '/:session/:target'], function (req, res, next) {
 
 // Deploy/undeploy on various targets
 app.use('/:session/:target', function (req, res, next) {
+	console.log(new Date().toISOString()+'\t'+req.method+' '+req.params.target+' catalog:'+req.query.catalog+' project:'+req.query.project+' OSenv:'+req.query.OSenv+' OSnetwork:'+req.query.OSnetwork);
 	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
 	  var mywin=dom.window;
 	  var mydom=mywin.document;
@@ -103,6 +105,8 @@ app.use('/:session/:target', function (req, res, next) {
 	  var direct;
 	  var DOMresult=false;
 	  if(req.query.project)mywin.default_project=req.query.project;
+	  if(req.query.OSenv)mywin.default_openstack_env=req.query.OSenv;
+	  if(req.query.OSnetwork)mywin.default_openstack_network_root=req.query.OSnetwork;
 	  switch(req.method){
 	  	case 'PUT': case 'POST': direct='deploy'; break;
 	  	case 'DELETE': direct='undeploy'; break;
@@ -115,18 +119,31 @@ app.use('/:session/:target', function (req, res, next) {
 	    if(mywin.jsonSession(req.body)){
 			switch(req.params.target){
 			   case direct: 
-				if(!mywin.buildNetworkFunctions()) break;
+				if(!mywin.ouputInstallerShell()) break;
 				success=undefined;
-				exec(mywin.rawUserOutput, function(error, stdout, stderr){
-					if(error)res.status(400).send(direct+' error '+error+"\nstdout:\n"+stdout+"\nstderr:\n"+stderr); 
-					else res.send(stdout);
-				});
+				try {
+					// Use a local file to invoke the installer, since direct invocation may hit the E2BIG Linux max size for a command
+					// Use a file name based on current time to avoid clashes in case of concurrent requests
+          			var hpe5gInstaller='hpe5g'+Date.now()+'.sh';
+					fs.writeFile(hpe5gInstaller, mywin.rawUserOutput, function(err) {
+					    if(err) {
+					        res.status(400).send('Direct mode: file "+hpe5gInstaller+" creation error:'+err);
+					    }
+					    exec("chmod a+x  "+hpe5gInstaller+"  && ./"+hpe5gInstaller, function(error, stdout, stderr){
+							fs.unlink(hpe5gInstaller, function(err){if(err)console.log(new Date().toISOString()+'\tCannot remove temporary installer file '+hpe5gInstaller+': '+err);});
+	                  		if(error)res.status(400).send(direct+" error\nstdout:\n"+stdout+"\nstderr:\n"+stderr); 
+	                  		else res.send(stdout);
+              			});
+					});
+				}catch(e){
+					res.status(400).send('Direct mode exception: '+e);
+				};
 				break;
-			   case 'hpe5g.sh': success=mywin.buildNetworkFunctions(); break;
-			   case 'dump': success=mywin.buildNetworkFunctions() && mywin.jsonSession(); break;
-			   case 'save': success=mywin.buildNetworkFunctions() ; DOMresult=true; break;
+			   case 'hpe5g.sh': success=mywin.ouputInstallerShell(); break;
+			   case 'dump': success=mywin.ouputInstallerShell() && mywin.jsonSession(); break;
+			   case 'save': success=mywin.ouputInstallerShell() ; DOMresult=true; break;
 			   case 'hpe5g.yml': 
-			   case 'hpe5g.yaml': success=mywin.buildHeatTemplate(); break;
+			   case 'hpe5g.yaml': success=mywin.outputHeatTemplate(); break;
 			   default: res.status(400).send('Unknown target '+req.params.target+'; expected: '+direct+', hpe5g.sh or hpe5g.y(a)ml'); break;
 			}
 		 }
