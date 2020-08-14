@@ -72,7 +72,23 @@
 <!-- Link to the end of the user area, useful to focus the user on the result on long pages -->
 <p>Quick links: <a id="endOfUserArea" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></p>
 <p>
-<textarea readonly="" rows="20" cols="200" id="userArea">[{"DirectServices":[{"Type":"ignite","Name":"gridgain","URL":"docker.io/gridgain","Image":"community","Tag":"8.7.14","Storage":"250Mi","Replicas":"1"},{"Type":"influxdb","Name":"udsf-flux","URL":"docker.io/bitnami","Image":"influxdb","Tag":"1.7.10","Storage":"1Gi","Replicas":"1"},{"Type":"redis","Name":"myredis","URL":"docker.io/bitnami","Image":"redis","Tag":"latest","Storage":"100Mi","Replicas":"1"}]},{"IndirectServices":[{"Type":"jenkins","Name":"myjenkins","URL":"quay.io/openshift","Image":"origin-jenkins","Tag":"latest","Replicas":"1"},{"Type":"prometheus-alertmanager","Name":"myalert","URL":"docker.io/prom","Image":"alertmanager","Tag":"v0.20.0","Storage":"8Gi","Replicas":"1"},{"Type":"prometheus","Name":"myprom","URL":"docker.io/prom","Image":"prometheus","Tag":"v2.16.0","Storage":"200Mi","Replicas":"1"},{"Type":"pushgateway","Name":"mygateway","URL":"docker.io/prom","Image":"pushgateway","Tag":"v1.0.1","Replicas":"1"},{"Type":"telegraf","Name":"mygraf","URL":"docker.io","Image":"telegraf","Tag":"1.14-alpine"}]},{"Operators":[{"Type":"jaeger-product","Name":"mike","Pipeline GIT":"https://github.hpe.com/CMS-5GCS/automated-deployer","directory":"pipelines/manual_approval","branch":"master"},{"Type":"servicemeshoperator","Name":"myplane"},{"Type":"amq-streams","Name":"kaaaaa","Replicas":"4"},{"Type":"kiali-ossm","Name":"myoss"}]}]</textarea>
+<textarea readonly="" rows="20" cols="200" id="userArea">Import summary
+VNF description: Set of services with jenkins pipeline on jaeger
+DirectServices
+	ignite	gridgain	docker.io/gridgain	community	8.7.14	250Mi	1
+	influxdb	udsf-flux	docker.io/bitnami	influxdb	1.7.10	1Gi	1
+	redis	myredis	docker.io/bitnami	redis	latest	100Mi	1
+IndirectServices
+	jenkins	myjenkins	quay.io/openshift	origin-jenkins	latest	1
+	prometheus-alertmanager	myalert	docker.io/prom	alertmanager	v0.20.0	8Gi	1
+	prometheus	myprom	docker.io/prom	prometheus	v2.16.0	200Mi	1
+	pushgateway	mygateway	docker.io/prom	pushgateway	v1.0.1	1
+	telegraf	mygraf	docker.io	telegraf	1.14-alpine
+Operators
+	jaeger-product	mike	https://github.hpe.com/CMS-5GCS/automated-deployer	pipelines/manual_approval	master
+	servicemeshoperator	myplane
+	amq-streams	kaaaaa	4
+	kiali-ossm	myoss</textarea>
 <a name="endOfUserArea"></a>
 </p>
 <iframe width="1500" height="200" name="importedDocument" style="display:none"></iframe>
@@ -3980,9 +3996,6 @@ hpe5gResources.defaults['nudsf-dr']['template']=
               credential-reference:
                 clear-text: password
               type: 
-          file-audit-logs:
-            local-audit:
-              path: /var/log/hpe/sde/udsf/audit.log
         logging:
           root-logger:
             level: INFO
