@@ -5,6 +5,7 @@
 4. [Examples](#Examples)
 5. [Sections detailed specifications](#SectionsDetails)
 6. [Catalog specification](#CatalogSpecification)
+    [Dynamic dependencies resolution](#dependenciesResolution)
 7. [OpenStack deployment help](#OpenStackHelp)
 
 This tool builds and run an installer deploying user defined HPE5G resources on OpenShift clusters.  
@@ -682,27 +683,33 @@ It consists in four sections:
   Example: telegraf can play an influxdb type, and can be deployed as an indirect service or a helm chart.    
     The udsf resource requiring both ignite and influxdb resources can specify this dependencies list:   
 	"nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
-    The udsf template has to use the placeholders ~ignite_NAME~ and ~influxdb_NAME~ to enable the dependencies resolution at deployment time.    
+    The udsf template has to use the placeholders \~ignite_NAME\~ and \~influxdb_NAME\~ to enable the dependencies resolution at deployment time.    
 3. values:
   Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
     - IndirectServices,NetworkFunctions,DirectServices: URL, image, tag, template
     - Operators: template
-    - HelmCharts: chart
-  The template attribute is a YAML description of the OpenShift template used for deploying the resource. It must/may include those placeholders:
-    - must: 
-      - ~NAME~ is the name of the resource
-      - ~PROJECT~ is the name of the OpenShift project (namespace)
-    - may:
-      - ~IMAGE~ is the name of the docker image
-      - ~REPLICAS~ is the number of replicas
-      - ~dependency_NAME~ is a reference to the actual name of a dependency for this resource.
-      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
-      - ~PERSISTENCE_START~conditional_sequence~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
-    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
-  Those placeholders are processed at build time with the actual values defined by the user in the assistant.
+    - HelmCharts: chart    
 4. admin:
   Define for each type if it requires special privileges for deployment (optional, default to false)    
   If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.    
+
+<a name="dependenciesResolution"></a>
+###Template parameters and dynamic dependencies resolution
+The template attribute in the values section is a YAML description of the OpenShift template used for deploying the resource. It must/may include those placeholders:
+  - must: 
+      - \~NAME\~ is the name of the resource
+      - \~PROJECT\~ is the name of the OpenShift project (namespace)
+  - may:
+      - \~IMAGE\~ is the name of the docker image
+      - \~REPLICAS\~ is the number of replicas
+      - \~dependency_NAME\~ is a reference to the actual name of a dependency for this resource.    
+      This placeholder allows dynamic resolution of dependencies between resources. For instance, in the udsf template, the datasource service name \~ignite_NAME\~ will be dynamically resolved as the actual name of the ignite instance in this project for this deployment.
+      - \~VOLUME\~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
+      - \~PERSISTENCE_START\~conditional_sequence\~PERSISTENCE_END\~ useful to manage resources with optional persistent storage like ignite: 
+    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
+     
+Those placeholders are processed at build time with the actual values defined by the user.
+Templates can also be loaded as files from the GUI using the Import Yaml template button in the Catalog fieldset. See the online help for more details.  
 
 <a name="OpenStackHelp"></a>
 ## OpenStack deployment help

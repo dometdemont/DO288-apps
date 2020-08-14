@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-08-10 Version 0.77</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-08-13 Version 0.78</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
@@ -113,6 +113,8 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-08-13 0.78	Move to UDSF 1.8 in the default catalog; include the deployer version in the OpenShift project description; 
+	default flavor to standard, not small; save flavor in Nodes section; restrict insecure registries to full stack deployment. 
 2020-08-10 0.77	Support template import in the catalog as yaml files; remove dependency on logger not supported in basic docker containers; robustness on missing sections in imported catalog. 
 2020-08-03 0.76	Adding redis-nopwd and cert-manager in default catalog; robustness on admin and dependencies sections free catalog and error reporting on REST API
 2020-07-28 0.75	Support OpenStack instances deployment alone without OpenShift, with specific image and flavor; support tester git clone with deploy key; 
@@ -306,7 +308,7 @@ userLoadedFile.prototype.isConsistent = function(){
 // And a table holding all IP addresses for this node, for infrastructure not allocating dynamically IP addresses (vmware, static)
 var heatPublicInterface = -1;   
 var cloudNode = function(aName, aFQDN){
-	this.flavor = 'flavorSmall';
+	this.flavor = 'flavorStandard';
 	this.name = aName;
 	this.fqdn = aFQDN;
 	this.interfaces = new Array();
@@ -1022,6 +1024,79 @@ Misc.build = function(target){
 	return result;
 };
 
+//===========================
+//Flavors settings
+//===========================
+var Flavors = new vnfResource("Flavors", [
+	{name:'Infrastructure', width:'100px', type:'choice', choices:['openstack']},
+	{name:'Flavor', width:'120px', type:'choice', choices:['flavorSmall', 'flavorStandard', 'flavorPerformance']},
+	{name:'name', type:'text', width:'80px'}
+	]
+	);
+//OpenStack profiles default values
+Flavors['openstack'] = new Array();
+Flavors['openstack']['flavorStandard'] = {name: 'v2.m8'};
+Flavors['openstack']['flavorSmall'] = {name: 'v2.m2'};
+Flavors['openstack']['flavorPerformance'] = {name: 'v4.m8'};
+
+Flavors.help = function(){
+var help=`Infrastructure flavors:
+Default flavor of a node is defined by the roles played on this node:
+- Small: Etcd
+- Standard: Worker
+- Performance: Master    
+Those default values can be overriden at the node level in the Nodes section.    
+Flavors are identified by name, made available by the infrastructure administrator    
+Examples:    
+`;
+	// Table built with spaces for alignment, thanks to padStart
+	var colLength=20;
+	['Infrastructure', 'Flavor', 'Name'].forEach(function(column){
+		help+=column.padStart(colLength);
+	});
+	help+="    ";
+	['openstack'].forEach(function(infrastructure){
+		['flavorStandard', 'flavorSmall','flavorPerformance'].forEach(function(flavor){
+		help+="\n"+infrastructure.padStart(colLength);
+		help+=flavor.padStart(colLength);
+		help+=Flavors[infrastructure][flavor].name.padStart(colLength)+"    ";
+		});	
+	});
+	help+="\n";
+	return help;
+}
+
+Flavors.build = function(target){
+	var nameIndexes = Flavors.nameIndexes;
+	var result = "";
+	Flavors.check="";
+	var table = document.getElementById("Flavors");
+	var rowCount = table.rows.length;
+	
+	for(var i=1; i < rowCount; i++){
+		if(result==""){
+			result += "\n"
+			result += "\n# ------------------------------- #";
+			result += "\n# Flavors customization           #";
+			result += "\n# ------------------------------- #";
+			}
+		var row = table.rows[i];
+		var infra=Flavors.getAndSetSelection(row, nameIndexes, 'Infrastructure');
+		var flavor=Flavors.getAndSetSelection(row, nameIndexes, 'Flavor');
+		switch(infra){
+			case 'openstack': 
+				Flavors[infra][flavor].name=Flavors.getAndSetValue(row, nameIndexes, 'name', Flavors[infra][flavor].name, "Flavor name for "+flavor+" on "+infra);
+				result+="\n# "+infra+" "+flavor+": name="+Flavors[infra][flavor].name;
+				break;
+			default:
+				Flavors.check += "\nFlavors section: setting flavors is not supported on infrastructure : "+infra;
+				break;
+		}
+	}
+	
+	if(Flavors.check != "")return Flavors.check;
+	return result;
+};
 
 // ===========================
 // Nodes resource
@@ -1101,7 +1176,7 @@ Nodes.build = function(target, engine){
 		
 		// Read the preferred image and flavor
 		var image=Nodes.getAndSetValue(row, nameIndexes, 'Image');
-		var flavor=Nodes.getAndSetValue(row, nameIndexes, 'Flavor');
+		var flavor=Nodes.getAndSetSelection(row, nameIndexes, 'Flavor');
 
 		// co-location checks
 		Nodes.check += checkDependency(isEtcd, [isWorker && isMaster, !isWorker ],  "Nodes: on node "+nodeName,", etcd and worker roles colocation requires a master role as well.");
@@ -1239,80 +1314,6 @@ Nodes.hideUnused = function(){
 		}else Networks.check+=checkInterface;
 	});
 	
-};
-
-// ===========================
-// Flavors settings
-// ===========================
-var Flavors = new vnfResource("Flavors", [
-	{name:'Infrastructure', width:'100px', type:'choice', choices:['openstack']},
-	{name:'Flavor', width:'120px', type:'choice', choices:['flavorSmall', 'flavorStandard', 'flavorPerformance']},
-	{name:'name', type:'text', width:'80px'}
-	]
-	);
-// OpenStack profiles default values
-Flavors['openstack'] = new Array();
-Flavors['openstack']['flavorStandard'] = {name: 'v2.m8'};
-Flavors['openstack']['flavorSmall'] = {name: 'v2.m2'};
-Flavors['openstack']['flavorPerformance'] = {name: 'v4.m8'};
-
-Flavors.help = function(){
-var help=`Infrastructure flavors:
-Default flavor of a node is defined by the roles played on this node:
-- Small: Etcd
-- Standard: Worker
-- Performance: Master    
-Those default values can be overriden at the node level in the Nodes section.    
-Flavors are identified by name, made available by the infrastructure administrator    
-Examples:    
-`;
-	// Table built with spaces for alignment, thanks to padStart
-	var colLength=20;
-	['Infrastructure', 'Flavor', 'Name'].forEach(function(column){
-		help+=column.padStart(colLength);
-	});
-	help+="    ";
-	['openstack'].forEach(function(infrastructure){
-		['flavorStandard', 'flavorSmall','flavorPerformance'].forEach(function(flavor){
-		help+="\n"+infrastructure.padStart(colLength);
-		help+=flavor.padStart(colLength);
-		help+=Flavors[infrastructure][flavor].name.padStart(colLength)+"    ";
-		});	
-	});
-	help+="\n";
-	return help;
-}
-
-Flavors.build = function(target){
-	var nameIndexes = Flavors.nameIndexes;
-	var result = "";
-	Flavors.check="";
-	var table = document.getElementById("Flavors");
-	var rowCount = table.rows.length;
-	
-	for(var i=1; i < rowCount; i++){
-		if(result==""){
-			result += "\n"
-			result += "\n# ------------------------------- #";
-			result += "\n# Flavors customization           #";
-			result += "\n# ------------------------------- #";
-			}
-		var row = table.rows[i];
-		var infra=Flavors.getAndSetSelection(row, nameIndexes, 'Infrastructure');
-		var flavor=Flavors.getAndSetSelection(row, nameIndexes, 'Flavor');
-		switch(infra){
-			case 'openstack': 
-				Flavors[infra][flavor].name=Flavors.getAndSetValue(row, nameIndexes, 'name', Flavors[infra][flavor].name, "Flavor name for "+flavor+" on "+infra);
-				result+="\n# "+infra+" "+flavor+": name="+Flavors[infra][flavor].name;
-				break;
-			default:
-				Flavors.check += "\nFlavors section: setting flavors is not supported on infrastructure : "+infra;
-				break;
-		}
-	}
-	
-	if(Flavors.check != "")return Flavors.check;
-	return result;
 };
 
 // ===========================
@@ -1717,6 +1718,11 @@ hpe5gResources.compile = function(){
 			if(networkFunction.dependency)check+=" in the provided list: "+networkFunction.dependency;
 		});
     });
+	
+	// Insecure registries not managed out of a full stack deployment since this requires a docker configuration on all nodes in /etc/docker/daemon.json
+	if((!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;})) && hpe5gResources.insecureRegistriesList){
+		check += "\nInsecure registries not managed out of a full stack deployment; this requires a docker configuration on all nodes performed during OpenShift deployment:"+hpe5gResources.insecureRegistriesList;
+	}
 	return check;
 }
 
@@ -2167,7 +2173,7 @@ oc login -u $oc_user &>> $logfile || _fail_ "Cannot log as $oc_user"
 _log_ "$_displayedAction completed: check $logfile"
 `;
 return _shellTemplate
-	.replace(/~PROJECT_DESCRIPTION~/g,document.getElementById("quickDescription").value+". Built from HPE5g assistant on: "+Date())
+	.replace(/~PROJECT_DESCRIPTION~/g,"From HPE5g automated deployer "+document.getElementById("vnfDescriptorWizardVersion").innerHTML+" on: "+Date()+" "+document.getElementById("quickDescription").value)
 	.replace(/~PROJECTS~/g,hpe5gResources.projects.join(' '))	// Resolve the list of projects
 	.replace(/~IMAGES_INSECURE_PROJECTS~/g,hpe5gResources.openshiftFunctions.map(function(e){if(e.insecureURL())return e.project;}).join(' '))	// Resolve the list of projects per image
 	.replace(/~IMAGES_INSECURE_URLS~/g,hpe5gResources.openshiftFunctions.map(function(e){if(e.insecureURL())return e.URL;}).join(' '))	// Resolve the list of URLs per image
@@ -2851,23 +2857,28 @@ It consists in four sections:
   Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
     - IndirectServices,NetworkFunctions,DirectServices: URL, image, tag, template
     - Operators: template
-    - HelmCharts: chart
-  The template attribute is a YAML description of the OpenShift template used for deploying the resource. It must/may include those placeholders:
-    - must: 
-      - ~NAME~ is the name of the resource
-      - ~PROJECT~ is the name of the OpenShift project (namespace)
-    - may:
-      - ~IMAGE~ is the name of the docker image
-      - ~REPLICAS~ is the number of replicas
-      - ~dependency_NAME~ is a reference to the actual name of a dependency for this resource.
-      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
-      - ~PERSISTENCE_START~conditional_sequence~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
-    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
-  Those placeholders are processed at build time with the actual values defined by the user in the assistant.
-  Templates can also be loaded as files from the GUI using the Import Yaml template button in the Catalog fieldset. See the online help for more details.
+    - HelmCharts: chart    
 4. admin:
   Define for each type if it requires special privileges for deployment (optional, default to false)    
   If true, a warning is emitted to inform the user that the deployment may fail if run without admin privileges.    
+
+<a name="dependenciesResolution"></a>
+###Template parameters and dynamic dependencies resolution
+The template attribute in the values section is a YAML description of the OpenShift template used for deploying the resource. It must/may include those placeholders:
+  - must: 
+      - ~NAME~ is the name of the resource
+      - ~PROJECT~ is the name of the OpenShift project (namespace)
+  - may:
+      - ~IMAGE~ is the name of the docker image
+      - ~REPLICAS~ is the number of replicas
+      - ~dependency_NAME~ is a reference to the actual name of a dependency for this resource.    
+      This placeholder allows dynamic resolution of dependencies between resources. For instance, in the udsf template, the datasource service name ~ignite_NAME~ will be dynamically resolved as the actual name of the ignite instance in this project for this deployment.
+      - ~VOLUME~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
+      - ~PERSISTENCE_START~conditional_sequence~PERSISTENCE_END~ useful to manage resources with optional persistent storage like ignite: 
+    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
+     
+Those placeholders are processed at build time with the actual values defined by the user.
+Templates can also be loaded as files from the GUI using the Import Yaml template button in the Catalog fieldset. See the online help for more details.  
 `;
 function catalogHelp(){userOutput(catalogDoc+`
 User interface buttons:
@@ -3050,7 +3061,7 @@ function buildNetworkFunctions(){
     	shell+=hpe5gHelmValues(catHelmValuesHeader, catFooter);
     	shell+=hpe5gDeploymentScript(warningMessage);
 	}else{
-		var quickDescription=document.getElementById("quickDescription").value+". Built from HPE5g assistant on: "+Date();
+		var quickDescription="From HPE5g automated deployer "+document.getElementById("vnfDescriptorWizardVersion").innerHTML+" on: "+Date()+" "+document.getElementById("quickDescription").value;
 		shell+=shellBody('curl');
 		
 		if(hpe5gHelmValues().length > 0){check+='Helm based deployments not supported on REST API' ;}
@@ -3065,7 +3076,7 @@ function buildNetworkFunctions(){
 				// Create the project if it does not exist or fail in case of deletion
 				shell+='\n_log_ "Checking project '+project+' on cluster '+cluster.name+'"';
 				shell+='\nuntil curl -f -v -k -X GET -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projects/'+project+'  &>> $logfile ; do ';
-				shell+='\n$_deploy || _fail_ "Missing project '+project+' on cluster '+cluster.name+'"';
+				shell+='\n$_deploy || _fail_ "Cannot check if project '+project+' exists on cluster '+cluster.name+'"';
 				shell+='\n_log_ "Creating project '+project+' on cluster '+cluster.name+'" && curl -f -v -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/project.openshift.io/v1/projectrequests  &>> $logfile <<HPE_EOF';
 				shell+=`
 {
@@ -3170,6 +3181,7 @@ esac; shift; done
 function ouputInstallerShell(){
 	var shellOpenStack='';
 	var shellOpenShift='';
+	Nodes.cloudNodes=undefined;
 
 	// Start with OpenStack resources if any
 	if(!Nodes.isEmpty()){
@@ -3478,8 +3490,8 @@ var defaultCatalog=`
     },
     "nudsf-dr": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
-      "image": "hpe-sde-nudsf-dr",
-      "tag": "1.5.0"
+      "image": "hpe-sde-udsf-nudsf-dr",
+      "tag": "1.8.0"
     },
     "nudr-dr": {
       "URL": "cmsgvm38.gre.hpecorp.net:18444",
@@ -3544,7 +3556,7 @@ var defaultCatalog=`
     "ignite": {
       "URL": "docker.io/gridgain",
       "image": "community",
-      "tag": "8.7.14"
+      "tag": "8.7.12"
     },
     "redis": {
       "URL": "docker.io/bitnami",
@@ -3724,283 +3736,6 @@ hpe5gResources.defaults['nudsf-dr']['template']=
         containers:
         - name: ~NAME~
           env:
-            - name: ROUTER_ENABLE_HTTP2
-              value: 'true'
-          image: ~IMAGE_STREAM~
-          imagePullPolicy: IfNotPresent
-          Requests:
-            cpu:    1000m
-            memory:   2000Mi
-          Limits:
-            cpu:  8000m
-            memory: 4000Mi
-          ports:
-          - containerPort: 8443
-            protocol: TCP
-          volumeMounts:
-            - name: ~NAME~
-              mountPath: /etc/opt/hpe-5g/nudsf-dr/
-            - name: ~NAME~-secrets
-              mountPath: /etc/opt/hpe-5g/nudsf-dr/security
-          livenessProbe:
-            failureThreshold: 3000
-            httpGet:
-              path: /nudsf-dr/v2/probes/healthy
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: 5
-            timeoutSeconds: 15
-          readinessProbe:
-            failureThreshold: 3000
-            httpGet:
-              path: /nudsf-dr/v2/probes/healthz
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 30
-            periodSeconds: 60
-            timeoutSeconds: 15
-        volumes:
-          - name: ~NAME~
-            configMap:
-              name: ~NAME~
-          - name: ~NAME~-secrets
-            secret:
-              secretName: ~NAME~
-    selector:
-      name: ~NAME~
-    replicas: ~REPLICAS~
-- kind: Service
-  apiVersion: v1
-  metadata:
-    name: ~NAME~
-    namespace: ~PROJECT~
-    labels:
-      name: ~NAME~
-      deploymentconfig: ~NAME~
-  spec:
-    type: LoadBalancer
-    ports:
-    - port: 8443
-      protocol: TCP
-      targetPort: 30043
-    selector:
-      name: ~NAME~
-      deploymentconfig: ~NAME~
-- kind: Route
-  apiVersion: v1
-  metadata:
-    name: ~NAME~
-    namespace: ~PROJECT~
-  spec:
-    tls:
-      termination: passthrough
-    to:
-      kind: Service
-      name: ~NAME~
-      namespace: ~PROJECT~
-- kind: ConfigMap
-  apiVersion: v1
-  metadata:
-    name: ~NAME~
-    namespace: ~PROJECT~
-  data:
-    nudsf-dr-config.yaml: |
-      #
-      # Sample Network function configuration.
-      #
-  
-      logging:
-        locale: en-US
-        loggers:
-      #    - name: log4j2
-      #      factory-class: com.hpe.paas.middleware.sdk.impl.logging.log4j.Log4j2I18nLoggerFactoryImpl
-          - name: fluentd
-            factory-class: com.hpe.paas.middleware.sdk.impl.logging.fluent.FluentI18nLoggerFactoryImpl
-            properties:
-              host: fluentd
-              port: 24224
-      statistics-configuration:
-        id: hpe-sde-udsf-dr-statistics
-        jmx:
-          domain: hpe-sde-udsf-dr
-          enabled: false
-          properties:
-            com.hpe.imsc.statistics.jmx.descriptors: "false"
-            com.hpe.imsc.statistics.jmx.notifications: "false"
-        jvm-metrics: true
-        properties:
-          com.hpe.imsc.statistics.influxdb.notifications: "false"
-          com.hpe.imsc.statistics.influxdb.server.database: hpe-sde-udsf-dr
-          com.hpe.imsc.statistics.influxdb.server.host: ~influxdb_NAME~.~PROJECT~.svc.cluster.local
-          com.hpe.imsc.statistics.influxdb.server.port: 8086
-          com.hpe.imsc.statistics.influxdb.server.protocol: http
-      call-tracing:
-        enabled: false
-        properties:
-          JAEGER_AGENT_HOST: localhost
-          JAEGER_AGENT_PORT: 6831
-          JAEGER_ENDPOINT: http://jaeger-collector:14268/api/traces
-          JAEGER_REPORTER_FLUSH_INTERVAL: 100
-          JAEGER_REPORTER_LOG_SPANS: true
-          JAEGER_SAMPLER_PARAM: 1
-          JAEGER_SAMPLER_TYPE: probabilistic
-          JAEGER_SERVICE_NAME: ~NAME~
-      datasources:
-        - id: ignite
-          profile:
-            name: kubernetes
-            properties:
-              masterUrl: https://openshift.default.svc.cluster.local:443
-              namespace: ~PROJECT~
-              serviceName: ~ignite_NAME~
-      model:
-        realms:
-        - id: realm0
-          properties:
-            replicas: 1
-          storages:
-          - id: space0
-            properties:
-              replicas: 1
-    project-nudsf-dr.yml: |+
-      #
-      # Sample Thorntail global configuration.
-      #
-      thorntail:
-        https:
-          only: true
-          port: 8443
-          keystore:
-            embedded: true
-          certificate:
-            generate: true
-            host: localhost
-        undertow:
-          alias: localhost
-          servers:
-            default-server:
-  
-              https-listeners:
-                default-https:
-                  socket-binding: https
-                  enable-http2: true
-                  ssl-context: sslctx
-                  http2-initial-window-size: 32000000
-                  http2-max-concurrent-streams: 200
-                  no-request-timeout: 600000
-        elytron:
-          server-ssl-contexts:
-            sslctx:
-              protocols: TLSv1.2
-              key-manager: km
-          key-managers:
-            km:
-              key-store: ks
-              credential-reference:
-                clear-text: hwroot
-          key-stores:
-            ks:
-              path: /etc/opt/hpe-5g/nudsf-dr/security/keystore.jks
-              credential-reference:
-                clear-text: hwroot
-              type: JKS
-        logging:
-          root-logger:
-            level: INFO
-            handlers:
-            - CONSOLE
-          loggers:
-            "stdout":
-               level: INFO
-               handlers:
-               - STDOUT
-            "com.hpe.cms5g.nudsf":
-               level: INFO
-            "com.hpe.cms.sde.udsf":
-               level: INFO
-            "com.hpe.cms.sde.dao":
-               level: INFO
-            "com.hpe":
-               level: INFO
-            "io.jaegertracing":
-              level: WARN
-            "io.undertow":
-               level: INFO
-            "io.netty":
-               level: INFO
-            "org.jboss.as":
-              level: INFO
-            "org.glassfish.jersey":
-              level: INFO
-          console-handlers:
-            STDOUT:
-              named-formatter: null
-              formatter: "%s%e%n"
-            CONSOLE:
-              named-formatter: null
-              formatter: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"
-- kind: Secret
-  apiVersion: v1
-  metadata:
-    name: ~NAME~
-    namespace: ~PROJECT~
-  type: Opaque
-  data:
-    keystore.jks: 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
-`;
-//================================================
-hpe5gResources.defaults['nudsf-dr']['template-1.8.0']=
-//================================================
-`
-- kind: ServiceAccount
-  apiVersion: v1
-  metadata:
-    name: ~NAME~
-    namespace: ~PROJECT~
-- kind: RoleBinding
-  apiVersion: authorization.openshift.io/v1
-  metadata:
-    name: ~NAME~-view
-    namespace: ~PROJECT~
-  roleRef:
-    kind: Role
-    name: view
-  subjects:
-  - kind: ServiceAccount
-    name: ~NAME~
-    namespace: ~PROJECT~
-- kind: ImageStream
-  apiVersion: v1
-  metadata:
-    name: ~NAME~
-    namespace: ~PROJECT~
-  spec:
-    tags:
-    - annotations:
-      from:
-        kind: DockerImage
-        name: ~IMAGE_STREAM~
-      generation: 1
-      importPolicy: {}
-      name: ""
-      referencePolicy:
-        type: Source
-- kind: DeploymentConfig
-  apiVersion: v1
-  metadata:
-    name: ~NAME~
-    namespace: ~PROJECT~
-  spec:
-    template: 
-      metadata:
-        labels: 
-          name: ~NAME~
-        name: ~NAME~
-      spec:
-        containers:
-        - name: ~NAME~
-          env:
           - name: JAVA_OPTS
             value: -Dpaas.service.name=RELEASE-NAME-nudsf-dr   -Djava.net.preferIPv4Stack=true  -XX:InitialRAMPercentage=40 -XX:MaxRAMPercentage=40 -XX:+AlwaysPreTouch -XX:MaxGCPauseMillis=100 -XX:+UseConcMarkSweepGC -XX:InitiatingHeapOccupancyPercent=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ScavengeBeforeFullGC -XX:+DisableExplicitGC -Dio.undertow.ssl.max-read-listener-invocations=1000 -Dgeneric.configuration.uri=file://///etc/opt/hpe/sde/udsf//nudsf-dr-config.yaml 
           image: ~IMAGE_STREAM~
@@ -4013,6 +3748,9 @@ hpe5gResources.defaults['nudsf-dr']['template-1.8.0']=
             memory: 4000Mi
           ports:
           - containerPort: 8443
+            protocol: TCP
+          - name: health
+            containerPort: 8080
             protocol: TCP
           volumeMounts:
             - name: ~NAME~
@@ -4243,9 +3981,6 @@ hpe5gResources.defaults['nudsf-dr']['template-1.8.0']=
               credential-reference:
                 clear-text: password
               type: 
-          file-audit-logs:
-            local-audit:
-              path: /var/log/hpe/sde/udsf/audit.log
         logging:
           root-logger:
             level: INFO
@@ -4288,7 +4023,7 @@ hpe5gResources.defaults['nudsf-dr']['template-1.8.0']=
     namespace: ~PROJECT~
   type: Opaque
   data:
-    keystore.jks: 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
+    keystore.p12: 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
 `;
 //================================================
 hpe5gResources.defaults['nudr-dr']['template']=
