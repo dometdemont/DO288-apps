@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-08-13 Version 0.78</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-08-29 Version 0.79</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
@@ -113,6 +113,7 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-08-29 0.79	new section Builds defining both Jenking pipelines and custom application builds; new section CustomApps to instantiate such applications from git repositories.
 2020-08-13 0.78	Move to UDSF 1.8 in the default catalog; include the deployer version in the OpenShift project description; 
 	default flavor to standard, not small; save flavor in Nodes section; restrict insecure registries to full stack deployment. 
 2020-08-10 0.77	Support template import in the catalog as yaml files; remove dependency on logger not supported in basic docker containers; robustness on missing sections in imported catalog. 
@@ -1447,7 +1448,6 @@ PersistentVolumes.build = function(target){
 	return result;
 };
 
-
 //===========================
 // Clusters
 //===========================
@@ -1505,6 +1505,172 @@ Clusters.build = function(target){
 	return result;
 };
 
+//===========================
+// Builds
+//===========================
+var Builds = new vnfResource("Builds", [
+	{name:'Type', type:'choice', width: '100px', choices:['pipeline','custom-app']}, 
+	{name:'Name', type:'text', width:'100px'},
+	{name:'GIT URL', type:'text', width:'400px'},
+	{name:'directory', type:'text', width:'200px'},
+	{name:'branch', type:'text', width:'120px'}
+	]
+	);
+
+Builds.help = function(){return `OpenShift builds:
+The OpenShift builds defined in this section rely on custom git projects as:
+- GIT URL: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
+- directory: (optional) directory in the github project hosting the project     
+- branch: (optional) git branch to use, eg: master    
+Two types of OpenShift builds can be defined:
+- jenkins pipelines available for continuous integration of hpe5g resources:
+   Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
+   - get_oc_resources: display the OpenShift current project and existing resources        
+   - manual_approval: expect the end  user to explicitly approve the build        
+- custom applications available as dynamic types in the CustomApps section for instanciation.
+`
+}
+
+//================================================================
+// Template fragment defining a build config 
+// either as a Jenkins pipeline or as a custom app
+//================================================================
+Builds.makeTemplate = function(name, type, uri, dir, branch){
+if(!uri)return;
+var result='';
+switch(type){
+	case 'pipeline':
+		result+=`
+- kind: "BuildConfig"
+  apiVersion: "build.openshift.io/v1"
+  metadata:
+    name: "~NAME~-`+name+`"
+  spec:
+    source:`;
+		if(dir)result+=`
+      contextDir: `+dir;
+result+=`
+      git:
+        uri: `+uri;
+if(branch)result+=`
+        ref: `+branch;
+result+=`
+    strategy:
+      jenkinsPipelineStrategy:
+        type: JenkinsPipeline
+`;
+	break;
+	case 'custom-app':
+		// Custom app deployment is not available as template, only from oc new-app CLI
+		// Build a one line shell script invoking this command if the parameter 'apply' is received or the related deletion if a parameter 'delete' is received
+		result+='( [[ "$1" == "delete" ]] && oc delete all --selector app=~NAME~-'+name+' ) || ( [[ "$1" == "apply" ]] && oc new-app --name ~NAME~-'+name+' '+uri;
+		if(branch)result+='#'+branch;
+		if(dir)result+=' --context-dir '+dir;
+		result+=' && oc expose svc/~NAME~-'+name+' )';
+	break;
+	default:
+		return;
+	break;
+}
+	
+Builds.templates[type][name]=result;
+};
+
+Builds.getTemplate = function(type, name){
+	if(!Builds.templates || !Builds.templates[type] || !Builds.templates[type][name])return '';
+	return Builds.templates[type][name];
+}
+Builds.getNames = function(type){
+	if(!Builds.templates || !Builds.templates[type])return [];
+	return Object.keys(Builds.templates[type]);
+}
+
+Builds.build = function(target){
+	var nameIndexes = Builds.nameIndexes;
+	var result="";
+	
+	var table = document.getElementById("Builds");
+	var rowCount = table.rows.length;
+	Builds.templates=new Object;
+	Builds.templates['pipeline']=new Object;
+	Builds.templates['custom-app']=new Object;
+	Builds.check = checkDependency(Builds.search('Type', 'pipeline'), [IndirectServices.search('Type', 'jenkins')], "Builds section: ", "pipeline types require a jenkins IndirectService");
+	
+	for(var i=1; i < rowCount; i++){
+		if(result==""){
+			result += "\n# ------------------------------- #";
+			result += "\n# Builds                          #";
+			result += "\n# ------------------------------- #";
+			};
+		var row = table.rows[i];
+		var type=Builds.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
+		var name=Builds.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
+		var gitURL=Builds.getAndSetValue(row, nameIndexes, 'GIT URL', 'https://github.com/dometdemont/DO288-apps');
+		var gitDirectory=Builds.getAndSetValue(row, nameIndexes, 'directory');
+		var gitBranch=Builds.getAndSetValue(row, nameIndexes, 'branch');
+		var check='';
+		if(!type)check += "\nBuilds section: "+name+": type is required";
+		if(!name)check += "\nBuilds section: "+type+" name is required";
+		if(!gitURL)check += "\nBuilds section: "+type+" "+name+": GIT URL is required";
+		if(!Builds.templates[type])check += "\nBuilds section: type "+type+" is not supported; expecting one of: "+Object.keys(Builds.templates).join();
+		else if(Builds.templates[type][name])check += "\nBuilds section: "+type+" "+name+" is duplicated";
+		Builds.check+=check;
+		if(check)continue;
+		
+		result+="\n#- "+type+" "+name+" build from GIT "+gitURL+"/"+gitDirectory+" branch: "+gitBranch;
+		Builds.makeTemplate(name, type, gitURL, gitDirectory, gitBranch);
+	}
+
+	if(Builds.check != "")return Builds.check;
+	return result;
+};
+
+//===========================
+//CustomApps
+//===========================
+var CustomApps = new vnfResource("CustomApps", [
+	{name:'Type', type:'choice', width: '140px', choices: function(){Builds.build(); return Builds.getNames('custom-app');}}, 
+	{name:'Name', type:'text', width:'100px'},
+	{name:'Project', type:'text', width:'60px'}
+	]
+);
+CustomApps.help = function(){return `CustomApps instantiation from GIT using source to image feature:
+PREREQUISITE: the Builds section defines the build source in GIT repository for each instantiable application type.
+- Type: the type of the build to instantiate as defined by the Name attribute in the Builds section 
+- Name: one word resource name for this application instance
+- Project: the OpenShift project hosting this application instance
+	
+`;
+}
+CustomApps.build = function(target){
+	var nameIndexes = CustomApps.nameIndexes;
+	var result = "";
+	CustomApps.check="";
+	var table = document.getElementById(this.title);
+	var rowCount = table.rows.length;
+	CustomApps.deployments = new Object;
+
+	for(var i=1; i < rowCount; i++){
+		if(result==""){
+			result += "\n"
+			result += "\n# --------------------------------";
+			result += "\n# CustomApps definition           ";
+			result += "\n# -------------------------------- ";
+			}
+		var row = table.rows[i];
+		var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
+		var template=Builds.getTemplate('custom-app', type);
+		var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
+		var project=this.getAndSetValue(row, nameIndexes, 'Project',Misc.getValue('default_project'));
+		if(!template){this.check += "\n"+this.title+": "+type+" is unknown in the Builds section as a custom-app"; continue;}
+		if(!CustomApps.deployments[project])CustomApps.deployments[project]=new Array();
+		CustomApps.deployments[project].push(template.replace(/~NAME~/g,name));
+		result+="\n#- "+name+": "+type+" on project: "+project;
+	}
+	
+	if(this.check != "")return this.check;
+	return result;
+};
 
 //===========================
 // HPE5G resources
@@ -1541,13 +1707,7 @@ hpe5gResource.prototype.help = function(){return `Attributes:
 - Replicas: number of replicas deployed for this instance.
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-	  - get_oc_resources: display the OpenShift current project and existing resources        
-	  - manual_approval: expect the end  user to explicitly approve the build        
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this function from the Builds section definition
 	
 `;
 }
@@ -1568,7 +1728,7 @@ hpe5gResource.prototype.build = function(target){
 			}
 		var row = table.rows[i];
 		var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
-		if(hpe5gResources.resources[this.title].indexOf(type) < 0){this.check += "\n"+this.title+": "+type+" is unknown in the catalog"; continue;}
+		if(!hpe5gResources.types[this.title] || hpe5gResources.types[this.title].indexOf(type) < 0){this.check += "\n"+this.title+": "+type+" is unknown in the catalog"; continue;}
 		var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
 		var project=this.getAndSetValue(row, nameIndexes, 'Project',Misc.getValue('default_project'));
 		var URL=this.getAndSetValue(row, nameIndexes, 'URL',hpe5gResources.defaults[type]['URL']);
@@ -1594,10 +1754,10 @@ hpe5gResource.prototype.build = function(target){
 		var dependencies=undefined;
 		if(dependenciesList)dependencies=dependenciesList.split(/[\s,]+/);
 		if(name.search(/[A-Z]/g) >= 0){this.check += "\n"+this.title+" "+name+" : upper cases are not supported";}
-		if(project == undefined || project == ''){this.check += "\n"+this.title+" "+name+" : project is required";}
+		if(!project){this.check += "\n"+this.title+" "+name+" : project is required";}
 		var displayImage="";
-		if(image == undefined || image == '' ){
-			if(this.title!='Operators' && this.title!='HelmCharts')this.check += "\n"+this.title+" "+name+" : image is required";
+		if(!image){
+			if(hpe5gResources.defaults[type]['image'])this.check += "\n"+this.title+" "+name+" : image is required";
 		}else{displayImage=" running image: "+image+":"+tag;}
 		if(storage)displayVolume+=" with "+storage+" storage";
 		if(volume !=''){
@@ -1605,13 +1765,12 @@ hpe5gResource.prototype.build = function(target){
 			else displayVolume+=" on volume: "+volume;
 		}
 		// Name must be unique accross all hpe5g resources
-		if(NetworkFunctions.count('Name', name) + DirectServices.count('Name', name) + IndirectServices.count('Name', name) + Operators.count('Name', name) > 1)this.check += "\n"+this.title+": resource name "+name+" is duplicated across sections "+hpe5gResources.names.join();
+		if(NetworkFunctions.count('Name', name) + DirectServices.count('Name', name) + IndirectServices.count('Name', name) + Operators.count('Name', name) > 1)this.check += "\n"+this.title+": resource name "+name+" is duplicated across sections "+hpe5gResources.sections.join();
 		this.check += checkDependency(hpe5gResources.defaults[type]['storage'] != undefined, [storage.length>0], this.title+" "+name,", Storage is required");
 		
-		var gitURL=this.getAndSetValue(row, nameIndexes, 'Pipeline GIT');
-		var gitDirectory=this.getAndSetValue(row, nameIndexes, 'directory');
-		var gitBranch=this.getAndSetValue(row, nameIndexes, 'branch', gitURL.length==0 ? '': 'master');
-		this.check += checkGroupConsistency([gitURL.length==0, gitDirectory.length==0, gitBranch.length==0], this.title+" "+name+" pipeline configuration inconsistent: ", "three attributes required or none");
+		var pipeline=this.getAndSetValue(row, nameIndexes, 'Pipeline');
+		var pipelineTemplate=Builds.getTemplate('pipeline', pipeline);
+		this.check += checkDependency(pipeline, [pipelineTemplate], this.title+" "+name+": pipeline "+pipeline, " is undefined in the Builds section");
 		
 		var replicasNumber = Number(replicas);
 		if(isNaN(replicasNumber)){
@@ -1627,9 +1786,7 @@ hpe5gResource.prototype.build = function(target){
 		hpe5gResources.provides[type][project].push(name);
 		
 		hpe5gResources.openshiftFunctions.push(
-  		new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, 
-  			hpe5gResources.pipeline(gitURL, gitDirectory, gitBranch)
-  		));
+  		new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, pipelineTemplate));
 		
 		if(insecure && hpe5gResources.insecureRegistries.indexOf(URL) < 0)hpe5gResources.insecureRegistries.push(URL);
 		
@@ -1689,23 +1846,28 @@ openshiftFunction.prototype.resolve = function(requirement){
 //==========================
 // Deployed 5G resources
 //==========================
+// Composite object holding the deployed 5G resources
 var hpe5gResources=new Object;
-hpe5gResources.names=['DirectServices','IndirectServices','Operators','NetworkFunctions','HelmCharts'];
+// Array of sections names holding 5G resources
+hpe5gResources.sections=['DirectServices','IndirectServices','Operators','NetworkFunctions','HelmCharts'];
+// Array of types per section: hpe5gResources.types[section]:[types]
+// Array of types, each holding a boolean tracking the admin privilege requirement for this type: hpe5gResources.admin[type]:boolean
 hpe5gResources.admin=new Array();
 
 // Reset the list of resources, to be called before building them
 hpe5gResources.init = function(){
-	hpe5gResources.openshiftFunctions=new Array();
-	hpe5gResources.provides=new Array();
-	hpe5gResources.projects=new Array();
+	hpe5gResources.openshiftFunctions=new Array();	// array of instances of the class openshiftFunction, the actually OpenShift resources deployed by this session
+	hpe5gResources.provides=new Array();			// array of instances names actually providing a specific type for a project: hpe5gResources.provides[type][project]:[names]
+	hpe5gResources.projects=new Array();			// array of projects names deployed by this session
 	hpe5gResources.adminList="";
-	hpe5gResources.insecureRegistries=new Array();
+	hpe5gResources.insecureRegistries=new Array();	// array of URLs pointing to insecure registries
 	hpe5gResources.insecureRegistriesList="";
 }
 
 // Compile the resources from the various resources sections: build the list of projects, registries, and cross check dependencies 
 hpe5gResources.compile = function(){
-	hpe5gResources.projects=Array.from(new Set(hpe5gResources.openshiftFunctions.map(function(e){return e.project;})));
+	// Build the list of projects as a concatenation of hpe5g resources and custom apps projects, removing duplicates
+	hpe5gResources.projects=Array.from(new Set(hpe5gResources.openshiftFunctions.map(function(e){return e.project;}).concat(Object.keys(CustomApps.deployments))));
 	if(hpe5gResources.insecureRegistries.length > 0)hpe5gResources.insecureRegistriesList += '"'+hpe5gResources.insecureRegistries.join('","')+'"';
 	
 	// Check cross functions dependencies
@@ -1730,7 +1892,7 @@ hpe5gResources.compile = function(){
 //NetworkFunctions
 //===========================
 var NetworkFunctions = new hpe5gResource("NetworkFunctions", [
-	{name:'Type', type:'choice', width: '100px', choices: function(){return hpe5gResources.resources['NetworkFunctions'];}}, 
+	{name:'Type', type:'choice', width: '100px', choices: function(){return hpe5gResources.types['NetworkFunctions'];}}, 
 	{name:'Name', type:'text', width:'80px'},
 	{name:'Project', type:'text', width:'60px'},
 	{name:'URL', type:'text', width:'200px'},
@@ -1741,16 +1903,14 @@ var NetworkFunctions = new hpe5gResource("NetworkFunctions", [
 	{name:'Volume', type:'text', width:'60px'},
 	{name:'Replicas', type:'text', width:'40px'},
 	{name:'Dependencies', type:'text', width:'100px'},
-	{name:'Pipeline GIT', type:'text', width:'200px'},
-	{name:'directory', type:'text', width:'120px'},
-	{name:'branch', type:'text', width:'120px'}
+	{name:'Pipeline', type:'text', width:'100px'}
 	]
 	);
 //===========================
 //DirectServices
 //===========================
 var DirectServices = new hpe5gResource("DirectServices", [
-	{name:'Type', type:'choice', width: '100px', choices: function(){return hpe5gResources.resources['DirectServices']}}, 
+	{name:'Type', type:'choice', width: '100px', choices: function(){return hpe5gResources.types['DirectServices']}}, 
 	{name:'Name', type:'text', width:'80px'},
 	{name:'Project', type:'text', width:'60px'},
 	{name:'URL', type:'text', width:'200px'},
@@ -1761,9 +1921,7 @@ var DirectServices = new hpe5gResource("DirectServices", [
 	{name:'Volume', type:'text', width:'60px'},
 	{name:'Replicas', type:'text', width:'40px'},
 	{name:'Dependencies', type:'text', width:'100px'},
-	{name:'Pipeline GIT', type:'text', width:'200px'},
-	{name:'directory', type:'text', width:'120px'},
-	{name:'branch', type:'text', width:'120px'}
+	{name:'Pipeline', type:'text', width:'100px'}
 	]
 	);
 DirectServices.help = function(){return hpe5gResource.prototype.help()+
@@ -1784,7 +1942,7 @@ As a consequence, the total claimed storage size is 3x the user defined size.
 //IndirectServices
 //===========================
 var IndirectServices = new hpe5gResource("IndirectServices", [
-	{name:'Type', type:'choice', width: '100px', choices: function(){return hpe5gResources.resources['IndirectServices']}}, 
+	{name:'Type', type:'choice', width: '100px', choices: function(){return hpe5gResources.types['IndirectServices']}}, 
 	{name:'Name', type:'text', width:'80px'},
 	{name:'Project', type:'text', width:'60px'},
 	{name:'URL', type:'text', width:'200px'},
@@ -1795,9 +1953,7 @@ var IndirectServices = new hpe5gResource("IndirectServices", [
 	{name:'Volume', type:'text', width:'60px'},
 	{name:'Replicas', type:'text', width:'40px'},
 	{name:'Dependencies', type:'text', width:'100px'},
-	{name:'Pipeline GIT', type:'text', width:'200px'},
-	{name:'directory', type:'text', width:'120px'},
-	{name:'branch', type:'text', width:'120px'}
+	{name:'Pipeline', type:'text', width:'100px'}
 	]
 	);
 IndirectServices.help = function(){return hpe5gResource.prototype.help()+
@@ -1813,13 +1969,11 @@ IndirectServices.help = function(){return hpe5gResource.prototype.help()+
 //Operators
 //===========================
 var Operators = new hpe5gResource("Operators", [
-	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.resources['Operators']}}, 
+	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.types['Operators']}}, 
 	{name:'Name', type:'text', width:'100px'},
 	{name:'Project', type:'text', width:'60px'},
 	{name:'Replicas', type:'text', width:'40px'},
-	{name:'Pipeline GIT', type:'text', width:'200px'},
-	{name:'directory', type:'text', width:'120px'},
-	{name:'branch', type:'text', width:'120px'}
+	{name:'Pipeline', type:'text', width:'100px'}
 	]
 );
 Operators.help = function(){return `Operator instantiation:
@@ -1828,13 +1982,7 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Name: one word resource name for this operator instance
 - Project: the OpenShift project hosting this operator instance
 - Replicas: number of replicas passsed to this operator instance.
-- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile     
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
-	  - get_oc_resources: display the OpenShift current project and existing resources        
-	  - manual_approval: expect the end  user to explicitly approve the build        
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this operator instance from the Builds section definition
 	
 `;
 }
@@ -1843,16 +1991,14 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 //HelmCharts
 //===========================
 var HelmCharts = new hpe5gResource("HelmCharts", [
-	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.resources['HelmCharts']}},
+	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.types['HelmCharts']}},
 	{name:'Name', type:'text', width:'100px'},
 	{name:'Project', type:'text', width:'60px'},
 	{name:'Chart', type:'text', width:'200px'},
 	{name:'Values', type:'file', width:'200px'},
 	{name:'Version', type:'text', width:'60px'},
 	{name:'Options', type:'text', width:'120px'},
-	{name:'Pipeline GIT', type:'text', width:'200px'},
-	{name:'directory', type:'text', width:'120px'},
-	{name:'branch', type:'text', width:'120px'}
+	{name:'Pipeline', type:'text', width:'100px'}
 	]
 );
 HelmCharts.help = function(){var help=this.title+
@@ -1865,44 +2011,11 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Values: local file injected in this chart as deployment values
 - Version: specify the exact chart version to install. If this is not specified, the latest version is installed
 - Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
-- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile     
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
-	  - get_oc_resources: display the OpenShift current project and existing resources    
-	  - manual_approval: expect the end  user to explicitly approve the build    
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this chart instance from the Builds section definition
 	
 `;
 return help;
 }
-
-//================================================================
-// Template fragment defining a build config as a Jenkins pipeline
-//================================================================
-hpe5gResources.pipeline = function(uri, dir, branch){
-if(uri.length == 0)return;
-var result=`
-- kind: "BuildConfig"
-  apiVersion: "build.openshift.io/v1"
-  metadata:
-    name: "~NAME~"
-  spec:
-    source:`;
-if(dir.length > 0)result+=`
-      contextDir: `+dir;
-result+=`
-      git:
-        uri: `+uri;
-if(branch.length > 0)result+=`
-        ref: `+branch;
-result+=`
-    strategy:
-      jenkinsPipelineStrategy:
-        type: JenkinsPipeline
-`;
-return result;
-};
 
 function deploymentHelp(){userOutput(welcomeMsg+OpenStackHelp);}
 var OpenStackHelp=
@@ -1989,9 +2102,9 @@ function deploymentDoc(){
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 `;
-	['Networks','Nodes','Flavors','Clusters','NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
+	['Networks','Nodes','Flavors','Clusters','Builds', 'CustomApps', 'NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
 		result+="\n### "+section+"\n"+window[section].help();
-		if(hpe5gResources.resources[section])result+="\n"+section+" supported types: "+hpe5gResources.resources[section]+"\n";
+		if(hpe5gResources.types[section])result+="\n"+section+" supported types: "+hpe5gResources.types[section]+"\n";
 	});
 	
 	result+=`
@@ -2163,6 +2276,7 @@ for _project in $oc_projects; do
 	# File naming convention for Network functions: openshift_project_<project>.yaml
 	# File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
 	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && _cmd_with_retry "oc process -f openshift_project_$_project.yaml | oc $_ocAction -f -" "Processing" && rm -f openshift_project_$_project.yaml &>> $logfile || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
+	if test -f openshift_project_$_project.sh ; then _log_ "$_displayedAction openshift_project_$_project.sh on project $_project" && ./openshift_project_$_project.sh $_ocAction &>> $logfile && rm -f openshift_project_$_project.sh &>> $logfile || _fail_ "$_displayedAction openshift_project_$_project.sh "; fi
 	for _helmValues in $(ls openshift_helm_$\{_project}_*.yaml 2> /dev/null) ; do eval $(head -1 $_helmValues) && _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" && tail -n +2 $_helmValues > _tmp_$_helmValues && _helmAction &>> $logfile && rm -f $_helmValues _tmp_$_helmValues &>> $logfile || _fail_ "$_displayedAction Helm instance on project $_project" ; done
 	# Undeployment: wait for pods termination  
 	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $logfile ; do : ; done
@@ -2180,7 +2294,22 @@ return _shellTemplate
 	.replace(/~IMAGES_INSECURE~/g,hpe5gResources.openshiftFunctions.map(function(e){if(e.insecureURL())return e.image;}).join(' '))	// Resolve the list of insecure images
 ;}
 
-// Return the Helm values files, one per helm instance 
+// Return the CustomApps deployment scripts, one per project
+// File naming convention for custom apps scripts: openshift_project_<project>.sh
+function hpe5gCustomAppsScript(){
+	var result="\n# CustomApps deployment scripts";
+	Object.keys(CustomApps.deployments).forEach(function(project){
+		result+="\ncat > openshift_project_"+project+".sh << 'EOF"+project+"'";
+		result+="\n#!/bin/bash";
+		result+="\n"+CustomApps.deployments[project].join(" && ")+" || exit 1";
+		result+="\nexit 0";
+		result+="\nEOF"+project;
+		result+="\nchmod a+x openshift_project_"+project+".sh\n";
+	});
+	return result;
+}
+
+// Return the Helm values files, one per helm instance: header and footer open and close the template, which is idented with tab
 function hpe5gHelmValues(header, footer, tab){
 	var result="";
 	hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
@@ -2193,7 +2322,9 @@ function hpe5gHelmValues(header, footer, tab){
 	});
 	return result;
 }
-// Return the OpenShift network functions templates, one per project
+
+// Return the OpenShift resources templates, one per project: header and footer open and close the template, which is idented with tab
+// If singleProject is provided, returns only the template for this project
 function hpe5gNetworkFunctions(header, footer, tab, singleProject){
 	var templateHeader=
 `
@@ -2627,7 +2758,9 @@ function buildHeatTemplate(){
       	heat+=port;
     	}  	// if this node is a VIP, neither volume nor instance are needed
     	
-     	// On the ems (first master), push the openshift templates as yaml files
+     	// On the ems (first master), push: the persistent volumes definition and the deployment script hpe5g.sh
+		// Exclude the openshift templates since their cumulated sizes could exceed the maximum allowed as raw data
+		// Openshift templates are passed as specific outputs, one per project
      	if(Nodes.cloudNodes[indexNode].isEms){
       	heat+=n0+"      config_drive: True";
       	heat+=n0+"      user_data_format: 'RAW'";
@@ -2668,7 +2801,7 @@ function buildHeatTemplate(){
 
 		// Shell script dropped on the ems node ready to deploy the volumes, projects, and hpe5g network functions 
 		heat+=n0+"            cat > /home/centos/hpe5g.sh << 'EOFILE'";
-		heat+=n0.concat(shellHeader(),shellBody('oc'),hpe5gDeploymentScript())
+		heat+=n0.concat(shellHeader(),shellBody('oc'),hpe5gCustomAppsScript(),hpe5gDeploymentScript())
 		.replace(/\n/g, "\n"+  
 	             '            ');	// fix the descriptor indentation as expected by Heat
 		heat+=n0+"            EOFILE";
@@ -2844,7 +2977,7 @@ It consists in four sections:
 
 1. types:
   Define the name of each type of resource managed by the assistant.
-  Each name must fall in one of those categories: `+hpe5gResources.names.join()+`
+  Each name must fall in one of those categories: `+hpe5gResources.sections.join()+`
 2. dependencies:
   Define for each type the list of required resources by their type names.   
   If a dependency can be resolved by different types, a list can be provided as a json table.    
@@ -2921,7 +3054,7 @@ function importYaml(){
 var catalogImport = new userLoadedFile("catalogImport", "Import Json catalog...", importCatalog);
 if(!catalogImport.isDefined())document.getElementById("catalogArea").appendChild(catalogImport.getDomElement());
 function exportCatalog(){
-	var catalog=JSON.stringify({types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults, admin: hpe5gResources.admin});
+	var catalog=JSON.stringify({types: hpe5gResources.types, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults, admin: hpe5gResources.admin});
 	userOutput(catalog);
 	// Stop there if headless, ie no user interface
 	if(Misc.getValue('headless'))return true;
@@ -2946,7 +3079,7 @@ function importCatalog(jsonCatalog = catalogImport.content, silent = false){
     	switch(key){
     	case 'types': 
     		Object.keys(catalog[key]).forEach(function(type) {
-        		if(hpe5gResources.names.indexOf(type)<0){check+="\nLevel 2: "+key+":invalid type "+type+"; expected: "+hpe5gResources.names.join(); return;}
+        		if(hpe5gResources.sections.indexOf(type)<0){check+="\nLevel 2: "+key+":invalid type "+type+"; expected: "+hpe5gResources.sections.join(); return;}
         		importedTypes = importedTypes.concat(catalog[key][type]);
     		});
     		break;
@@ -2965,14 +3098,14 @@ function importCatalog(jsonCatalog = catalogImport.content, silent = false){
 	});
     if(check.length>0)userOutput("Inconsistent imported catalog:"+check);
     else if (silent || confirm("You are about to override the current catalog with imported data. Click Cancel to merge both instead.")) {
-  	  hpe5gResources.resources=catalog.types; 
+  	  hpe5gResources.types=catalog.types; 
   	  // Init sections missing in the imported catalog with an empty table
-  	  hpe5gResources.names.forEach(function(section){if(!hpe5gResources.resources[section])hpe5gResources.resources[section]=new Array;});
+  	  hpe5gResources.sections.forEach(function(section){if(!hpe5gResources.types[section])hpe5gResources.types[section]=new Array;});
   	  hpe5gResources.depends=catalog.dependencies; 
   	  hpe5gResources.defaults=catalog.values; 
   	  hpe5gResources.admin=catalog.admin;
   	} else {
-  	  Object.keys(hpe5gResources.resources).forEach(function(section) {hpe5gResources.resources[section]=hpe5gResources.resources[section].concat(catalog.types[section]);});
+  	  Object.keys(hpe5gResources.types).forEach(function(section) {hpe5gResources.types[section]=hpe5gResources.types[section].concat(catalog.types[section]);});
   	  hpe5gResources.depends=hpe5gResources.depends?Object.assign(hpe5gResources.depends, catalog.dependencies):catalog.dependencies; 
       hpe5gResources.defaults=hpe5gResources.defaults?Object.assign(hpe5gResources.defaults, catalog.values):catalog.values; 
       hpe5gResources.admin=hpe5gResources.admin?Object.assign(hpe5gResources.admin, catalog.admin):catalog.admin;
@@ -3021,23 +3154,27 @@ function displayCatalog(){
 		if(!isNaN(candidate))catalog_display_ellipse=candidate;
 	}
 
-	var catalog={types: hpe5gResources.resources, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults, admin: hpe5gResources.admin};
+	var catalog={types: hpe5gResources.types, dependencies: hpe5gResources.depends, values: hpe5gResources.defaults, admin: hpe5gResources.admin};
 	userOutput("Catalog:\n"+objToString(catalog));
 }
 //=================================
 //OpenShift network functions build
 //=================================
-// Build a shell script named hpe5g.sh and drop it in the Download directory
+// Return a shell script deploying resources on OpenShift
 // Two options: oc (openshift cli) or curl (openshift rest api) based
 // The curl options support multiple targeted clusters, defined in Clusters.targeted array
-// The oc options is used if Clusters.targeted is empty and relies on oc invocations on the single target cluster
+// If Clusters.targeted is empty, the oc options is used ; otherwise oc and helm are invoked on the single target cluster defined in the user context
 function buildNetworkFunctions(){
 	hpe5gResources.init();
 
-	// Check the NetworkFunctions section (or get the errors)
-	NetworkFunctions.build(); DirectServices.build(); IndirectServices.build(); Operators.build(); HelmCharts.build(); Clusters.build();
-	var check = NetworkFunctions.check+DirectServices.check+IndirectServices.check+Operators.check+HelmCharts.check+hpe5gResources.compile();
-	if(check.length != 0){userOutput(check); return '';}
+	// Check the hpe5gResources sections + Builds and Clusters (or get the errors)
+	var check = '';
+	['Builds', 'CustomApps', 'Clusters'].concat(hpe5gResources.sections).forEach(function(section){
+		window[section].build();
+		check += window[section].check;
+	});
+	check += hpe5gResources.compile();
+	if(check){userOutput(check); return '';}
 	
 	var shell='';
 	var warningMessage='';
@@ -3059,12 +3196,15 @@ function buildNetworkFunctions(){
     	shell+=shellBody('oc');
     	shell+=hpe5gNetworkFunctions(catHeader, catFooter);
     	shell+=hpe5gHelmValues(catHelmValuesHeader, catFooter);
+		shell+=hpe5gCustomAppsScript();
     	shell+=hpe5gDeploymentScript(warningMessage);
 	}else{
 		var quickDescription="From HPE5g automated deployer "+document.getElementById("vnfDescriptorWizardVersion").innerHTML+" on: "+Date()+" "+document.getElementById("quickDescription").value;
 		shell+=shellBody('curl');
 		
-		if(hpe5gHelmValues().length > 0){check+='Helm based deployments not supported on REST API' ;}
+		if(hpe5gHelmValues().length > 0){check+='\nHelm based deployments not supported on OpenShift REST API, only on CLI' ;}
+		if(Object.keys(CustomApps.deployments).length > 0){check+='\nCustom Apps deployments not supported on OpenShift REST API, only on CLI' ;}
+		if(check){userOutput(check); return '';}
 
 		Clusters.targeted.forEach(function(cluster){
 			hpe5gResources.projects.forEach(function(project){
@@ -3631,9 +3771,9 @@ var welcomeMsg=`Welcome to the CMS5G Core stack automated deployer assistant.
 To deploy resources, click on the section names in the Summary line or import an existing session using the file chooser button.
 
 Resources deployment on top of OpenShift:`;
-hpe5gResources.names.forEach(function(section){
+hpe5gResources.sections.forEach(function(section){
 	welcomeMsg+="\n- "+section+": ";
-	welcomeMsg+=hpe5gResources.resources[section].join();
+	welcomeMsg+=hpe5gResources.types[section].join();
 });
 welcomeMsg+=`
 Then click on 'Resources': the installer is downloaded by the browser in the 'download' folder.
