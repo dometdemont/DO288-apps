@@ -39,7 +39,7 @@ pipeline {
 
         stage('stage 3') {
             steps {
-                sh 'echo hello from stage 3!. This is the last stage...'
+                sh 'curl http://assistant-mad-also.2886795294-80-host17nc.environments.katacoda.com/bs-set.html/dump'
             }
         }
 
