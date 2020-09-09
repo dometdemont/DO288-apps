@@ -1,3 +1,5 @@
+def _ENDPOINT = "undefined"
+
 pipeline {
     options {
         // set a timeout of 30 minutes for this pipeline
@@ -9,7 +11,7 @@ pipeline {
       }
     }
     environment {
-        def _ENDPOINT = "undefined"
+        
     }
     stages {
         stage('OpenShift context') {
@@ -17,7 +19,7 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                          def _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
+                          _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
                           echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
                         }
                     }
@@ -27,12 +29,12 @@ pipeline {
 
       stage('Default session dump empty') {
         steps {
-              sh '[[ $(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]'
+              sh "[[ $(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]"
           }
       }
       stage('Error on invalid session') {
         steps {
-              sh '[[ $(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]'
+              sh "[[ $(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]"
           }
       }
 
