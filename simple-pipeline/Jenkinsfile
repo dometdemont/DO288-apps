@@ -9,7 +9,7 @@ pipeline {
       }
     }
     environment {
-    _ENDPOINT = "http://assistant-mad-also.2886795284-80-host17nc.environments.katacoda.com/"
+    _ENDPOINT = "http://assistant-mad-also.2886795284-80-host17nc.environments.katacoda.com"
     }
     stages {
         stage('OpenShift project') {
@@ -17,7 +17,7 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                                echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route openshift.selector( 'route/${_NAME}' ).describe()"
+                                echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${openshift.selector( 'route/${_NAME}').describe()}"
                         }
                     }
                 }
