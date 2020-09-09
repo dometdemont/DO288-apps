@@ -10,9 +10,6 @@ pipeline {
         label 'master'
       }
     }
-    environment {
-        
-    }
     stages {
         stage('OpenShift context') {
             steps {
