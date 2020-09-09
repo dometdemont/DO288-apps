@@ -29,7 +29,7 @@ pipeline {
       }
       stage('Error on invalid session') {
         steps {
-              sh '! curl http://assistant-mad-also.2886795312-80-host05nc.environments.katacoda.com/unlikely.html/dump'
+              sh '[[ $(curl http://assistant-mad-also.2886795312-80-host05nc.environments.katacoda.com/unlikely.html/dump) != 0 ]]'
           }
       }
 
