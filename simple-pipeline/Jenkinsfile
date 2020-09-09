@@ -10,8 +10,7 @@ pipeline {
     }
 
     stages {
-
-        stage('stage 1') {
+        stage('OpenShift project') {
             steps {
                 script {
                     openshift.withCluster() {
@@ -23,25 +22,18 @@ pipeline {
             }
         }
 
-    stage('stage 2') {
-			steps {
-				sh 'echo hello from stage 2!'
-				}
-			}
+      stage('Default session empty') {
+        steps {
+              sh '[[ "$(curl http://assistant-mad-also.2886795316-80-host17nc.environments.katacoda.com/hpe5g.html)" == "[]" ]]'
+          }
+      }
 
-        stage('Default session is empty') {
-            steps {
-                sh '[[ "$(curl http://assistant-mad-also.2886795316-80-host17nc.environments.katacoda.com/hpe5g.html)" == "[]" ]]'
-            }
+      stage('Manual approval') {
+        steps {
+          timeout(time: 60, unit: 'MINUTES') {
+          input message: "Confirm success?"
+          }
         }
+      }
     }
-    
-    stage('manual approval') {
-			steps {
-				timeout(time: 60, unit: 'MINUTES') {
-				input message: "Confirm success?"
-				}
-			}
-		}
-
 }
