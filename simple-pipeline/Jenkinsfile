@@ -24,7 +24,7 @@ pipeline {
 
       stage('Default session empty') {
         steps {
-              sh '[[ "$(curl http://assistant-mad-also.2886795316-80-host17nc.environments.katacoda.com/hpe5g.html)" == "[]" ]]'
+              sh '[[ "$(curl http://assistant-mad-also.2886795312-80-host05nc.environments.katacoda.com/hpe5g.html)" == "[]" ]]'
           }
       }
 
