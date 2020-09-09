@@ -29,12 +29,12 @@ pipeline {
 
       stage('Default session dump empty') {
         steps {
-              sh "[[ \"$(curl http://${_ENDPOINT}/hpe5g.html/dump)\" == \"[]\" ]]"
+              sh "[[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]"
           }
       }
       stage('Error on invalid session') {
         steps {
-              sh "[[ $(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]"
+              sh "[[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]"
           }
       }
 
