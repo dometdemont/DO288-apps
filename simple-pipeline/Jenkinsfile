@@ -8,13 +8,16 @@ pipeline {
         label 'master'
       }
     }
+    environment {
+    _ENDPOINT = "http://assistant-mad-also.2886795284-80-host17nc.environments.katacoda.com/"
+    }
     stages {
         stage('OpenShift project') {
             steps {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                                echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME}"
+                                echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route openshift.selector( 'route/${_NAME}' ).describe()"
                         }
                     }
                 }
@@ -23,12 +26,12 @@ pipeline {
 
       stage('Default session dump empty') {
         steps {
-              sh '[[ "$(curl http://$(oc get route ${_NAME})/hpe5g.html/dump)" == "[]" ]]'
+              sh '[[ "$(curl ${_ENDPOINT}/hpe5g.html/dump)" == "[]" ]]'
           }
       }
       stage('Error on invalid session') {
         steps {
-              sh '[[ $(curl http://$(oc get route ${_NAME})/unlikely.html/dump) != 0 ]]'
+              sh '[[ $(curl ${_ENDPOINT}/unlikely.html/dump) != 0 ]]'
           }
       }
 
