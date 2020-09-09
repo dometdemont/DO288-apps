@@ -27,6 +27,11 @@ pipeline {
               sh '[[ "$(curl http://assistant-mad-also.2886795312-80-host05nc.environments.katacoda.com/hpe5g.html/dump)" == "[]" ]]'
           }
       }
+      stage('Error on invalid session') {
+        steps {
+              sh '! curl http://assistant-mad-also.2886795312-80-host05nc.environments.katacoda.com/unlikely.html/dump)'
+          }
+      }
 
       stage('Manual approval') {
         steps {
