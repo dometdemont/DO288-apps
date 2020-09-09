@@ -1,3 +1,5 @@
+def _ENDPOINT = "undefined"
+
 pipeline {
     options {
         // set a timeout of 30 minutes for this pipeline
@@ -8,16 +10,15 @@ pipeline {
         label 'master'
       }
     }
-    environment {
-    _ENDPOINT = "http://assistant-mad-also.2886795284-80-host17nc.environments.katacoda.com"
-    }
+
     stages {
-        stage('OpenShift project') {
+        stage('OpenShift context') {
             steps {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                                echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${openshift.selector( 'route/${_NAME}').object().spec.host}"
+                          _ENDPOINT=${openshift.selector( 'route/${_NAME}').object().spec.host}
+                          echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
                         }
                     }
                 }
