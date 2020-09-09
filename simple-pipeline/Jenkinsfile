@@ -23,25 +23,25 @@ pipeline {
             }
         }
 
-        stage('stage 2') {
+    stage('stage 2') {
 			steps {
 				sh 'echo hello from stage 2!'
 				}
 			}
 
-        stage('manual approval') {
+        stage('Default session is empty') {
+            steps {
+                sh '[[ "$(curl http://assistant-mad-also.2886795316-80-host17nc.environments.katacoda.com/hpe5g.html)" == "[]" ]]'
+            }
+        }
+    }
+    
+    stage('manual approval') {
 			steps {
 				timeout(time: 60, unit: 'MINUTES') {
-				input message: "Move to stage 3?"
+				input message: "Confirm success?"
 				}
 			}
 		}
 
-        stage('stage 3') {
-            steps {
-                sh 'curl http://assistant-mad-also.2886795294-80-host17nc.environments.katacoda.com/bs-set.html/dump'
-            }
-        }
-
-    }
 }
