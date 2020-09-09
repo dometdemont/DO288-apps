@@ -8,9 +8,6 @@ pipeline {
         label 'master'
       }
     }
-    environment {
-    _ENDPOINT = "http://assistant-mad-also.2886795312-80-host05nc.environments.katacoda.com"
-    }
     stages {
         stage('OpenShift project') {
             steps {
@@ -26,12 +23,12 @@ pipeline {
 
       stage('Default session dump empty') {
         steps {
-              sh '[[ "$(curl ${_ENDPOINT}/hpe5g.html/dump)" == "[]" ]]'
+              sh '[[ "$(curl http://$(oc get route ${_NAME})/hpe5g.html/dump)" == "[]" ]]'
           }
       }
       stage('Error on invalid session') {
         steps {
-              sh '[[ $(curl ${_ENDPOINT}/unlikely.html/dump) != 0 ]]'
+              sh '[[ $(curl http://$(oc get route ${_NAME})/unlikely.html/dump) != 0 ]]'
           }
       }
 
