@@ -17,7 +17,7 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                          _ENDPOINT=${openshift.selector( 'route/${_NAME}').object().spec.host}
+                          _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
                           echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
                         }
                     }
