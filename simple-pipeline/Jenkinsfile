@@ -25,7 +25,7 @@ pipeline {
                           _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
                           _PROJECT = openshift.project()
                           _CLUSTER = openshift.cluster()
-                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
+                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with deployer ${_NAME} and route ${_ENDPOINT} as user ${params._USER}/${params._PASSWORD} "
                           }
                     }
                 }
