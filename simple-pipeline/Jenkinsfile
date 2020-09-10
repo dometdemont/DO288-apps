@@ -17,19 +17,19 @@ pipeline {
                     openshift.withCluster() {
                         openshift.withProject() {
                           _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
-                          echo "stage 1: using project: ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
+                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
                         }
                     }
                 }
             }
         }
 
-      stage('Default session dump empty') {
+      stage('Get empty default session dump') {
         steps {
               sh "[[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]"
           }
       }
-      stage('Error on invalid session') {
+      stage('Get error on invalid session') {
         steps {
               sh "[[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]"
           }
