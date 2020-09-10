@@ -11,6 +11,10 @@ pipeline {
         label 'master'
       }
     }
+    parameters {
+        string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user used to instantiate resources')
+        password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password')
+    }
     stages {
         stage('OpenShift context') {
             steps {
@@ -40,9 +44,9 @@ pipeline {
             openshift.withCluster() {
                   openshift.withCredentials( 'fzGvfZshV-g56r60R3JhJ-HgxzZ4N7YogPIo5HRObDQ' ) {
                   sh """
-                  oc login -u developer -p developer
+                  oc login ${params._USER} -p ${params._PASSWORD}
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
-                  chmod a+x bs-set.sh && ./bs-set.sh || cat ${_PROJECT}.log
+                  chmod a+x bs-set.sh && ./bs-set.sh
                   """
                   }
             }
