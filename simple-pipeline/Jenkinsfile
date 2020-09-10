@@ -1,4 +1,5 @@
 def _ENDPOINT = "undefined"
+def _PROJECT = "undefined"
 
 pipeline {
     options {
@@ -17,6 +18,7 @@ pipeline {
                     openshift.withCluster() {
                         openshift.withProject() {
                           _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
+                          _PROJECT = openshift.project()
                           echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
                         }
                     }
@@ -35,7 +37,7 @@ pipeline {
       stage('Deploy bs-set') {
         steps {
               sh """
-              curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.html/hpe5g.sh?project=bs-set --data '' > bs-set.sh &&
+              curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
               chmod a+x bs-set.sh && ./bs-set.sh
               """
           }
