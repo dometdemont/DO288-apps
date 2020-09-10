@@ -37,7 +37,6 @@ pipeline {
       stage('Deploy bs-set') {
         steps {
               sh """
-              oc login -u developer -p developer
               curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
               chmod a+x bs-set.sh && ./bs-set.sh
               """
