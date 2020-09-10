@@ -24,9 +24,12 @@ pipeline {
             }
         }
 
-      stage('Get empty default session dump') {
+      stage('Get default and bs-set session dump') {
         steps {
-              sh "[[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]"
+              sh """
+              [[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]
+              \$(curl http://${_ENDPOINT}/bs-set.html/dump)
+              """
           }
       }
       stage('Get error on invalid session') {
