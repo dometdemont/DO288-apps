@@ -19,8 +19,8 @@ pipeline {
                         openshift.withProject() {
                           _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
                           _PROJECT = openshift.project()
-                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with deployer ${_NAME} and route ${_ENDPOINT} as user ${params._USER}/${params._PASSWORD}"
-                      }
+                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
+                        }
                     }
                 }
             }
@@ -37,8 +37,8 @@ pipeline {
       stage('Deploy bs-set') {
         steps {
               sh """
+              oc login -u developer -p developer
               curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
-              oc login -u developer -p developer && oc whoami &&
               chmod a+x bs-set.sh && ./bs-set.sh
               """
           }
