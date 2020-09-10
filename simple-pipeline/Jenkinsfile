@@ -42,11 +42,13 @@ pipeline {
         steps {
           script {
             openshift.withCluster() {
+                openshift.withCredentials( '7_AYjfzL8Fk1WDToSRzVkHx_WDdShoyF1ljpd9JvSBI' ) {
                   sh """
                   oc login -u ${params._USER} -p ${params._PASSWORD}
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh
                   """
+                }
             }
           }
         }
