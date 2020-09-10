@@ -28,7 +28,7 @@ pipeline {
         steps {
               sh """
               [[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]
-              \$(curl http://${_ENDPOINT}/bs-set.html/dump)
+              curl http://${_ENDPOINT}/bs-set.html/dump
               """
           }
       }
