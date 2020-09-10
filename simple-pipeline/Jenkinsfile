@@ -28,13 +28,13 @@ pipeline {
         steps {
               sh """
               [[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]
-              curl http://${_ENDPOINT}/bs-set.html/dump
+              curl -f http://${_ENDPOINT}/bs-set.html/dump
               """
           }
       }
       stage('Deploy bs-set') {
         steps {
-              sh "curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.html/deploy?project=bs-set"
+              sh "curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.html/deploy?project=bs-set"
           }
       }
       stage('Get error on invalid session') {
