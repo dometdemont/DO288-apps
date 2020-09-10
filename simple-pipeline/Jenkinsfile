@@ -17,10 +17,13 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
+                          openshift.withCredentials( 'developer-admin-edit-view' ) {
                           _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
                           _PROJECT = openshift.project()
                           echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
+                          echo "OpenShift credentials: ${openshift.withCredentials( 'developer-admin-edit-view' )}"
                         }
+                      }
                     }
                 }
             }
