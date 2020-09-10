@@ -44,7 +44,7 @@ pipeline {
         steps {
           script {
                   sh """
-                  oc login ${_CLUSTER} -u ${_USER} -p ${_PASSWORD} --insecure-skip-tls-verify
+                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh
                   """
