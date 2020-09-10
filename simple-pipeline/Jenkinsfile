@@ -1,5 +1,5 @@
 def _ENDPOINT = "undefined"
-def _PROJECT = "undefine"
+def _PROJECT = "undefined"
 
 pipeline {
     options {
@@ -11,11 +11,6 @@ pipeline {
         label 'master'
       }
     }
-    parameters {
-        string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user used to instantiate resources')
-        password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password')
-    }
-
     stages {
         stage('OpenShift context') {
             steps {
@@ -43,7 +38,7 @@ pipeline {
         steps {
               sh """
               curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
-              oc login -u ${params._USER} -p ${params._PASSWORD} && oc whoami &&
+              oc login -u developer -p developer && oc whoami &&
               chmod a+x bs-set.sh && ./bs-set.sh
               """
           }
