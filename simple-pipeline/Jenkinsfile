@@ -38,12 +38,20 @@ pipeline {
       }
       stage('Deploy bs-set') {
         steps {
-              sh """
-              oc whoami
-              curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
-              chmod a+x bs-set.sh && ./bs-set.sh || cat ${_PROJECT}.log
-              """
+          script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  openshift.withCredentials( 'fzGvfZshV-g56r60R3JhJ-HgxzZ4N7YogPIo5HRObDQ' ) {
+                  sh """
+                  oc whoami
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  chmod a+x bs-set.sh && ./bs-set.sh || cat ${_PROJECT}.log
+                  """
+                  }
+                }
+            }
           }
+        }
       }
       stage('Get error on invalid session') {
         steps {
