@@ -17,9 +17,11 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
+                          openshift.withCredentials( 'fzGvfZshV-g56r60R3JhJ-HgxzZ4N7YogPIo5HRObDQ' ) {
                           _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
                           _PROJECT = openshift.project()
                           echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
+                          }
                         }
                     }
                 }
