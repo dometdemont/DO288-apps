@@ -1,5 +1,5 @@
 def _ENDPOINT = "undefined"
-def _PROJECT = "undefined"
+def _PROJECT = "undefine"
 
 pipeline {
     options {
@@ -11,18 +11,20 @@ pipeline {
         label 'master'
       }
     }
+    parameters {
+        string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user used to instantiate resources')
+        password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password')
+    }
+
     stages {
         stage('OpenShift context') {
             steps {
                 script {
                     openshift.withCluster() {
                         openshift.withProject() {
-                          openshift.withCredentials( 'developer-admin-edit-view' ) {
                           _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
                           _PROJECT = openshift.project()
-                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with name ${_NAME} and route ${_ENDPOINT}"
-                          echo "OpenShift credentials: ${openshift.withCredentials( 'developer-admin-edit-view' )}"
-                        }
+                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with deployer ${_NAME} and route ${_ENDPOINT} as user ${params._USER}/${params._PASSWORD}"
                       }
                     }
                 }
@@ -40,7 +42,7 @@ pipeline {
       stage('Deploy bs-set') {
         steps {
               sh """
-              oc login -u developer -p developer
+              oc login -u ${params._USER} -p ${params._PASSWORD}
               curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
               chmod a+x bs-set.sh && ./bs-set.sh
               """
