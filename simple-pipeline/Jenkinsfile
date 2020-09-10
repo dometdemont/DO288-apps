@@ -44,7 +44,7 @@ pipeline {
             openshift.withCluster() {
                   openshift.withCredentials( 'fzGvfZshV-g56r60R3JhJ-HgxzZ4N7YogPIo5HRObDQ' ) {
                   sh """
-                  oc login ${params._USER} -p ${params._PASSWORD}
+                  oc login -u ${params._USER} -p ${params._PASSWORD}
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh
                   """
