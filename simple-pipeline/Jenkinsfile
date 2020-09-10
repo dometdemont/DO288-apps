@@ -32,6 +32,11 @@ pipeline {
               """
           }
       }
+      stage('Deploy bs-set') {
+        steps {
+              sh "curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.html/deploy?project=bs-set"
+          }
+      }
       stage('Get error on invalid session') {
         steps {
               sh "[[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]"
