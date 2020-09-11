@@ -13,6 +13,7 @@ pipeline {
       }
     }
     parameters {
+        string(name: '_BS_SET', defaultValue: 'bs-set.basic.html', description: 'Backing services set to deploy')
         string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user used to instantiate resources')
         password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password')
     }
@@ -46,7 +47,7 @@ pipeline {
           script {
                   sh """
                   oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
-                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${_BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh
                   """
           }
@@ -64,7 +65,7 @@ pipeline {
           script {
                   sh """
                   oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
-                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${_BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh --deploy && ./bs-set.sh --undeploy
                   """
           }
@@ -79,8 +80,8 @@ pipeline {
           # Deploy backing services with unknown attributes:
           jsonPayload=\'[  {    "NetworkFunctions": [      {        "Type": "wild-network-function",        "Name": "wild"      }    ]  },  {    "DirectServices": [      {        "Type": "ignite",        "Name": "memorydb",        "URL": "docker.io/apacheignite",        "Image": "ignite",        "Tag": "2.7.5",        "Wild attribute": "fancy"      },      {        "Type": "influxdb",        "Name": "myflux",        "Storage": "100Mi"      }    ]  }]\'
           oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
-          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data $jsonPayload) != 0 ]]
-          curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data $jsonPayload
+          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data \$jsonPayload) != 0 ]]
+          curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data \$jsonPayload
           """
         }
       }
