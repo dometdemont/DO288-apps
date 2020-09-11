@@ -74,12 +74,19 @@ pipeline {
       stage('Expected errors') {
         steps {
           sh """
+          oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+          
           # Non existing session
           [[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]
           
           # Deploy backing services with unknown attributes:
           echo '[  {    "NetworkFunctions": [      {        "Type": "wild-network-function",        "Name": "wild"      }    ]  },  {    "DirectServices": [      {        "Type": "ignite",        "Name": "memorydb",        "URL": "docker.io/apacheignite",        "Image": "ignite",        "Tag": "2.7.5",        "Wild attribute": "fancy"      },      {        "Type": "influxdb",        "Name": "myflux",        "Storage": "100Mi"      }    ]  }]' > payload.json
-          oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+          
+          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json") != 0 ]]
+          curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json"
+          
+          # Deploy a udsf function from an empty session not providing the ignite and influxdb required services.
+          echo '[{    "NetworkFunctions": [      {        "Type": "nudsf-dr",        "Name": "myudsf"      }    ]  }]' > payload.json
           [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json") != 0 ]]
           curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json"
           """
