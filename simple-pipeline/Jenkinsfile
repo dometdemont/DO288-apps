@@ -55,7 +55,7 @@ pipeline {
       stage('Deployment approval') {
         steps {
           timeout(time: 60, unit: 'MINUTES') {
-          input message: "Confirm success?"
+          input message: "Please confirm deployment success"
           }
         }
       }
@@ -78,7 +78,8 @@ pipeline {
           
           # Deploy backing services with unknown attributes:
           oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
-          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data '[  {    "NetworkFunctions": [      {        "Type": "wild-network-function",        "Name": "wild"      }    ]  },  {    "DirectServices": [      {        "Type": "ignite",        "Name": "memorydb",        "URL": "docker.io/apacheignite",        "Image": "ignite",        "Tag": "2.7.5",        "Wild attribute": "fancy"      },      {        "Type": "influxdb",        "Name": "myflux",        "Storage": "100Mi"      }    ]  }]' 2>&1 /dev/stdout ) != 0 ]]
+          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data '[  {    "NetworkFunctions": [      {        "Type": "wild-network-function",        "Name": "wild"      }    ]  },  {    "DirectServices": [      {        "Type": "ignite",        "Name": "memorydb",        "URL": "docker.io/apacheignite",        "Image": "ignite",        "Tag": "2.7.5",        "Wild attribute": "fancy"      },      {        "Type": "influxdb",        "Name": "myflux",        "Storage": "100Mi"      }    ]  }]' 2>&1 curlError.log ) != 0 ]]
+          cat curlError.log && rm -f curlError.log
           """
         }
       }
