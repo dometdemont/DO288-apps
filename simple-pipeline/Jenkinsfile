@@ -47,7 +47,7 @@ pipeline {
           script {
                   sh """
                   oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
-                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${_BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh
                   """
           }
@@ -65,7 +65,7 @@ pipeline {
           script {
                   sh """
                   oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
-                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${_BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh --deploy && ./bs-set.sh --undeploy
                   """
           }
