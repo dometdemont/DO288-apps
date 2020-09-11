@@ -78,10 +78,10 @@ pipeline {
           [[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]
           
           # Deploy backing services with unknown attributes:
-          jsonPayload='[  {    "NetworkFunctions": [      {        "Type": "wild-network-function",        "Name": "wild"      }    ]  },  {    "DirectServices": [      {        "Type": "ignite",        "Name": "memorydb",        "URL": "docker.io/apacheignite",        "Image": "ignite",        "Tag": "2.7.5",        "Wild attribute": "fancy"      },      {        "Type": "influxdb",        "Name": "myflux",        "Storage": "100Mi"      }    ]  }]'
+          echo '[  {    "NetworkFunctions": [      {        "Type": "wild-network-function",        "Name": "wild"      }    ]  },  {    "DirectServices": [      {        "Type": "ignite",        "Name": "memorydb",        "URL": "docker.io/apacheignite",        "Image": "ignite",        "Tag": "2.7.5",        "Wild attribute": "fancy"      },      {        "Type": "influxdb",        "Name": "myflux",        "Storage": "100Mi"      }    ]  }]' > payload.json
           oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
-          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data \'\$jsonPayload\') != 0 ]]
-          curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data \'\$jsonPayload\'
+          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json") != 0 ]]
+          curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json"
           """
         }
       }
