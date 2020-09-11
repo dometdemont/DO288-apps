@@ -32,11 +32,12 @@ pipeline {
             }
         }
 
-      stage('Get default and bs-set session dump') {
+      stage('Dump sessions and catalogs') {
         steps {
               sh """
               [[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]
               curl -f http://${_ENDPOINT}/bs-set.html/dump
+              curl -f http://${_ENDPOINT}/hpe5g.html/catalog?catalog=bs-only.catalog.json 
               """
           }
       }
@@ -51,17 +52,62 @@ pipeline {
           }
         }
       }
-      stage('Get error on invalid session') {
-        steps {
-              sh "[[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]"
-          }
-      }
-
-      stage('Manual approval') {
+      stage('Deployment approval') {
         steps {
           timeout(time: 60, unit: 'MINUTES') {
           input message: "Confirm success?"
           }
+        }
+      }
+      stage('Idempotence & undeployment') {
+        steps {
+          script {
+                  sh """
+                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/bs-set.basic.html/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  chmod a+x bs-set.sh && ./bs-set.sh --deploy && ./bs-set.sh --undeploy
+                  """
+          }
+        }
+      }
+      stage('Expected errors') {
+        steps {
+          sh """
+          // Non existing session
+          [[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]
+          
+          // Deploy resources using an unknown type or unknown attributes: backing services with unknown attributes:
+          oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+          curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data @- <<'EOF'
+          [
+            {
+              "NetworkFunctions": [
+                {
+                  "Type": "wild-network-function",
+                  "Name": "wild"
+                }
+              ]
+            },
+            {
+              "DirectServices": [
+                {
+                  "Type": "ignite",
+                  "Name": "memorydb",
+                  "URL": "docker.io/apacheignite",
+                  "Image": "ignite",
+                  "Tag": "2.7.5",
+                  "Wild attribute": "fancy"
+                },
+                {
+                  "Type": "influxdb",
+                  "Name": "myflux",
+                  "Storage": "100Mi"
+                }
+              ]
+            }
+          ]
+          EOF
+          """
         }
       }
     }
