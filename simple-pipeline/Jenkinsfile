@@ -42,7 +42,7 @@ pipeline {
               """
           }
       }
-      stage("Deploy ${params._BS_SET}") {
+      stage('Deployment') {
         steps {
           script {
                   sh """
