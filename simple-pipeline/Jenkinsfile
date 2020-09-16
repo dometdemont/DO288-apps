@@ -55,7 +55,7 @@ pipeline {
       }
       stage('Deployment approval') {
         steps {
-          timeout(time: 60, unit: 'MINUTES') {
+          timeout(time: 8, unit: 'MINUTES') {
           input message: "Please confirm deployment success"
           }
         }
@@ -65,6 +65,8 @@ pipeline {
           script {
                   sh """
                   oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  oc whoami -t
+                  oc config current-context | cut -d/ -f2 | tr - .
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh --deploy && ./bs-set.sh --undeploy
                   """
