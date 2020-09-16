@@ -65,10 +65,12 @@ pipeline {
           script {
                   sh """
                   oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  _OCtoken=$(oc whoami -t)
+                  _OCendpoint=$(oc config current-context | cut -d/ -f2 | tr - .)
                   echo -n '[{"Clusters": [{"Name": "sut","Endpoint": "' > payload.json
-                  oc config current-context | cut -d/ -f2 | tr - . >> payload.json
+                  echo -n $_OCendpoint >> payload.json
                   echo -n '","Token": "' >> payload.json
-                  oc whoami -t >> payload.json
+                  echo -n $_OCtoken >> payload.json
                   echo -n '","Targeted": true}]}]' >> payload.json
                   cat payload.json
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/deploy?project=${_PROJECT} --data "@payload.json"
