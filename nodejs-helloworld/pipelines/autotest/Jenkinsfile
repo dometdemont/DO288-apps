@@ -1,0 +1,117 @@
+def _CLUSTER = "undefined"
+def _ENDPOINT = "undefined"
+def _PROJECT = "undefined"
+
+pipeline {
+    options {
+        // set a timeout of 30 minutes for this pipeline
+        timeout(time: 30, unit: 'MINUTES')
+    }
+    agent {
+      node {
+        label 'master'
+      }
+    }
+    parameters {
+        string(name: '_BS_SET', defaultValue: 'bs-set.basic.html', description: 'Backing services set to deploy')
+        string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user used to instantiate resources')
+        password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password')
+    }
+    stages {
+        stage('OpenShift context') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject() {
+                          _ENDPOINT = openshift.selector( 'route/${_NAME}').object().spec.host
+                          _PROJECT = openshift.project()
+                          _CLUSTER = openshift.cluster()
+                          echo "OpenShift context: using project ${openshift.project()} in cluster ${openshift.cluster()} with deployer ${_NAME} and route ${_ENDPOINT} as user ${params._USER}/${params._PASSWORD} "
+                          }
+                    }
+                }
+            }
+        }
+
+      stage('Dump sessions and catalogs') {
+        steps {
+              sh """
+              [[ \$(curl http://${_ENDPOINT}/hpe5g.html/dump) == [] ]]
+              curl -f http://${_ENDPOINT}/bs-set.html/dump
+              curl -f http://${_ENDPOINT}/hpe5g.html/catalog?catalog=bs-only.catalog.json 
+              """
+          }
+      }
+      stage('Local mode deployment') {
+        steps {
+          script {
+                  sh """
+                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  chmod a+x bs-set.sh && ./bs-set.sh
+                  """
+          }
+        }
+      }
+      stage('Deployment approval') {
+        steps {
+          timeout(time: 8, unit: 'MINUTES') {
+          input message: "Please confirm deployment success"
+          }
+        }
+      }
+      stage('Idempotence & undeployment') {
+        steps {
+          script {
+                  sh """
+                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
+                  chmod a+x bs-set.sh && ./bs-set.sh --deploy && ./bs-set.sh --undeploy
+                  """
+          }
+        }
+      }
+      stage('Direct mode asynchronous deployment & undeployment') {
+        steps {
+          script {
+                  sh """
+                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  _OCtoken=\$(oc whoami -t)
+                  _OCendpoint=\$(oc config current-context | cut -d/ -f2 | tr - .)
+                  echo -n '[{"Clusters": [{"Name": "sut","Endpoint": "' > payload.json
+                  echo -n \$_OCendpoint >> payload.json
+                  echo -n '","Token": "' >> payload.json
+                  echo -n \$_OCtoken >> payload.json
+                  echo -n '","Targeted": true}]}]' >> payload.json
+                  cat payload.json
+                  curl -f -X PUT -H \"Content-Type: application/json\" \'http://${_ENDPOINT}/${params._BS_SET}/deploy?async&project=${_PROJECT}\' --data "@payload.json"
+                  while [[ \$(curl -o /dev/null -s -w \"%{http_code}\\n\" http://${_ENDPOINT}/${params._BS_SET}/job) == 202 ]] ; do sleep 2 && echo job running ; done 
+                  [[ \$(curl -o /dev/null -s -w \"%{http_code}\\n\" http://${_ENDPOINT}/${params._BS_SET}/job) == 200 ]] 
+                  curl -f -X DELETE -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/undeploy?project=${_PROJECT} --data "@payload.json"
+                  """
+          }
+        }
+      }
+      stage('Expected errors') {
+        steps {
+          sh """
+          oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+          
+          # Non existing session
+          [[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]
+          
+          # Deploy backing services with unknown attributes:
+          echo '[  {    "NetworkFunctions": [      {        "Type": "wild-network-function",        "Name": "wild"      }    ]  },  {    "DirectServices": [      {        "Type": "ignite",        "Name": "memorydb",        "URL": "docker.io/apacheignite",        "Image": "ignite",        "Tag": "2.7.5",        "Wild attribute": "fancy"      },      {        "Type": "influxdb",        "Name": "myflux",        "Storage": "100Mi"      }    ]  }]' > payload.json
+          
+          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json") != 0 ]]
+          curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json"
+          
+          # Deploy a udsf function from an empty session not providing the ignite and influxdb required services.
+          echo '[{    "NetworkFunctions": [      {        "Type": "nudsf-dr",        "Name": "myudsf"      }    ]  }]' > payload.json
+          [[ \$(curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json") != 0 ]]
+          curl -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/hpe5g.html/hpe5g.sh --data "@payload.json"
+          """
+        }
+      }
+    }
+}

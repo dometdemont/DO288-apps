@@ -1,0 +1,28 @@
+pipeline {
+    options {
+        // set a timeout of 3 minutes for this pipeline
+        timeout(time: 3, unit: 'MINUTES')
+    }
+    agent {
+      node {
+        label 'master'
+      }
+    }
+
+    stages {
+
+        stage('OpenShift context') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject() {
+                                echo "OpenShift context: project ${openshift.project()} in cluster ${openshift.cluster()}"
+                        }
+                    }
+                }
+            }
+        }
+
+    	stage('manual approval'){steps { timeout(time:60, unit:'MINUTES'){input message: "Please confirm the build status"}}}
+    }
+}
