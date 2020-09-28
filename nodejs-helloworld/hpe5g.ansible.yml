@@ -1,0 +1,326 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  tasks:
+  - name: bring the Heat stack {{stack_name | default('hpe5g') }} to the state {{the_state | default('present') }}
+    os_stack:
+      state: "{{the_state | default('present') }}"
+      name: "{{stack_name | default('hpe5g') }}"
+      template: "{{the_template | default('nivr-cluster-nfv.yaml') }}"
+      parameters:
+        NetworkRoot: "{{the_network | default('192.168.111') }}"
+        Image: "{{ lookup('env','CLOUD_IMAGE') }}"
+        key_name: "{{ lookup('env','CLOUD_SSH_KEY_PAIR') }}"
+        ExternalNetwork: "{{ lookup('env','CLOUD_EXTERNAL_NETWORK') }}"
+    register: the_stack
+    until: the_stack is success
+    retries: 2
+    delay: 10
+  - meta: end_play
+    when: the_state is defined and the_state == "absent"
+
+  - name: set facts from stack outputs descriptions discarding verbose logs
+    with_items: "{{the_stack.stack.outputs}}"
+    loop_control:
+      loop_var:
+        _output
+    set_fact: "{{_output.output_key}}={{_output.description}}"
+    no_log: True
+
+  - name: set facts from stack outputs values discarding verbose logs
+    with_items: "{{the_stack.stack.outputs}}"
+    loop_control:
+      loop_var:
+        _output
+    set_fact: '{{_output.output_key}}_value={{_output.output_value}}'
+    no_log: True
+
+  - fail: msg="Missing Heat stack output value for public_nodes"
+    when: public_nodes_value is not defined
+
+  - name: stack description {{the_stack.stack.description}}
+    debug:
+      var=public_nodes_value
+  - name: "{{misc}}"
+    debug:
+      var=misc_value
+
+  - copy: content="{{ public_nodes_value }}" dest="{{stack_name | default('hpe5g') }}.json"
+
+  - name: Wait for SSH 
+    with_items: "[{{public_nodes_value}}]"
+    loop_control:
+      loop_var:
+        _host
+    command: >
+      ssh -oBatchMode=yes -oStrictHostKeyChecking=no -i {{ lookup('env','CLOUD_SSH_KEY') }}
+      {{ lookup('env',' CLOUD_DEFAULT_USER') }}@{{_host['ipaddress']}} true
+    register: result
+    until: result is success
+    retries: 30
+    delay: 10
+
+  - name: add hosts in the ansible dynamic inventory
+    with_items: "[{{public_nodes_value}}]"
+    loop_control:
+      loop_var:
+        _host
+    add_host:
+      name: "{{_host['fqdn']}}"
+      groups: "{{_host['groups']}}"
+      ansible_ssh_host: "{{_host['ipaddress']}}"
+      patched_files: "{{ lookup('env','PATCHED_FILES') }}"
+      yum_explicit_packages: "{{ lookup('env','YUM_EXPLICIT_PACKAGES') }}"
+      mandatory_services: "{{ lookup('env','MANDATORY_SERVICES') }}"
+      misc_value: '{{misc_value}}'
+      openshift_templates_value: '{{openshift_templates_value}}'
+
+  - name: "Clone the git openshift-ansible project release-{{misc_value.oc_version}}"
+    become: no
+    git:
+      repo: "https://github.com/openshift/openshift-ansible"
+      dest: "{{ lookup('env','PWD') }}/openshift-ansible"
+      version: "release-{{misc_value.oc_version}}"
+    environment:
+      http_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+      https_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+    when: openshift_inventory_value is defined
+
+  - name: retrieve the openshift playbook locally in openshift-ansible/inventory/{{the_stack.stack.name}}.yaml
+    copy:
+      content: "{{ openshift_inventory_value }}"
+      dest: "openshift-ansible/inventory/{{the_stack.stack.name}}.yaml"
+    when: openshift_inventory_value is defined
+   
+- name: tune nodes for patches and packages
+  hosts: base
+  become: True
+  vars:
+    theNodeHostname: "{{hostvars[inventory_hostname]['ansible_facts']['fqdn']}}"
+    theNodeIpAddress: "{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
+    openshift_http_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+    openshift_https_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+  tasks:
+    - name: Deploying node
+      debug: 
+        var=theNodeHostname
+
+    - name: Create patches directories on nodes
+      with_dict: "{{patched_files}}"
+      loop_control:
+        loop_var:
+          _patch
+      file: 
+        path: "{{_patch.value}}" 
+        state: directory
+        recurse: yes
+
+    - name: Get patches from cache {{cachePatch}} if any
+      with_dict: "{{patched_files}}"
+      loop_control:
+        loop_var:
+          _patch
+      template:
+        src: "{{cachePatch}}{{_patch.key}}"
+        dest: "{{_patch.value}}"
+        mode: preserve
+      when: cachePatch is defined
+
+    - name: Install additional explicit packages {{ yum_explicit_packages }}, ignoring errors
+      yum:
+        name: "{{ yum_explicit_packages }}"
+      ignore_errors: yes
+
+    - name: Start mandatory explicit services, if any
+      with_items: "{{ mandatory_services }}"
+      loop_control:
+        loop_var:
+          _service
+      systemd:
+        name: "{{_service}}"
+        state: started
+        masked: no
+
+    - name: Make sure the host is in /etc/hosts 
+      shell: grep {{theNodeHostname}} /etc/hosts || echo {{theNodeIpAddress}} {{theNodeHostname}} >> /etc/hosts
+
+- name: ems node tasks
+  hosts: ems
+  vars:
+    tester_user: "{{ lookup('env','CLOUD_DEFAULT_USER') }}"
+  tasks:
+    - name: "Drop OpenShift templates to /home/{{tester_user}}"
+      with_dict: "[{{openshift_templates_value}}]"
+      loop_control:
+        loop_var:
+          _openshift_template
+      copy:
+          dest: "/home/{{tester_user}}/{{_openshift_template.key}}.yaml"
+          content: "{{_openshift_template.value}}"
+    
+- name: CMS5G Core Stack tester deployment
+  hosts: tester
+  become: True
+  vars:
+    node_version: "{{misc_value.tester_nodejs_version}}"
+    tester_user: "{{ lookup('env','CLOUD_DEFAULT_USER') }}"
+    tester_git: "{{misc_value.tester_git_url}}"
+    tester_deploy_key: "{{misc_value.tester_deploy_key}}"
+  tasks:
+    - name: Install nodejs for the tester
+      lineinfile:
+        path: "/home/{{tester_user}}/.bash_profile"
+        line: "export PATH=/usr/local/lib/nodejs/node-{{node_version}}-linux-x64/bin:$PATH"
+    - name: retrieve nodejs distribution
+      get_url:
+        url: "https://nodejs.org/download/release/{{node_version}}/node-{{node_version}}-linux-x64.tar.xz"
+        dest: "/tmp/"
+      environment:
+        http_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+        https_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+    - name: create nodejs directory
+      file:
+        path: "/usr/local/lib/nodejs"
+        state: directory
+    - name: extract nodejs
+      unarchive:
+        src: "/tmp/node-{{node_version}}-linux-x64.tar.xz"
+        dest: "/usr/local/lib/nodejs"
+        remote_src: yes
+    - name: create node link to the path
+      file:
+        src: "/usr/local/lib/nodejs/node-{{node_version}}-linux-x64/bin/node"
+        dest: "/usr/sbin/node"
+        state: link
+    - name: create npm link to the path
+      file:
+        src: "/usr/local/lib/nodejs/node-{{node_version}}-linux-x64/bin/npm"
+        dest: "/usr/sbin/npm"
+        state: link
+    - name: "Ensure GitHub deploy key {{misc_value.tester_deploy_key}} is present on the server at /home/{{tester_user}}/.ssh/deploy_key"
+      copy:
+        src: "{{tester_deploy_key}}"
+        dest: "/home/{{tester_user}}/.ssh/deploy_key"
+        mode: 0600
+        owner: "{{tester_user}}"
+        group: "{{tester_user}}"
+      when: misc_value.tester_deploy_key is defined
+    - name: "Force clone the tester project {{tester_git}} for {{tester_user}} user with deploy key /home/{{tester_user}}/.ssh/deploy_key"
+      git:
+        repo: "{{tester_git}}"
+        dest: "/home/{{tester_user}}/tester"
+        force: yes
+        accept_hostkey: yes
+        key_file: "/home/{{tester_user}}/.ssh/deploy_key"
+      become_user: "{{tester_user}}"
+      when: misc_value.tester_deploy_key is defined
+      environment:
+        http_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+        https_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+    - name: "Force clone the tester project {{tester_git}} for {{tester_user}} user"
+      git:
+        repo: "{{tester_git}}"
+        dest: "/home/{{tester_user}}/tester"
+        force: yes
+      become_user: "{{tester_user}}"
+      when: misc_value.tester_deploy_key is not defined
+      environment:
+        http_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+        https_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+    - name: "install npm modules for the tester"
+      with_items: ["printf","nanotimer","console-timestamp","node-fqdn","compute-histogram","nconf","getopt","graphite","jaeger-client","redis","http2","@request/multipart","influx"]
+      loop_control:
+        loop_var:
+          _module
+      npm:
+        name: "{{_module}}"
+        path: "/home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/"
+      environment:
+        http_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+        https_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+    - name: Make the tester installer executable
+      become_user: "{{tester_user}}"
+      file: 
+        path: /home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/INSTALL
+        mode: a+rx
+    - name: remove npm install invocation introduced on april 1st 2020 but failing
+      become_user: "{{tester_user}}"
+      lineinfile: 
+        path: /home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/INSTALL
+        state: absent
+        line: 'npm install'
+    - name: Install the tester
+      become_user: "{{tester_user}}"
+      shell:
+        cmd: ./INSTALL /home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/tester
+        chdir: /home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/
+      environment:
+        http_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+        https_proxy: "{{ lookup('env','OPENSHIFT_HTTP_PROXY') }}"
+    - name: update nodejs packages
+      npm: 
+        path: /home/{{tester_user}}/tester
+        state: latest
+    - name: Tester template configuration file Udsfgen.json
+      become_user: "{{tester_user}}"
+      copy:
+        dest: "/home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/tester/Udsfgen.json"
+        content: |
+          {
+            "Interval": 5,
+            "Rate":1,
+            "Cmd_Port": 21000,
+            "Nb_Instances": 1,
+            "NF_Params" : [
+              { "name": "UDSF","url":"https://10.128.0.xx:8443"}
+              ],
+            "Jaeger_URL": "http://192.168.100.102:32268",
+            "IMSI_Digits": 15,
+            "MSISDN_Digits": 10,
+            "UE_Prefix": "2000",
+            "UDSF_STORAGE":"space0",
+            "UDSF_REALM":"realm0",
+            "telegraf_host":"192.168.100.102",
+            "telegraf_port": "30846"
+          }
+    - name: Tester template configuration file Udrgen.json
+      become_user: "{{tester_user}}"
+      copy:
+        dest: "/home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/tester/Udrgen.json"
+        content: |
+          {
+            "Interval": 5,
+            "Rate":1,
+            "Cmd_Port": 21000,
+            "Nb_Instances": 1,
+            "NF_Params" : [
+              { "name": "UDR","url":"https://10.128.0.xx:8443"},
+              { "name": "PROV","url":"https://10.128.0.xx:8443"}
+              ],
+            "Jaeger_URL": "http://192.168.100.102:32268",
+            "IMSI_Digits": 15,
+            "MSISDN_Digits": 10,
+            "UE_Prefix": "2000",
+            "UDSF_STORAGE":"space0",
+            "UDSF_REALM":"realm0",
+            "telegraf_host":"192.168.100.102",
+            "telegraf_port": "30846"
+          }
+
+    - name: Drop a README file for running the tester
+      become_user: "{{tester_user}}"
+      copy:
+        dest: "/home/{{tester_user}}/tester/README"
+        content: |
+          To run the CMS5G Core Stack tester on this node:
+          cd /home/{{tester_user}}/tester/Non_Functional/NodeJS/NEW_GENE/tester
+          Get the UDSF, UDR, PROV IP address
+          oc get pods -o wide
+          UDSF: 
+          update Udsfgen.json with the UDSF pod IP address, then run:
+          ./Udsfgen -t udsfadd -i 2 -c 16 -n 500000 -r 10 -s 500000 -m 2048
+          UDR: update Udrgen.json with the UDR pod IP address, then run:
+          ./Udrgen -t postudr -z 56 -O && ./Udrgen -t putudr  -z 55 -O && ./Udrgen -t putudr  -z 58 -O
+
+          

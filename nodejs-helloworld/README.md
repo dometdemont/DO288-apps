@@ -84,6 +84,9 @@ The installer is directly invoked from the application server running the deploy
 -	The OpenShift oc CLI and/or helm are available on the nodejs server and configured with the proper user,
 -	Or the curl utility is available on the nodejs server and all targeted clusters are reachable from this server.
 
+For long lasting tasks, an asynchronous mode is available: it is enabled by passing the additional 'async' parameter to the direct request. In asynchronous mode,
+the request is immediatley answered and the task progress can be checked using a GET request ending with the 'job' keyword. A running job can be stopped by submitting
+a DELETE request ending with the 'job' keyword. 
 #### Local
 The target in the REST request is: hpe5g.sh
 - curl -X PUT -H "Content-Type: application/json" http://ENDPOINT/SESSION/hpe5g.sh ...
@@ -115,7 +118,7 @@ See also an [example of OpenStack resources deployment](#ExampleOpenStack)
 
 ### REST operations
 The RESTful interface is exposing three verbs:
-- [GET](#GET) to access the interactive GUI, dump an existing session or a catalog,
+- [GET](#GET) to access the interactive GUI, dump an existing session or a catalog, check the asynchronous job status,
 - [PUT](#PUT) to deploy a set of resources by building and retrieving or running an installer, or to build a new session,
 - [DELETE](#DELETE) to delete or undeploy a set of resources and projects.
 #### GET<a name="GET"></a>
@@ -132,11 +135,20 @@ Where:
 Where:
 - session is the HTML session file on the application server, typically hpe5g.html delivered as an empty session by the github project.
 - Optional parameter: catalog is the catalog json file on the application server. Default: list the default catalog content. 
+##### View the running job
+`curl  -X GET  http://<host:port>/<session>/job`   
+Where:
+- session is the HTML session file on the application server    
+Returns stdout/stderr along with a status code:
+- if the job is running: 202 Accepted
+- if the job successfully completed: 200 OK
+- if the job failed: 400 Bad Request
+- if no job exists: 404 Not Found
 
 #### PUT<a name="PUT"></a>
 Build and retrieve or run an installer or a Heat template from an HTML session available on the application server, or build a new session:
 
-`curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>&OSenv=<OpenStack environment file>&OSnetwork=<OpenStack private network CIDR>] --data <resources>`
+`curl -X PUT -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&async&catalog=<catalog>&OSenv=<OpenStack environment file>&OSnetwork=<OpenStack private network CIDR>] --data <resources>`
 
 Where:
 - session is the HTML session file to start from on the application server, typically hpe5g.html delivered as an empty session by the github project. This session can be user defined and dropped on the application server, for instance to start from a known set of backing services.
@@ -174,6 +186,7 @@ Where:
     
 - Optional parameters:
     - project is the default OpenShift project (namespace) in which resources not specifically attatched to a project are to be deployed; default: hpe5g
+    - async to launch the request in asynchronous mode; the job status can then be checked with a GET request on the 'job' path, and aborted with a DELETE request on the 'job' path.
     - catalog is the catalog to use as a json file available on the application server. For the catalog specification, refer to the online help in the interactive tool, field set 'catalog'.
     - OSenv is the file defining the OpenStack target. This file must be available in the installer execution environment at deployment time. Refer to the [Nodes section detailed specifications](#SectionsDetails) for writing this environment file.
     - OSnetwork defines the 3 first numbers of the CIDR used to name the private networks, like 192.168.55
@@ -188,29 +201,29 @@ This resources json file can be built from the interactive mode by dumping the s
 Build and retrieve or run an undeployer from an HTML session available on the application server:   
 `curl -X DELETE -H "Content-Type: application/json"  http://<host:port>/<session>/<target>[?project=<project>&catalog=<catalog>] --data <resources>`
 
-Where all PUT parameters apply, except the target 'deploy' changed to 'undeploy'.
+Where all PUT parameters apply, except the target 'deploy' changed to 'undeploy' and the target 'job' used to abort an asynchronous job.
  
 ## Examples <a name="Examples"></a>
 ### Access the GUI
 Navigate to:
-- Empty session [http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html](http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html)
-- Backing service set example session [http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html](http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html)
+- Empty session [http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html](http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html)
+- Backing service set example session [http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html](http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html)
 
 ### Dump the services defined in the backing services set bs-set.html  
 ```
-curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/dump
+curl http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/dump
 ```
 Output:   
 [{"DirectServices":[{"Type":"ignite","Name":"gridgain","URL":"docker.io/gridgain","Image":"community","Tag":"8.7.14","Storage":"250Mi","Replicas":"1"},{"Type":"influxdb","Name":"udsf-flux","URL":"docker.io/bitnami","Image":"influxdb","Tag":"1.7.10","Storage":"1Gi","Replicas":"1"},{"Type":"redis","Name":"myredis","URL":"docker.io/bitnami","Image":"redis","Tag":"latest","Storage":"100Mi","Replicas":"1"}]},{"IndirectServices":[{"Type":"jenkins","Name":"myjenkins","URL":"quay.io/openshift","Image":"origin-jenkins","Tag":"latest","Replicas":"1"},{"Type":"elasticsearch","Name":"myelastic","URL":"docker.elastic.co/elasticsearch","Image":"elasticsearch-oss","Tag":"6.7.0","Storage":"4Gi","Replicas":"1"},{"Type":"prometheus-alertmanager","Name":"myalert","URL":"docker.io/prom","Image":"alertmanager","Tag":"v0.20.0","Storage":"8Gi","Replicas":"1"},{"Type":"prometheus","Name":"myprom","URL":"docker.io/prom","Image":"prometheus","Tag":"v2.16.0","Storage":"200Mi","Replicas":"1"},{"Type":"pushgateway","Name":"mygateway","URL":"docker.io/prom","Image":"pushgateway","Tag":"v1.0.1","Replicas":"1"}]},{"Operators":[{"Type":"jaeger","Name":"mike","Pipeline GIT":"https://github.hpe.com/CMS-5GCS/automated-deployer","directory":"pipelines/manual_approval","branch":"master"},{"Type":"svc-mesh-ctlplane","Name":"myplane"},{"Type":"kafka","Name":"kaaaaa"}]}]
 ### Dump a specific catalog  
 ```
-curl http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/catalog?catalog=bs-only.catalog.json 
+curl http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/catalog?catalog=bs-only.catalog.json 
 ```
 Output: (ellipsized)   
 {"types":{"NetworkFunctions":[],"IndirectServices":["jenkins","elasticsearch","prometheus-alertmanager","prometheus","kube-state-metrics","pushgateway","grafana"],"DirectServices":["ignite","redis","influxdb","fluentd"],"Operators":["jaeger","kiali","svc-mesh-ctlplane","kafka","elasticSearchOperator"],"HelmCharts":[]},"dependencies":{"jenkins":[],"elasticsearch":[],"prometheus-alertmanager":[],"prometheus":[],"kube-state-metrics":[],"pushgateway":[],"grafana":[],"ignite":[],"redis":[],"influxdb":[],"fluentd":[],"jaeger":[],"kiali":[],"svc-mesh-ctlplane":[],"kafka":[],"elasticSearchOperator":[]},"values":{"jenkins":{"URL":"quay.io/openshift","image":"origin-jenkins","tag":"latest","template":...
 ### Deploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data @- <<'EOF' 
+curl -X PUT -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=bs-set --data @- <<'EOF' 
 [
   {
     "Clusters": [
@@ -227,12 +240,12 @@ EOF
 ```
 ### Undeploy the backing services set bs-set.html on the cluster ocp1 in the project bs-set
 ```
-curl -X DELETE -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/undeploy?project=bs-set --data '[{"Clusters":[{"Name":"ocp1","Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443","Token":"lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY","Targeted":true}]}]'
+curl -X DELETE -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/undeploy?project=bs-set --data '[{"Clusters":[{"Name":"ocp1","Endpoint":"api.openshift1.ocp0.gre.hpecorp.net:6443","Token":"lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY","Targeted":true}]}]'
 ```
 ### Build an installer deploying an ignite service named memorydb in the project 'alif' using the default values
 Save the installer tmp.sh deploying one ignite backing service named memorydb; all other attributes values are retrieved from the default catalog:
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh?project=alif --data '[{"DirectServices":[{"Type":"ignite","Name":"memorydb"}]}]' > tmp.sh
+curl -X PUT -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh?project=alif --data '[{"DirectServices":[{"Type":"ignite","Name":"memorydb"}]}]' > tmp.sh
 ```
 Deploy by invoking this installer, then undeploy thanks to the --undeploy option
 ```
@@ -243,22 +256,22 @@ chmod a+x tmp.sh
 ### Create a new backing services set bs-set-udsf.html from the existing bs-set adding a specific ignite version named udsf-db for udsf compatibility
 Build, retrieve then copy this new backing services set to the application server:
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/save?project=alif --data '[{"DirectServices": [{"Type": "ignite","Name": "udsf-db","URL": "docker.io/apacheignite","Image": "ignite","Tag": "2.7.5"}]}]' > bs-set-udsf.html
+curl -X PUT -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/save?project=beta --data '[{"DirectServices": [{"Type": "ignite","Name": "udsf-db","URL": "docker.io/gridgain","Image": "community","Tag": "8.7.12"}]}]' > bs-set-udsf.html
 assistant_pod=$(oc get pods -n assistant  | grep Running | awk '{print $1}')
 oc cp -n assistant bs-set-udsf.html $assistant_pod:/opt/app-root/src/
 ```
-Check the new session at http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html
+Check the new session at http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html
 ### Deploy a udsf network function using this new backing services set
 Deploy a udsf function and related services ignite, influxdb in the alif project using the bs-set-udsf backing services set deploying ignite with a specific image compatible with udsf:
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html/deploy?project=alif --data @- <<'EOF' 
+curl -X PUT -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set-udsf.html/deploy?project=beta --data @- <<'EOF' 
 [
   {
     "Clusters": [
       {
         "Name": "ocp",
         "Endpoint": "api.openshift1.ocp0.gre.hpecorp.net:6443",
-        "Token": "lQL18tUV4p3McWkyESXmB3rl01c9NDBF0yWQ3uaXTUY",
+        "Token": "oFcGv7aSzDJcaaQR4r2smtULr8mz0SUQUYNfbDNi38M",
         "Targeted": true
       }
     ]
@@ -278,7 +291,7 @@ EOF
 ### Deploy from Helm charts udm and a specific version of telegraf 
 Save in tmp.sh the installer deploying udm in the project alif:
 ```
-curl -X PUT -H "Content-Type: application/json"  http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json" > tmp.sh
+curl -X PUT -H "Content-Type: application/json"  http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data "@helm.json" > tmp.sh
 ```
 Where helm.json looks like:
 ```
@@ -311,11 +324,11 @@ chmod a+x tmp.sh
 ./tmp.sh
 ./tmp.sh --undeploy
 ```
-### Deploy/undeploy three instances on OpenStack running various images <a name="ExampleOpenStack"></a>
+### Deploy/undeploy in asynchronous mode three instances on OpenStack running various images <a name="ExampleOpenStack"></a>
 Deploy a stack named alif hosting three instances named alpha, beta and gamma connected to the public network with floating IPs and running Centos 7, 7.5 and 7.6 respectively, the latter using a redefined performance flavor as v4.m16    
-The environment configuring the OpenStack access is defined in RHOS12.env
+The environment configuring the OpenStack access is defined in RHOS12.env; the parameter 'async' enables the asynchronous mode; the process Id is returned as data:
 ```
-curl --connect-timeout 300 --max-time 300 -X PUT -H "Content-Type: application/json" 'http://localhost:8080/hpe5g.html/deploy?OSenv=/home/centos/automated-deployer/RHOS12.env&project=alif' --data @- <<'EOF' 
+curl -X PUT -H "Content-Type: application/json" 'http://localhost:8080/hpe5g.html/deploy?OSenv=/home/centos/automated-deployer/RHOS12.env&project=alif&async' --data @- <<'EOF' 
 [
   {
     "Networks": [
@@ -337,7 +350,22 @@ curl --connect-timeout 300 --max-time 300 -X PUT -H "Content-Type: application/j
   }
 ]
 EOF
+564319
+```
+Wait for completion by checking the job progress:
+```
+curl http://localhost:8080/hpe5g.html/job
 
+stdout:
+
+stderr:
+
+Asynchronous job is running: pid 564319
+```
+Get the instances details upon completion:
+```
+curl http://localhost:8080/hpe5g.html/job
+stdout:
 [
   {
     "ipaddress": "30.117.0.29",
@@ -381,11 +409,58 @@ curl -X PUT -H "Content-Type: application/json" 'http://localhost:8080/hpe5g.htm
 EOF
 ```
 Undeployment is performed by turning the PUT verb to DELETE and the deploy action to undeploy.
+
+### Abort an asynchronous job
+Deploy a stack named alif hosting three instances named alpha, beta and gamma connected to the public network with floating IPs and running Centos 7, 7.5 and 7.6 respectively, the latter using a redefined performance flavor as v4.m16   
+```
+curl -X PUT -H "Content-Type: application/json" 'http://localhost:8080/hpe5g.html/deploy?OSenv=/home/centos/automated-deployer/RHOS12.env&project=alif&async' --data @- <<'EOF'
+[
+  {
+    "Networks": [
+      {"network": "MGMT", "interface": "eth0", "mask": "255.255.255.224"},
+      {"network": "PUBLIC"}
+    ]
+  },
+  {
+    "Nodes": [
+      {"MGMT fqdn": "alpha.localdomain", "MGMT IP addr": "?", "PUBLIC IP addr": "?", "Image": "Centos 7"},
+      {"MGMT fqdn": "beta.localdomain", "MGMT IP addr": "?", "PUBLIC IP addr": "?", "Image": "Centos 7.5"},
+      {"MGMT fqdn": "gamma.localdomain", "MGMT IP addr": "?", "PUBLIC IP addr": "?", "Flavor": "flavorPerformance", "Image": "Centos 7.6"}
+    ]
+  },
+  {
+    "Flavors": [
+      {"Infrastructure": "openstack", "Flavor": "flavorPerformance", "name": "v4.m16"}
+    ]
+  }
+]
+EOF
+
+564668
+```
+Check the asynchronous job status
+```
+curl http://localhost:8080/hpe5g.html/job                                                                
+stdout:
+
+stderr:
+
+Asynchronous job is running: pid 564668
+```
+Kill the asynchronous job
+```
+curl -X DELETE -H "Content-Type: application/json" http://localhost:8080/hpe5g.html/job
+Job 564668 stopped
+stdout:
+
+stderr:
+```
+
 ### Failure examples
 ##### Deploy an invalid set of resources
 Attempt to deploy resources using an unknown type or unknown attributes: backing services with unknown attributes:
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data @- <<'EOF'
+curl -X PUT -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/hpe5g.sh --data @- <<'EOF'
 [
   {
     "NetworkFunctions": [
@@ -425,7 +500,7 @@ Unknown attribute Wild attribute in section DirectServices ignored.
 ##### Deploy a network function missing dependencies
 Attempt to deploy a udsf function from an empty session not providing the ignite and influxdb required services.   
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data @- <<'EOF'
+curl -X PUT -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/hpe5g.html/deploy --data @- <<'EOF'
 [
   {
     "Clusters": [
@@ -454,7 +529,7 @@ NetworkFunctions: myudsf missing dependency influxdb on project hpe5g
 ##### Deploy an incompatible udsf function on top of the backing services set defined in bs-set.html  
 The ignite version configured in the bs-set session is not compatible with the udsf deployed version, thus preventing udsf to start.   
 ```
-curl -X PUT -H "Content-Type: application/json" http://automated-deployer-assistant.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=alif --data @- <<'EOF'
+curl -X PUT -H "Content-Type: application/json" http://assistant-automated-deployer.apps.openshift1.ocp0.gre.hpecorp.net/bs-set.html/deploy?project=alif --data @- <<'EOF'
 [
   {
     "Clusters": [
@@ -532,6 +607,33 @@ OpenShift clusters candidate for deployment through OpenShift RESTful API:
   Typically retrieved from a session with: oc whoami -t
 - Targeted: check this box to deploy the defined resources to this cluster
 
+### Builds
+OpenShift builds:
+The OpenShift builds defined in this section rely on custom git projects as:
+- GIT URL: github project URL, eg: git@github.hpe.com:CMS-5GCS/automated-deployer.git         
+- directory: (optional) directory in the github project hosting the code     
+- branch: (optional) git branch to use, eg: master        
+- sshKey: (optional) private ssh key enabling access the git repository                
+Two types of OpenShift builds can be defined:        
+- jenkins pipelines available for continuous integration of hpe5g resources:        
+    The Jenkins environment variable _NAME is made available to the pipeline ; it is set to the name of the resource to which this pipeline is attached.         
+    This is useful to dynamically discover OpenShift resources like routes, services ,etc.        
+    Example of route retrieval in a Jenkins stage: openshift.selector( 'route/${_NAME}').object().spec.host         
+    Three examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :            
+    - get_oc_resources: display the OpenShift current project and existing resources        
+    - manual_approval: expect the end  user to explicitly approve the build        
+    - autotest: non regression tests for the automated deployer itself    
+- custom applications available as dynamic types in the CustomApps section for instanciation.        
+
+### CustomApps
+CustomApps instantiation from GIT using source to image feature:
+PREREQUISITE: the Builds section defines the build source in GIT repository for each instantiable application type.
+- Type: the type of the build to instantiate as defined by the Name attribute in the Builds section 
+- Name: one word resource name for this application instance
+- Project: the OpenShift project hosting this application instance
+- Pipeline: create a Jenkins pipeline for this application from the Builds section definition
+	
+
 ### NetworkFunctions
 Attributes:
 - Type: the type of the resource to deploy
@@ -546,13 +648,7 @@ Attributes:
 - Replicas: number of replicas deployed for this instance.
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-	  - get_oc_resources: display the OpenShift current project and existing resources        
-	  - manual_approval: expect the end  user to explicitly approve the build        
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this function from the Builds section definition
 	
 
 NetworkFunctions supported types: nudsf-dr,nudr-dr,nudr-prov,nudr-reg-agent,nudm-ee,nudm-li-poi,nudm-li-tf,nudm-ueau,nudm-uecm,nudm-sdm,nudm-notify,sf-cmod,nrf-reg-agent
@@ -571,13 +667,7 @@ Attributes:
 - Replicas: number of replicas deployed for this instance.
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-	  - get_oc_resources: display the OpenShift current project and existing resources        
-	  - manual_approval: expect the end  user to explicitly approve the build        
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this function from the Builds section definition
 	
 NOTES:
 - redis default admin password is the name of the instance.
@@ -608,13 +698,7 @@ Attributes:
 - Replicas: number of replicas deployed for this instance.
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
-- Pipeline: create a Jenkins pipeline for this function based on a github project delivering a Jenkinsfile    
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-	  - get_oc_resources: display the OpenShift current project and existing resources        
-	  - manual_approval: expect the end  user to explicitly approve the build        
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this function from the Builds section definition
 	
 NOTES: 
 - jenkins recommended values for RedHat OpenShift 3 are : 
@@ -632,13 +716,7 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Name: one word resource name for this operator instance
 - Project: the OpenShift project hosting this operator instance
 - Replicas: number of replicas passsed to this operator instance.
-- Pipeline: create a Jenkins pipeline for this operator instance based on a github project delivering a Jenkinsfile     
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
-	  - get_oc_resources: display the OpenShift current project and existing resources        
-	  - manual_approval: expect the end  user to explicitly approve the build        
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this operator instance from the Builds section definition
 	
 
 Operators supported types: jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,prometheus-operator
@@ -653,13 +731,7 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Values: local file injected in this chart as deployment values
 - Version: specify the exact chart version to install. If this is not specified, the latest version is installed
 - Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
-- Pipeline: create a Jenkins pipeline for this chart instance based on a github project delivering a Jenkinsfile     
-	GIT: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-	directory: (optional) directory in the github project hosting the pipeline definition as a Jenkinsfile, eg pipelines/get_oc_resources    
-	  Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :     
-	  - get_oc_resources: display the OpenShift current project and existing resources    
-	  - manual_approval: expect the end  user to explicitly approve the build    
-	branch: (optional) git branch to use, eg: master
+- Pipeline: create a Jenkins pipeline for this chart instance from the Builds section definition
 	
 
 HelmCharts supported types: nudm-chart,nudr-chart,telegraf-chart,generic

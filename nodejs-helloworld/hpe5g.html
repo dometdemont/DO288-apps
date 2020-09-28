@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-08-29 Version 0.79</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-09-25 Version 0.81</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
@@ -113,7 +113,9 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
-2020-08-29 0.79	new section Builds defining both Jenking pipelines and custom application builds; new section CustomApps to instantiate such applications from git repositories.
+2020-09-25 0.81	OpenShift 3.11 deployment: define the ansible extra variable openshift_epel_rpm_url=epel-release defining the epel package, to override the default failing value
+	Include OpenShift templates in the OpenStack template only if useful  
+2020-09-16 0.80	new section Builds defining both Jenking pipelines and custom application builds; new section CustomApps to instantiate such applications from git repositories.
 2020-08-13 0.78	Move to UDSF 1.8 in the default catalog; include the deployer version in the OpenShift project description; 
 	default flavor to standard, not small; save flavor in Nodes section; restrict insecure registries to full stack deployment. 
 2020-08-10 0.77	Support template import in the catalog as yaml files; remove dependency on logger not supported in basic docker containers; robustness on missing sections in imported catalog. 
@@ -1513,21 +1515,27 @@ var Builds = new vnfResource("Builds", [
 	{name:'Name', type:'text', width:'100px'},
 	{name:'GIT URL', type:'text', width:'400px'},
 	{name:'directory', type:'text', width:'200px'},
-	{name:'branch', type:'text', width:'120px'}
+	{name:'branch', type:'text', width:'120px'},
+	{name:'sshKey', type:'file', width:'120px'}
 	]
 	);
 
 Builds.help = function(){return `OpenShift builds:
 The OpenShift builds defined in this section rely on custom git projects as:
-- GIT URL: github project URL, eg: https://github.hpe.com/CMS-5GCS/automated-deployer    
-- directory: (optional) directory in the github project hosting the project     
-- branch: (optional) git branch to use, eg: master    
-Two types of OpenShift builds can be defined:
-- jenkins pipelines available for continuous integration of hpe5g resources:
-   Two examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :    
-   - get_oc_resources: display the OpenShift current project and existing resources        
-   - manual_approval: expect the end  user to explicitly approve the build        
-- custom applications available as dynamic types in the CustomApps section for instanciation.
+- GIT URL: github project URL, eg: git@github.hpe.com:CMS-5GCS/automated-deployer.git         
+- directory: (optional) directory in the github project hosting the code     
+- branch: (optional) git branch to use, eg: master        
+- sshKey: (optional) private ssh key enabling access the git repository                
+Two types of OpenShift builds can be defined:        
+- jenkins pipelines available for continuous integration of hpe5g resources:        
+    The Jenkins environment variable _NAME is made available to the pipeline ; it is set to the name of the resource to which this pipeline is attached.         
+    This is useful to dynamically discover OpenShift resources like routes, services ,etc.        
+    Example of route retrieval in a Jenkins stage: openshift.selector( 'route/\${_NAME}').object().spec.host         
+    Three examples are provided by https://github.hpe.com/CMS-5GCS/automated-deployer/pipelines :            
+    - get_oc_resources: display the OpenShift current project and existing resources        
+    - manual_approval: expect the end  user to explicitly approve the build        
+    - autotest: non regression tests for the automated deployer itself    
+- custom applications available as dynamic types in the CustomApps section for instanciation.        
 `
 }
 
@@ -1535,20 +1543,32 @@ Two types of OpenShift builds can be defined:
 // Template fragment defining a build config 
 // either as a Jenkins pipeline or as a custom app
 //================================================================
-Builds.makeTemplate = function(name, type, uri, dir, branch){
+Builds.makeTemplate = function(name, type, uri, dir, branch, sshKey){
 if(!uri)return;
 var result='';
 switch(type){
 	case 'pipeline':
-		result+=`
-- kind: "BuildConfig"
-  apiVersion: "build.openshift.io/v1"
+if(sshKey.content)result+=`
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ~NAME~-`+name+`
+    namespace: ~PROJECT~
+  type: Opaque
+  data:
+    ssh-privatekey: `+btoa(sshKey.content);
+result+=`
+- kind: BuildConfig
+  apiVersion: build.openshift.io/v1
   metadata:
     name: "~NAME~-`+name+`"
   spec:
     source:`;
 		if(dir)result+=`
       contextDir: `+dir;
+		if(sshKey.content)result+=`
+      sourceSecret:
+        name: ~NAME~-`+name;
 result+=`
       git:
         uri: `+uri;
@@ -1558,15 +1578,22 @@ result+=`
     strategy:
       jenkinsPipelineStrategy:
         type: JenkinsPipeline
-`;
+        env:
+          - name: "_NAME"
+            value: ~NAME~`
+;
 	break;
 	case 'custom-app':
 		// Custom app deployment is not available as template, only from oc new-app CLI
 		// Build a one line shell script invoking this command if the parameter 'apply' is received or the related deletion if a parameter 'delete' is received
-		result+='( [[ "$1" == "delete" ]] && oc delete all --selector app=~NAME~-'+name+' ) || ( [[ "$1" == "apply" ]] && oc new-app --name ~NAME~-'+name+' '+uri;
+		result+='( [[ "$1" == "delete" ]] && oc delete all --selector app=~NAME~ ) || ( [[ "$1" == "apply" ]]';
+		if(sshKey.content)result+=" && oc create secret generic ~NAME~-"+name+" --type=kubernetes.io/ssh-auth --from-literal=ssh-privatekey='"+sshKey.content+"'";
+		result+=' && oc new-app --name ~NAME~';
+		if(sshKey.content)result+=' --source-secret=~NAME~-'+name;
+		result+=' '+uri;
 		if(branch)result+='#'+branch;
 		if(dir)result+=' --context-dir '+dir;
-		result+=' && oc expose svc/~NAME~-'+name+' )';
+		result+=' && oc expose svc/~NAME~ )';
 	break;
 	default:
 		return;
@@ -1608,17 +1635,21 @@ Builds.build = function(target){
 		var gitURL=Builds.getAndSetValue(row, nameIndexes, 'GIT URL', 'https://github.com/dometdemont/DO288-apps');
 		var gitDirectory=Builds.getAndSetValue(row, nameIndexes, 'directory');
 		var gitBranch=Builds.getAndSetValue(row, nameIndexes, 'branch');
+		var delButton=row.getElementsByClassName("delButton")[0];
+		var sshKey=window[this.title + "_sshKey_" + delButton.id];
 		var check='';
 		if(!type)check += "\nBuilds section: "+name+": type is required";
 		if(!name)check += "\nBuilds section: "+type+" name is required";
+		if(name.search(/[A-Z_]/g) >= 0){check += "\nBuilds section: "+name+" : upper case and underscore characters are not supported";}
 		if(!gitURL)check += "\nBuilds section: "+type+" "+name+": GIT URL is required";
 		if(!Builds.templates[type])check += "\nBuilds section: type "+type+" is not supported; expecting one of: "+Object.keys(Builds.templates).join();
 		else if(Builds.templates[type][name])check += "\nBuilds section: "+type+" "+name+" is duplicated";
 		Builds.check+=check;
 		if(check)continue;
 		
-		result+="\n#- "+type+" "+name+" build from GIT "+gitURL+"/"+gitDirectory+" branch: "+gitBranch;
-		Builds.makeTemplate(name, type, gitURL, gitDirectory, gitBranch);
+		result+="\n#- "+type+" "+name+" build from GIT "+gitURL+"/"+gitDirectory+" branch: "+gitBranch+" sshKey: ";
+		if(sshKey.content)result+=sshKey.content.length+" bytes";
+		Builds.makeTemplate(name, type, gitURL, gitDirectory, gitBranch, sshKey);
 	}
 
 	if(Builds.check != "")return Builds.check;
@@ -1631,7 +1662,8 @@ Builds.build = function(target){
 var CustomApps = new vnfResource("CustomApps", [
 	{name:'Type', type:'choice', width: '140px', choices: function(){Builds.build(); return Builds.getNames('custom-app');}}, 
 	{name:'Name', type:'text', width:'100px'},
-	{name:'Project', type:'text', width:'60px'}
+	{name:'Project', type:'text', width:'60px'},
+	{name:'Pipeline', type:'text', width:'100px'}
 	]
 );
 CustomApps.help = function(){return `CustomApps instantiation from GIT using source to image feature:
@@ -1639,6 +1671,7 @@ PREREQUISITE: the Builds section defines the build source in GIT repository for 
 - Type: the type of the build to instantiate as defined by the Name attribute in the Builds section 
 - Name: one word resource name for this application instance
 - Project: the OpenShift project hosting this application instance
+- Pipeline: create a Jenkins pipeline for this application from the Builds section definition
 	
 `;
 }
@@ -1663,6 +1696,11 @@ CustomApps.build = function(target){
 		var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
 		var project=this.getAndSetValue(row, nameIndexes, 'Project',Misc.getValue('default_project'));
 		if(!template){this.check += "\n"+this.title+": "+type+" is unknown in the Builds section as a custom-app"; continue;}
+		var pipeline=this.getAndSetValue(row, nameIndexes, 'Pipeline');
+		var pipelineTemplate=Builds.getTemplate('pipeline', pipeline);
+		this.check += checkDependency(pipeline, [pipelineTemplate], this.title+" "+name+": pipeline "+pipeline, " is undefined in the Builds section");
+		if(pipeline)hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, undefined, project, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, pipelineTemplate));
+		
 		if(!CustomApps.deployments[project])CustomApps.deployments[project]=new Array();
 		CustomApps.deployments[project].push(template.replace(/~NAME~/g,name));
 		result+="\n#- "+name+": "+type+" on project: "+project;
@@ -1753,7 +1791,7 @@ hpe5gResource.prototype.build = function(target){
 		var dependenciesList=this.getAndSetValue(row, nameIndexes, 'Dependencies');
 		var dependencies=undefined;
 		if(dependenciesList)dependencies=dependenciesList.split(/[\s,]+/);
-		if(name.search(/[A-Z]/g) >= 0){this.check += "\n"+this.title+" "+name+" : upper cases are not supported";}
+		if(name.search(/[A-Z_]/g) >= 0){this.check += "\n"+this.title+" "+name+" : upper case and underscore characters are not supported";}
 		if(!project){this.check += "\n"+this.title+" "+name+" : project is required";}
 		var displayImage="";
 		if(!image){
@@ -1769,6 +1807,7 @@ hpe5gResource.prototype.build = function(target){
 		this.check += checkDependency(hpe5gResources.defaults[type]['storage'] != undefined, [storage.length>0], this.title+" "+name,", Storage is required");
 		
 		var pipeline=this.getAndSetValue(row, nameIndexes, 'Pipeline');
+		if(pipeline.search(/[A-Z_]/g) >= 0){this.check += "\n"+this.title+" "+name+" pipeline "+pipeline+": upper case and underscore characters are not supported";}
 		var pipelineTemplate=Builds.getTemplate('pipeline', pipeline);
 		this.check += checkDependency(pipeline, [pipelineTemplate], this.title+" "+name+": pipeline "+pipeline, " is undefined in the Builds section");
 		
@@ -2273,10 +2312,11 @@ fi
 _log_ "$_displayedAction the network functions and Helm instances"
 for _project in $oc_projects; do 
 	oc project $_project &>> $logfile || _fail_ "Cannot switch to project $_project"
+	# Deploy custom apps if any
+	if test -f openshift_project_$_project.sh ; then _log_ "$_displayedAction openshift_project_$_project.sh on project $_project" && ./openshift_project_$_project.sh $_ocAction &>> $logfile && rm -f openshift_project_$_project.sh &>> $logfile || _fail_ "$_displayedAction openshift_project_$_project.sh "; fi
 	# File naming convention for Network functions: openshift_project_<project>.yaml
 	# File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
 	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" && _cmd_with_retry "oc process -f openshift_project_$_project.yaml | oc $_ocAction -f -" "Processing" && rm -f openshift_project_$_project.yaml &>> $logfile || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
-	if test -f openshift_project_$_project.sh ; then _log_ "$_displayedAction openshift_project_$_project.sh on project $_project" && ./openshift_project_$_project.sh $_ocAction &>> $logfile && rm -f openshift_project_$_project.sh &>> $logfile || _fail_ "$_displayedAction openshift_project_$_project.sh "; fi
 	for _helmValues in $(ls openshift_helm_$\{_project}_*.yaml 2> /dev/null) ; do eval $(head -1 $_helmValues) && _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" && tail -n +2 $_helmValues > _tmp_$_helmValues && _helmAction &>> $logfile && rm -f $_helmValues _tmp_$_helmValues &>> $logfile || _fail_ "$_displayedAction Helm instance on project $_project" ; done
 	# Undeployment: wait for pods termination  
 	while [[ "$_ocAction" == "delete" ]] && _log_ "Waiting 30s for terminating pods on project $_project" && sleep 30 && oc get pods 2> /dev/null | grep -e Terminating &>> $logfile ; do : ; done
@@ -2345,9 +2385,11 @@ objects:
 		// - dependencies names with the actual name, defined in the template as ~<requirement>_NAME~
 		var _header=templateHeader;
 		hpe5gResources.openshiftFunctions.forEach(function(networkFunction){
-		var deployment=hpe5gResources.defaults[networkFunction.type]['template'];
-		if(networkFunction.project != project || !deployment)return;
+		var deployment='';
+		if(networkFunction.project != project)return;
+		if(hpe5gResources.defaults[networkFunction.type] && hpe5gResources.defaults[networkFunction.type]['template'])deployment+=hpe5gResources.defaults[networkFunction.type]['template'];
 		if(networkFunction.pipeline)deployment+=networkFunction.pipeline;
+		if(!deployment)return;
 		if(header && _header.length>0)result+=header(project);
 		deployment=_header+deployment.replace(/\n/g, "\n  ");	// indentation of objects compared to the header
 		if(tab != undefined)deployment=deployment.replace(/\n/g, "\n"+tab);	// indentation of objects compared to the project header
@@ -2358,7 +2400,7 @@ objects:
 		.replace(/~IMAGE~/g,networkFunction.image)
 		.replace(/~IMAGE_STREAM~/g,networkFunction.imageStream())
 		.replace(/~REPLICAS~/g,networkFunction.replicas);
-		if(networkFunction.storage.length>0){
+		if(networkFunction.storage){
 			deployment=deployment
 			.replace(/~STORAGE~/g,networkFunction.storage)
 			.replace(/~VOLUME~/g,networkFunction.volume)
@@ -2866,9 +2908,11 @@ function buildHeatTemplate(){
     heat+=n0+"      "+item.name+": "+item.value;   	
     });
     
-    heat+=n0+"  openshift_templates:";
+	// Add OpenShift templates to deploy if an ems is available
+	heat+=n0+"  openshift_templates:";
     heat+=n0+"    description: set of OpenShift templates ready for deployment";
     heat+=n0+"    value:";
+    if(Nodes.cloudNodes && Nodes.cloudNodes.some(function(e){return e.isEms;})){
     // OpenShift network functions and Helm instances, per project
 	// File naming convention for Network functions and services: openshift_project_<project>.yaml
 	// File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
@@ -2883,6 +2927,8 @@ function buildHeatTemplate(){
     // List of HelmCharts deployed on openshift
     heat+=hpe5gHelmValues(heatHelmValuesHeader,undefined,'  ').replace(/\n/g, "\n"+  
     	     '      ');	// fix the descriptor indentation as expected by Heat
+	}
+	
     return heat;
 }
 
@@ -2947,7 +2993,7 @@ rm -f openshift-ansible/inventory/$oc_stack.yaml 2> /dev/null
 > $oc_stack.json
 ansible-playbook  hpe5g.ansible.yml --extra-vars "stack_name=$oc_stack the_template=$oc_stack.yaml the_network=$oc_network cachePatch=$PWD/ the_state=$state" &>> $logfile || _fail_ "OpenStack deployment of $oc_stack"
 if [ $state == "present" ] && test -f openshift-ansible/inventory/$oc_stack.yaml ; then
-  ansible-playbook -b -i openshift-ansible/inventory/$oc_stack.yaml openshift-ansible/playbooks/prerequisites.yml &>> $logfile && 
+  ansible-playbook --extra-vars "openshift_epel_rpm_url=epel-release" -b -i openshift-ansible/inventory/$oc_stack.yaml openshift-ansible/playbooks/prerequisites.yml &>> $logfile && 
   ansible-playbook -b -i openshift-ansible/inventory/$oc_stack.yaml openshift-ansible/playbooks/deploy_cluster.yml &>> $logfile && 
   eval $(grep ^openshift_ip openshift-ansible/inventory/$oc_stack.yaml) &>> $logfile || _fail_ "OpenShift cluster deployment" 
   echo "- Connect to OpenShift GUI as a user with any password" &>> $logfile
