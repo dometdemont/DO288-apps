@@ -7,12 +7,14 @@
     os_stack:
       state: "{{the_state | default('present') }}"
       name: "{{stack_name | default('hpe5g') }}"
+      validate_certs: no
       template: "{{the_template | default('nivr-cluster-nfv.yaml') }}"
       parameters:
         NetworkRoot: "{{the_network | default('192.168.111') }}"
         Image: "{{ lookup('env','CLOUD_IMAGE') }}"
         key_name: "{{ lookup('env','CLOUD_SSH_KEY_PAIR') }}"
         ExternalNetwork: "{{ lookup('env','CLOUD_EXTERNAL_NETWORK') }}"
+        AvailabilityZone: "{{ lookup('env','CLOUD_AVAILABILITY_ZONE') }}"
     register: the_stack
     until: the_stack is success
     retries: 2

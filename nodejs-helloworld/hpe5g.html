@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-09-25 Version 0.81</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-09-29 Version 0.82</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
@@ -113,6 +113,8 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-09-29 0.82	OpenStack deployments: disable root certificate authority checking, not available everywhere; support storage on volumes using Misc.openstack_volume_size
+  Support etcd operator from the default catalog
 2020-09-25 0.81	OpenShift 3.11 deployment: define the ansible extra variable openshift_epel_rpm_url=epel-release defining the epel package, to override the default failing value
 	Include OpenShift templates in the OpenStack template only if useful  
 2020-09-16 0.80	new section Builds defining both Jenking pipelines and custom application builds; new section CustomApps to instantiate such applications from git repositories.
@@ -375,7 +377,7 @@ consistency.check = function (){
 //		. text (default)
 // - value (optional: the default value)
 // Two methods linked to buttons at the bottom of the table are to be provided for each VNF resource:
-// - build: returns the MSE Descriptor section for this resource as a string; if any issue prevents this build, the check variable should return the error messages 
+// - build: returns the Descriptor section for this resource as a string; if any issue prevents this build, the check variable should return the error messages 
 // - help: provides hints for this resource as a text string
 // Convenient methods are offered for a resource:
 // search(column, value): to search for a text value in a given column
@@ -461,7 +463,7 @@ var vnfResource = function(title, columns, userFiles){
 		tableFiles.appendChild(aFile.getDomElement());
 	});
 	
-	// Add a button to trigger the MSE Descriptor build for this section
+	// Add a button to trigger the Descriptor build for this section
 	var buildButton = document.createElement('INPUT');
 	buildButton.type="button";
 	buildButton.value="Apply";
@@ -976,7 +978,8 @@ var MiscItems = [
 	{name: 'default_project', value: 'hpe5g', comment: "The default OpenShift project/namespace for deploying resources"},
 	{name: 'default_action', value: 'deploy', comment: "The default installer action: deploy or undeploy"},
 	{name: 'default_openstack_env', value: 'RHOS12.env', comment: "The default OpenStack environment file name"},
-	{name: 'default_openstack_network_root', value: '192.168.199', comment: "The default OpenStack network root as 3 unique digits like 192.168.199"}
+	{name: 'default_openstack_network_root', value: '192.168.199', comment: "The default OpenStack network root as 3 unique digits like 192.168.199"},
+  {name: 'openstack_volume_size', value: '', comment: "Size in Gb of the specific volume allocated to each OpenStack instance:\n\t\tIn that case, the OpenStack image must refer to a volume ID used for cloning.\n\t\tDefault: local storage sized according to the flavor and initialiazed with the image."}
 	];
 
 var Misc = new vnfResource("Misc", [
@@ -1114,7 +1117,7 @@ var Nodes= new vnfResource("Nodes", [
 	{name:'Worker', type:'bool'},
 	{name:'Tester', type:'bool'},
 	{name:'Flavor', width:'120px', type:'choice', choices:['','flavorSmall', 'flavorStandard', 'flavorPerformance']},
-	{name:'Image', type:'text', width: '120px'}
+	{name:'Image', type:'text', width: '200px'}
 	]
 	);
 	
@@ -1128,7 +1131,7 @@ Nodes.help = function(){
 - Tester: node hosting the nodejs application used as HPE network functions tester    
   This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
 - Flavor: shortcut defining the resources allocated for this node; mapping to the actual flavor for the target infrastructure is based on the Flavors section
-- Image: the name of the qcow2 image used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
+- Image: name of the qcow2 image or ID of the volume used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
 `;
 }
 
@@ -1456,7 +1459,7 @@ PersistentVolumes.build = function(target){
 var Clusters = new vnfResource("Clusters", [
 	{name:'Name', type:'text', width:'80px'},
 	{name:'Endpoint', type:'text', width:'300px'},
-	{name:'Token', type:'text', width:'200px'},
+	{name:'Token', type:'text', width:'300px'},
 	{name:'Targeted', type:'bool'},
 	]
 	);
@@ -1855,7 +1858,9 @@ var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVol
 	// Insecure registries are managed by docker; secured registries are pulled directly from the URL
 	this.insecureURL = function(){return hpe5gResources.insecureRegistries.indexOf(this.URL) >= 0;}
 	this.imageStream = function(){
-		var _imageStream=this.URL+'/'+this.image;
+		var _imageStream=this.URL;
+		if(_imageStream)_imageStream+='/';
+		_imageStream+=this.image;
 		if(this.insecureURL())_imageStream='docker-registry.default.svc:5000/'+this.project+'/'+this.image;
 		return _imageStream;
 	}
@@ -2069,8 +2074,6 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
     - in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
     - create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
     - save the private key, eg mykey.pem
-    - retrieve the infrastructure certificate:    
-    From https://cmsgvm42.gre.hpecorp.net/hos/ click the info button on your request and download the certificate
 
 - Ansible controller
     - create a network and a router connected to the external network
@@ -2092,7 +2095,7 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
      http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone git@10.74.128.22:CMS-5GCS/automated-deployer.git
     - move to this directory    
      cd automated-deployer
-    - retrieve in this directory from step 1 the infrastructure certificate and the private ssh key file and set ssh compliant access rights eg :    
+    - retrieve in this directory the private ssh key file and set ssh compliant access rights eg :    
      chmod 0600 *.pem 
  
 - OpenStack target definition
@@ -2104,7 +2107,6 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
       - export OS_PROJECT_ID="b5f5a70ae58d4405a780aac02094a264"
       - export OS_PROJECT_NAME="d3mRHOS13"
       - export OS_USERNAME="d3m"
-      - export OS_CACERT="grenoble-infra-root-ca_gs118.crt"
     - set the ssh key to use:
       - export CLOUD_SSH_KEY_PAIR="mykey"
       - export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
@@ -2616,13 +2618,13 @@ function jsonSession(payload){
 // OpenShift Heat template build
 // =============================
 function buildHeatTemplate(){
-	var useHeatVolumes = 'none';
 	var oc_version=document.getElementById("oc_version").value;
 	
 	// Build the inventory for Heat (or get the errors) and do not publish
 	// Required soon enough to get Heat specific variables properly setup
     var openshift = buildInventory('Heat');
 	if(openshift.length == 0)return '';
+  var useHeatVolumes = Misc.getValue('openstack_volume_size');
     
 	var n0="\n";
 	var quickDescription = document.getElementById("quickDescription");
@@ -2636,11 +2638,7 @@ function buildHeatTemplate(){
     heat+=n0+"    default: 192.168.100";
 	heat+=n0+"  Image:";
     heat+=n0+"    type: string";
-    switch(useHeatVolumes){
-    	case 'none':    	heat+=n0+"    description: The name of the image used to instantiate storage on MSE nodes"; break;
-    	case 'from image':	heat+=n0+"    description: The name of the image used to instantiate MSE volumes"; break;
-    	case 'from master':	heat+=n0+"    description: The id of the master volume used to instantiate MSE volumes"; break;
-    }
+    heat+=n0+"    description: The name of the image used to instantiate storage on nodes";
     heat+=n0+"    default: 'Centos 7.6'";
 	heat+=n0+"  ExternalNetwork:";
     heat+=n0+"    type: string";
@@ -2649,7 +2647,7 @@ function buildHeatTemplate(){
     heat+=n0+"  AvailabilityZone:";
     heat+=n0+"    type: string";
     heat+=n0+"    label: Availability zone";
-    heat+=n0+"    description: The name of the zone hosting the MSE nodes";
+    heat+=n0+"    description: The name of the zone hosting the nodes";
     heat+=n0+"    default: nova";
 	heat+=n0+"  flavorStandard:";
     heat+=n0+"    type: string";
@@ -2667,11 +2665,11 @@ function buildHeatTemplate(){
     heat+=n0+"    type: string";
     heat+=n0+"    description: the ssh key injected in the instances for remote access";
     heat+=n0+"    default: ''";
-    if(useHeatVolumes != 'none'){
+    if(useHeatVolumes){
 	heat+=n0+"  VolumeSize:";
     heat+=n0+"    type: number";
     heat+=n0+"    description: The size in Gb of the volumes attached to the nodes.";
-    heat+=n0+"    default: 20";
+    heat+=n0+"    default: "+useHeatVolumes;
 	}
 	heat+=n0;
 	heat+=n0+"resources:";
@@ -2784,11 +2782,19 @@ function buildHeatTemplate(){
       	
       	// if this node is a VIP, neither volume nor instance are needed
       	if(!Nodes.cloudNodes[indexNode].isVIP){
+        if(useHeatVolumes){
+        heat+=n0+"  "+name+"-Volume:";
+        heat+=n0+"    type: OS::Cinder::Volume";
+        heat+=n0+"    properties: ";
+        heat+=n0+"      source_volid: "+Nodes.cloudNodes[indexNode].image;
+        heat+=n0+"      name: {list_join: [ '-', ['"+name+"', { get_param : 'OS::stack_name' }]]}";
+        heat+=n0+"      size: { get_param: VolumeSize }";
+        }
       	heat+=n0+"  "+name+":";
-    	heat+=n0+"    type: OS::Nova::Server";
-    	heat+=n0+"    properties:";
+      	heat+=n0+"    type: OS::Nova::Server";
+      	heat+=n0+"    properties:";
       	heat+=n0+"      name: "+name;
-      	if(useHeatVolumes != 'none'){
+      	if(useHeatVolumes){
       	heat+=n0+"      block_device_mapping: [{ device_name: 'vda', volume_id : { get_resource: "+name+"-Volume } }]";
       	}else{
       	heat+=n0+"      image: "+Nodes.cloudNodes[indexNode].image; 
@@ -2974,7 +2980,6 @@ _success_() {
 # Ensure ansible availability and OpenStack environment setting
 which ansible-playbook > /dev/null || _fail_ Missing ansible-playbook: please install ansible-playbook before deploying on OpenStack
 test -f $OS_env && source $OS_env &>> $logfile || _fail_ Missing or failing OpenStack environment file $OS_env 
-test -f $OS_CACERT || _fail_ Missing $OS_CACERT file: please review OS_CACERT environment variables in the OpenStack environment definition file $OS_env
 test -f $CLOUD_SSH_KEY || _fail_ Missing $CLOUD_SSH_KEY file: please review CLOUD_SSH_KEY environment variables in the OpenStack environment definition file $OS_env
 
 # Create the Heat stack file
@@ -3245,7 +3250,6 @@ function buildNetworkFunctions(){
 		shell+=hpe5gCustomAppsScript();
     	shell+=hpe5gDeploymentScript(warningMessage);
 	}else{
-		var quickDescription="From HPE5g automated deployer "+document.getElementById("vnfDescriptorWizardVersion").innerHTML+" on: "+Date()+" "+document.getElementById("quickDescription").value;
 		shell+=shellBody('curl');
 		
 		if(hpe5gHelmValues().length > 0){check+='\nHelm based deployments not supported on OpenShift REST API, only on CLI' ;}
@@ -3271,8 +3275,8 @@ function buildNetworkFunctions(){
   "metadata": {
     "name": "`+project+`"
   },
-  "description": "`+quickDescription+`",
-  "displayName": "Project `+project+` created from REST API"
+  "displayName": "`+document.getElementById("quickDescription").value+`",
+  "description": "From HPE5g automated deployer `+document.getElementById("vnfDescriptorWizardVersion").innerHTML+" on: "+Date()+`"
 }
 HPE_EOF`;
 				shell+='\nif [ $? != 0 ] ; then _fail_ "Cannot create project '+project+' on cluster '+cluster.name+'" ; fi';
@@ -3298,10 +3302,12 @@ HPE_EOF`;
                 shell+='\nif [ $? != 0 ] ; then _fail_ "Cannot create secret '+secretName+' for project '+project+' on cluster '+cluster.name+'" ; fi';
                 shell+='\nsleep 2 ; done';
                 
-                // Deploy/undeploy the template instance: use the first resource name in this project as the template name to allow subsequent deployment in the same project without duplicating the template name
+                // Deploy/update/undeploy the template instance: use the first resource name in this project as the template name to allow subsequent deployment in the same project without duplicating the template name
                 var templateInstanceName=hpe5gResources.openshiftFunctions.find(function(f){return f.project == project;}).name;
                 shell+='\n_log_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'"';
-                shell+='\nif $_deploy ; then curl -f -v -k -X POST -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances &>> $logfile <<'HPE_EOF'";
+                shell+='\n_httpVerb=POST _httpTarget=""';
+                shell+='\nif curl -f -v -k -X GET -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+'/templateinstances/'+templateInstanceName+' &>> $logfile ; then _httpVerb=PUT; _httpTarget=/'+templateInstanceName+'; fi';
+                shell+='\nif $_deploy ; then curl -f -v -k -X $_httpVerb -d @- -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+"/templateinstances$_httpTarget &>> $logfile <<'HPE_EOF'";
                 shell+=`
 {
   "kind": "TemplateInstance",
@@ -3319,8 +3325,8 @@ HPE_EOF`;
 HPE_EOF`;
 				shell+='\nif [ $? != 0 ] ; then _fail_ "$_displayedAction resources for project '+project+' on cluster '+cluster.name+'" ; fi';
 				
-				shell+='\n# Poll the TemplateInstance until the condition types report status True at a 2 seconds period limited to 10 seconds, delay compatible with a REST request.';
-				shell+='\n_cmd_with_retry "_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+' '+templateInstanceName+'" Processing 10 2';
+				shell+='\n# Poll the TemplateInstance until the condition types report status True at a 15 seconds period limited to two minute.';
+				shell+='\n_cmd_with_retry "_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+' '+templateInstanceName+'" Processing 120 15';
 				shell+='\n# If the TemplateInstance status is true, but not Ready, fail with the error message; otherwise report success';
 				shell+='\nif [ $? == 0 ] && [[ "$(_getTemplateInstanceStatus '+cluster.token+' '+cluster.endpoint+' '+project+' '+templateInstanceName+')" != \'"Ready"\' ]] ; then _fail_ $(_getTemplateInstanceMessage '+cluster.token+' '+cluster.endpoint+' '+project+' '+templateInstanceName+') ; fi';
 				shell+='\nelse curl -f -v -k -X DELETE -H "Authorization: Bearer '+cluster.token+'" -H "Accept: application/json" -H "Content-Type: application/json" https://'+cluster.endpoint+'/apis/template.openshift.io/v1/namespaces/'+project+'/templateinstances/'+templateInstanceName+' &>> $logfile';
@@ -3573,6 +3579,7 @@ var defaultCatalog=`
       "elasticsearch-operator",
       "kiali-ossm",
       "grafana-operator",
+      "etcd-operator",
       "prometheus-operator"
     ],
     "HelmCharts": [
@@ -3628,6 +3635,7 @@ var defaultCatalog=`
 	    "grafana": true,
 	    "kube-state-metrics": true,
 	    "grafana-operator": true,
+      "etcd-operator": true,
 	    "prometheus-operator": true
   },
   "values": {
@@ -3774,6 +3782,7 @@ var defaultCatalog=`
     "elasticsearch-operator": {},
     "kiali-ossm": {},
     "grafana-operator": {},
+    "etcd-operator": {},
     "prometheus-operator": {},
     "nudm-chart": {
       "chart": "hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz"
@@ -11192,6 +11201,39 @@ hpe5gResources.defaults['grafana-operator']['template']=
         "links": []
       }
     name: simple-dashboard.json
+`;
+//================================================
+hpe5gResources.defaults['etcd-operator']['template']=
+//================================================
+`
+- kind: OperatorGroup
+  apiVersion: operators.coreos.com/v1
+  metadata:
+    name: etcd-operator-~PROJECT~
+    namespace: ~PROJECT~
+  spec:
+    targetNamespaces:
+    - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
+  metadata:
+    name: etcd-operator-~PROJECT~
+    namespace: ~PROJECT~
+  spec:
+    channel: singlenamespace-alpha
+    installPlanApproval: Automatic
+    name: etcd
+    source: community-operators
+    sourceNamespace: openshift-marketplace
+- kind: EtcdCluster
+  apiVersion: etcd.database.coreos.com/v1beta2
+  metadata:
+  metadata:
+    name: ~NAME~-etcd
+    namespace: ~PROJECT~
+  spec:
+    size: ~REPLICAS~
+    version: 3.2.13
 `;
 </script>
 </body>
