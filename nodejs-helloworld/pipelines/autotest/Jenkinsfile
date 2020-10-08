@@ -14,8 +14,9 @@ pipeline {
     }
     parameters {
         string(name: '_BS_SET', defaultValue: 'bs-set.basic.html', description: 'Backing services set to deploy')
-        string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user used to instantiate resources')
-        password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password')
+        string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user name, required if token is undefined')
+        password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password, required if token is undefined')
+        token(name: '_TOKEN', description: 'OpenShift security token, required if user and password are undefined')
     }
     stages {
         stage('OpenShift context') {
@@ -46,7 +47,9 @@ pipeline {
         steps {
           script {
                   sh """
-                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  _OCcredentials=\"--username=${params._USER} --password=${params._PASSWORD}\"
+                  test -n \"${params._TOKEN}\" && _OCcredentials=\"--token=${params._TOKEN}\"
+                  oc login ${_CLUSTER} \$_OCcredentials --insecure-skip-tls-verify
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh
                   """
@@ -64,7 +67,9 @@ pipeline {
         steps {
           script {
                   sh """
-                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  _OCcredentials=\"--username=${params._USER} --password=${params._PASSWORD}\"
+                  test -n \"${params._TOKEN}\" && _OCcredentials=\"--token=${params._TOKEN}\"
+                  oc login ${_CLUSTER} \$_OCcredentials --insecure-skip-tls-verify
                   curl -f -X PUT -H \"Content-Type: application/json\" http://${_ENDPOINT}/${params._BS_SET}/hpe5g.sh?project=${_PROJECT} --data '' > bs-set.sh &&
                   chmod a+x bs-set.sh && ./bs-set.sh --deploy && ./bs-set.sh --undeploy
                   """
@@ -75,7 +80,9 @@ pipeline {
         steps {
           script {
                   sh """
-                  oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+                  _OCcredentials=\"--username=${params._USER} --password=${params._PASSWORD}\"
+                  test -n \"${params._TOKEN}\" && _OCcredentials=\"--token=${params._TOKEN}\"
+                  oc login ${_CLUSTER} \$_OCcredentials --insecure-skip-tls-verify
                   _OCtoken=\$(oc whoami -t)
                   _OCendpoint=\$(oc config current-context | cut -d/ -f2 | tr - .)
                   echo -n '[{"Clusters": [{"Name": "sut","Endpoint": "' > payload.json
@@ -95,7 +102,9 @@ pipeline {
       stage('Expected errors') {
         steps {
           sh """
-          oc login ${_CLUSTER} -u ${params._USER} -p ${params._PASSWORD} --insecure-skip-tls-verify
+          _OCcredentials=\"--username=${params._USER} --password=${params._PASSWORD}\"
+          test -n \"${params._TOKEN}\" && _OCcredentials=\"--token=${params._TOKEN}\"
+          oc login ${_CLUSTER} \$_OCcredentials --insecure-skip-tls-verify
           
           # Non existing session
           [[ \$(curl http://${_ENDPOINT}/unlikely.html/dump) != 0 ]]
