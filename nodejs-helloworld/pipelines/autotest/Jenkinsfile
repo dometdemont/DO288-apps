@@ -16,7 +16,7 @@ pipeline {
         string(name: '_BS_SET', defaultValue: 'bs-set.basic.html', description: 'Backing services set to deploy')
         string(name: '_USER', defaultValue: 'developer', description: 'OpenShift user name, required if token is undefined')
         password(name: '_PASSWORD', defaultValue: 'developer', description: 'OpenShift user password, required if token is undefined')
-        token(name: '_TOKEN', description: 'OpenShift security token, required if user and password are undefined')
+        string(name: '_TOKEN', description: 'OpenShift security token, required if user and password are undefined')
     }
     stages {
         stage('OpenShift context') {
