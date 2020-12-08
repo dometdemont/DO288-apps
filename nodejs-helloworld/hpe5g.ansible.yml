@@ -12,7 +12,7 @@
       parameters:
         NetworkRoot: "{{the_network | default('192.168.111') }}"
         Image: "{{ lookup('env','CLOUD_IMAGE') }}"
-        key_name: "{{ lookup('env','CLOUD_SSH_KEY_PAIR') }}"
+        key_name: "{{ lookup('env','CLOUD_SSH_KEY_PAIR') or lookup('env','OS_SSH_KEY_PAIR') }}"
         ExternalNetwork: "{{ lookup('env','CLOUD_EXTERNAL_NETWORK') }}"
         AvailabilityZone: "{{ lookup('env','CLOUD_AVAILABILITY_ZONE') }}"
     register: the_stack
@@ -72,7 +72,7 @@
       name: "{{_host['fqdn']}}"
       groups: "{{_host['groups']}}"
       ansible_ssh_host: "{{_host['ipaddress']}}"
-      patched_files: "{{ lookup('env','PATCHED_FILES') }}"
+      patched_files: "{{ lookup('env','PATCHED_FILES') or '{}' }}"
       yum_explicit_packages: "{{ lookup('env','YUM_EXPLICIT_PACKAGES') }}"
       mandatory_services: "{{ lookup('env','MANDATORY_SERVICES') }}"
       misc_value: '{{misc_value}}'

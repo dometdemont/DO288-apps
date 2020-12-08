@@ -9,10 +9,14 @@
 7. [OpenStack deployment help](#OpenStackHelp)
 
 This tool builds and run an installer deploying user defined HPE5G resources on OpenShift clusters.  
-It can also build a Heat stack template deploying on OpenStack an OpenShift cluster including HPE5G resources and/or additional instances.  
+It can also deploy on OpenStack an OpenShift cluster including HPE5G resources and/or additional instances.  
 It operates in two modes: interactive or headless.
 
-For the interactive mode, open the [hpe5g.html](hpe5g.html) file in a browser and click the Help buttons for more information.
+For the interactive mode, open the [hpe5g.html](hpe5g.html) file in a browser. From this interface, once the application is defined as a set of resources, the user can build either:
+- an installer invokable from a bash console, or 
+- an OpenShift hpe5gApp application, deployable using the hpe5g operator 
+     
+Click the Help buttons in the user interface for more information. 
 
 The headless mode is implemented as a [nodejs application](hpe5g.js) ; the tool is then accessible through a RESTful interface exposing three verbs: [GET](#GET), [PUT](#PUT) and [DELETE](#DELETE).  
 
@@ -103,18 +107,20 @@ If this attribute is missing:
 ### OpenStack deployment<a name="OpenStack"></a>
 The automated deployer can deploy a full OpenShift cluster, HPE5G resources, and/or additional instances made available to run custom tools.
 #### OpenStack resources
-The resources deployed are defined in three sections:
+The resources deployed are defined in four sections:
 - Networks: list of private networks and public interface,
-- Nodes: list of instances, their roles, flavors and images,
+- Nodes: list of instances, their roles in an OpenShift 3.x cluster, flavors and images,
+- OpenShiftNodes: list of OpenShift 4.x clusters
 - Flavors: list of actual infrastructure flavors.    
 Refer to the [Sections detailed specifications](#SectionsDetails) for a detailed description of each section attributes.    
 
 #### Deployment
-The deployment is driven from an ansible playbook delivered with the automated deployer project. This playbook is invoked by the installer built by the automated deployer, either in direct or local mode. Specific prerequisites apply for OpenStack deployments to the installer execution environment:
+For resources defined in the Nodes section, the deployment is driven from an ansible playbook delivered with the automated deployer project. This playbook is invoked by the installer built by the automated deployer, either in direct or local mode. Specific prerequisites apply for OpenStack deployments to the installer execution environment:
 - ansible and OpenStack client installation
 - target OpenStack project definition in an file setting environment variables: OpenStack project, credentials, URLs, etc...     
+For resources defined in the OpenShiftNodes section, the deployment relies on the openshift installer and openshift client provided by RedHat. A pull secret must be provided in the Misc section.
 Refer to the [OpenStack deployment help](#OpenStackHelp) for installing the prerequisites and writing the environment file.  
-See also an [example of OpenStack resources deployment](#ExampleOpenStack)
+See also an [example of OpenStack resources deployment](#ExampleOpenStack)   
 
 ### REST operations
 The RESTful interface is exposing three verbs:
@@ -178,8 +184,7 @@ Where:
 	      - name: the node name in OpenStack
 	      - groups: the ansible list of groups this node belongs to
 	      - fqdn: the fully qualified domain name of this node
-  },
-	       
+    - hpe5gApp.yaml: to retrieve the application definition as an HPE5gApp kind, deployable using the hpe5g operator. This operator has to be installed beforehand from https://quay.io/cnr registryNamespace: dometdemont    
     - dump: to retrieve the concatenation of resources passed as payload with the resources defined in the session; the returned json is a merge of both set of resources, ready for a single shot deployment
     - save: similar to dump, but resulting in an HTML session ready to use as a starting point for other deployments  
     - hpe5g.yaml: to retrieve an OpenStack Heat template deploying a full OpenShift cluster, HPE5G resources, and/or additional instances made available to run custom tools.       
@@ -554,10 +559,27 @@ EOF
 ```
 The installer is not able to detect this incompatibility. The client has to check the application status from the standard OpenShift API/CLI.   
 
+
 <a name="SectionsDetails"></a>
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 
+### Misc
+Miscellaneous settings:
+- rhel_pullsecret: User secret provided by RedHat for deploying an OpenShift 4.x cluster; visit https://cloud.redhat.com/openshift/install/pull-secret
+- anyuid: true|false: relax security on the OpenShift cluster before deploying resources by granting all containers the root privilege and approving pending certificates (not recommended)
+- extnet: Name of the OpenStack external network used to connect the public addresses of the instances defined in the Nodes section
+- tester_nodejs_version: Nodejs version used to run the CMS5G Core Stack tester tool
+- tester_git_url: Git project URL delivering the CMS5G Core Stack tester tool
+- tester_deploy_key: Optional git deploy key to clone the project delivering the CMS5G Core Stack tester tool
+- headless: if not empty: do not assume a user for answering prompts and downloading files: use default values without prompting and do not save any file.
+- default_project: The default OpenShift project/namespace for deploying resources
+- default_action: The default installer action: deploy or undeploy
+- default_openstack_env: The default OpenStack environment file name
+- default_openstack_network_root: The default OpenStack network root as 3 unique digits like 192.168.199
+- openstack_volume_size: Size in Gb of the specific volume allocated to each OpenStack instance:
+    In that case, the OpenStack image must refer to a volume ID used for cloning.
+    Default: local storage sized according to the flavor and initialiazed with the image.
 ### Networks
 Network interfaces names and associated masks and resources 
 - network:
@@ -572,6 +594,30 @@ Network interfaces names and associated masks and resources
     - recommended: 255.255.255.224: width: 5, 8 networks, 32 nodes
 - portgroup: VMware specific; unused on OpenStack
 
+### OpenShiftNodes
+OpenShift 4.x clusters definitions
+- Name : name of the OpenShift instance to deploy
+- Domain: domain name of the OpenShift instance to deploy; default: localdomain
+- OSenv: name of the file providing the OpenStack environment. Retrieved from the OpenStack GUI: Project/API access
+      By default, this file prompts the user for his password; to make the deployment unattended, replace the prompt with the actual password in the variable OS_PASSWORD
+      Mandatory additional variables:
+      - OS_CACERT: path to a file providing a specific cacert in case the SSL cert is signed by an unknown CA
+      Extensions supported as additional variables: 
+      - Proxy URLs for OpenShift cluster
+      OPENSHIFT_HTTP_PROXY
+      OPENSHIFT_HTTPS_PROXY
+      OPENSHIFT_NO_PROXY
+      - name of the ssh key pair defined in the OpenStack project, pushed to the OpenShift nodes for remote access (useful to connect to openshift nodes)
+      OS_SSH_KEY_PAIR
+- ext-net: name of the external network in the OpenStack infrastructure to connect this instance to; default: ext-net
+- ext-dns: external domain name server; default 8.8.8.8
+- Masters: number of masters: default 3
+- Workers: number of workers : default 3
+- etc-hosts: boolean enabling /etc/hosts update (requires sudo privilege) 
+- Flavor: shortcut defining the resources allocated for these nodes; mapping to the actual flavor for the target infrastructure is based on the Flavors section
+
+All OpenShift clusters are deployed using the RedHat secret provided in the Misc section mandatory entry: rhel_pullsecret
+
 ### Nodes
 Nodes and roles definition and assignment
 - MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
@@ -582,7 +628,7 @@ Nodes and roles definition and assignment
 - Tester: node hosting the nodejs application used as HPE network functions tester    
   This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
 - Flavor: shortcut defining the resources allocated for this node; mapping to the actual flavor for the target infrastructure is based on the Flavors section
-- Image: the name of the qcow2 image used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
+- Image: name of the qcow2 image or ID of the volume used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
 
 ### Flavors
 Infrastructure flavors:
@@ -632,7 +678,7 @@ PREREQUISITE: the Builds section defines the build source in GIT repository for 
 - Name: one word resource name for this application instance
 - Project: the OpenShift project hosting this application instance
 - Pipeline: create a Jenkins pipeline for this application from the Builds section definition
-	
+  
 
 ### NetworkFunctions
 Attributes:
@@ -649,7 +695,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-	
+  
 
 NetworkFunctions supported types: nudsf-dr,nudr-dr,nudr-prov,nudr-reg-agent,nudm-ee,nudm-li-poi,nudm-li-tf,nudm-ueau,nudm-uecm,nudm-sdm,nudm-notify,sf-cmod,nrf-reg-agent
 
@@ -668,7 +714,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-	
+  
 NOTES:
 - redis default admin password is the name of the instance.
   redis-nopwd deploys a redis instance without password 
@@ -699,7 +745,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-	
+  
 NOTES: 
 - jenkins recommended values for RedHat OpenShift 3 are : 
   . URL: docker.io/openshift
@@ -717,9 +763,9 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Project: the OpenShift project hosting this operator instance
 - Replicas: number of replicas passsed to this operator instance.
 - Pipeline: create a Jenkins pipeline for this operator instance from the Builds section definition
-	
+  
 
-Operators supported types: jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,prometheus-operator
+Operators supported types: jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,etcd-operator,ignite-operator,prometheus-operator
 
 ### HelmCharts
 HelmCharts
@@ -732,7 +778,7 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Version: specify the exact chart version to install. If this is not specified, the latest version is installed
 - Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
 - Pipeline: create a Jenkins pipeline for this chart instance from the Builds section definition
-	
+  
 
 HelmCharts supported types: nudm-chart,nudr-chart,telegraf-chart,generic
 
@@ -754,7 +800,7 @@ It consists in four sections:
   The placeholder used in templates is the first element in this list.    
   Example: telegraf can play an influxdb type, and can be deployed as an indirect service or a helm chart.    
     The udsf resource requiring both ignite and influxdb resources can specify this dependencies list:   
-	"nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
+  "nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
     The udsf template has to use the placeholders \~ignite_NAME\~ and \~influxdb_NAME\~ to enable the dependencies resolution at deployment time.    
 3. values:
   Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
@@ -778,7 +824,7 @@ The template attribute in the values section is a YAML description of the OpenSh
       This placeholder allows dynamic resolution of dependencies between resources. For instance, in the udsf template, the datasource service name \~ignite_NAME\~ will be dynamically resolved as the actual name of the ignite instance in this project for this deployment.
       - \~VOLUME\~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
       - \~PERSISTENCE_START\~conditional_sequence\~PERSISTENCE_END\~ useful to manage resources with optional persistent storage like ignite: 
-    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
+        the conditional sequence is removed when no persistent storage is defined by the user for this resource    
      
 Those placeholders are processed at build time with the actual values defined by the user.
 Templates can also be loaded as files from the GUI using the Import Yaml template button in the Catalog fieldset. See the online help for more details.  
@@ -796,8 +842,6 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
     - in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
     - create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
     - save the private key, eg mykey.pem
-    - retrieve the infrastructure certificate:    
-    From https://cmsgvm42.gre.hpecorp.net/hos/ click the info button on your request and download the certificate
 
 - Ansible controller
     - create a network and a router connected to the external network
@@ -819,7 +863,7 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
      http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone git@10.74.128.22:CMS-5GCS/automated-deployer.git
     - move to this directory    
      cd automated-deployer
-    - retrieve in this directory from step 1 the infrastructure certificate and the private ssh key file and set ssh compliant access rights eg :    
+    - retrieve in this directory the private ssh key file and set ssh compliant access rights eg :    
      chmod 0600 *.pem 
  
 - OpenStack target definition
@@ -831,12 +875,11 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
       - export OS_PROJECT_ID="b5f5a70ae58d4405a780aac02094a264"
       - export OS_PROJECT_NAME="d3mRHOS13"
       - export OS_USERNAME="d3m"
-      - export OS_CACERT="grenoble-infra-root-ca_gs118.crt"
     - set the ssh key to use:
       - export CLOUD_SSH_KEY_PAIR="mykey"
       - export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
     - set the name of the external network offering public access
-  	  - export CLOUD_EXTERNAL_NETWORK=ext-net
+      - export CLOUD_EXTERNAL_NETWORK=ext-net
     - set the default image to used:
       - export CLOUD_IMAGE="Cent OS 7"
     - retrieve the infrastructure certificate: e.g. grenoble-infra-root-ca_gs118.crt 
@@ -853,10 +896,13 @@ The first master public IP address is available as $openshift_ip: eg 30.118.0.24
     - accept the security warning and log on with any name and password
     - approve the self signed certificate for the metrics display engine Hawkular by clicking the warning link in another tab
     - connect to the master, connect with the user name used in the GUI
-     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip	
+     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip 
      - oc login -u <user>
     - invoke the deployment script: ./hpe5g.sh
 
 - Undeploy
      - run the same installer with the --undeploy option
- 
+
+Conversely, OpenShift 4.x clusters are defined in the OpenShiftNodes section of the automated deployer assistant. Such deployments do not require ansible but the openshift installer and client, plus a pull secret, all retrieved from RedHat download site: https://cloud.redhat.com/openshift/install/openstack/installer-provisioned
+- openshift-install and oc are to be available in the console path with the target version
+- the pull secret has to be defined in the Misc section of the assistant: rhel_pullsecret

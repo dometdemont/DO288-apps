@@ -142,7 +142,7 @@ app.use('/:session/:target', function (req, res, next) {
 	    if(mywin.jsonSession(req.body)){
 			switch(req.params.target){
 			   case direct: 
-				if(!mywin.ouputInstallerShell()) break;
+				if(!mywin.outputInstallerShell()) break;
 				success=undefined;
 				try {
 					// Use a local file to invoke the installer, since direct invocation may hit the E2BIG Linux max size for a command
@@ -186,12 +186,14 @@ app.use('/:session/:target', function (req, res, next) {
 					job = null
 					res.status(200).send(message);
 					break;
-			   case 'hpe5g.sh': success=mywin.ouputInstallerShell(); break;
-			   case 'dump': success=mywin.ouputInstallerShell() && mywin.jsonSession(); break;
-			   case 'save': success=mywin.ouputInstallerShell() ; DOMresult=true; break;
+			   case 'hpe5g.sh': success=mywin.outputInstallerShell(); break;
+			   case 'dump': success=mywin.outputInstallerShell() && mywin.jsonSession(); break;
+			   case 'save': success=mywin.outputInstallerShell() ; DOMresult=true; break;
 			   case 'hpe5g.yml': 
 			   case 'hpe5g.yaml': success=mywin.outputHeatTemplate(); break;
-			   default: res.status(400).send('Unknown target '+req.params.target+'; expected: '+direct+', job, hpe5g.sh or hpe5g.y(a)ml, dump, save'); break;
+         case 'hpe5gApp.yml':
+         case 'hpe5gApp.yaml': success=mywin.outputAppHpe5g(); break;
+			   default: success=undefined; res.status(400).send('Unknown target '+req.params.target+'; expected: '+direct+', job, hpe5g.sh or hpe5g.y(a)ml, hpe5gApp.y(a)ml, dump, save'); break;
 			}
 		 }
 		 switch(success){
