@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-12-04 Version 0.84</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2020-12-14 Version 0.85</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
@@ -114,6 +114,8 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2020-12-14 0.85 OpenStack deployments: support up to 5 private networks, enrich the Heat output section with a ports attribute listing all IP addresses;
+  New section OperatorSources to define additional operators catalog sources.
 2020-12-04 0.84 OpenShiftNodes section: deploy OpenShift 4.x clusters on OpenStack
 2020-11-13 0.83 Build option: hpe5gApp kubernetes native application for deployment with the hpe5gApp operator; ignite-operator built from the operator-sdk in helm adapter mode. 
 2020-09-29 0.82	OpenStack deployments: disable root certificate authority checking, not available everywhere; support storage on volumes using Misc.openstack_volume_size
@@ -861,8 +863,8 @@ vnfResource.prototype.getAndSetSelection = function(row, nameIndexes, column, de
 // Network interfaces
 // ==================
 var Networks = new vnfResource("Networks", [
-	{name:'network', type:'choice', width: '80px', choices:['MGMT', 'PUBLIC']}, 
-	{name:'interface', type:'text', width: '50px', value:'eth0'}, 
+	{name:'network', type:'choice', width: '80px', choices:['MGMT', 'PUBLIC', 'DATA1','DATA2','DATA3','DATA4']}, 
+	{name:'interface', type:'text', width: '50px'}, 
 	{name:'mask', type:'text', width: '120px', value:'255.255.255.224'}, 
 	{name:'portgroup', type:'text', width: '120px'}]
 	);
@@ -872,6 +874,7 @@ Networks.help = function(){
 - network:
     - MGMT is mandatory: all nodes should be connected to the MGMT interface
     - PUBLIC: optional external IP address of nodes visible through an address translation (mandatory for OpenStack nodes)
+    - DATA1-4: optional private networks
 - interface: name of the network interface on the target
 - mask: Netmasks should be consistent across networks    
   The first netmask in the table sets the network width for all networks.     
@@ -896,21 +899,22 @@ Networks.build = function(target, engine){
 	Networks.portgroups = new Array();
 	Networks.heatMaxNetwork = 0;
 	var networkCount = Number(Networks.count('interface'));
-	if(target == 'Heat')networkCount--; // For Heat target, do not count the public interface in the quota, it is a 'pseudo interface', not actually instantiated
+	if(target == 'openstack')networkCount--; // For openstack target, do not count the public interface in the quota, it is a 'pseudo interface', not actually instantiated
 	Networks.heatWidth = undefined;
 	
 	if(Networks.count('network', 'MGMT') != 1)Networks.check += "\nNetworks: one and only one MGMT is required";
-	Networks.check += checkDependency(target == 'Heat', [Networks.count('network', 'PUBLIC') > 0 ],  "Networks: missing PUBLIC pseudo interface; ", "required for OpenStack Heat target");
-	['APP', 'SIP', 'LBNAT', 'PUBLIC', 'HA', 'DATA', 'M3UA1', 'M3UA2'].forEach(function(name){
+	Networks.check += checkDependency(target == 'openstack', [Networks.count('network', 'PUBLIC') > 0 ],  "Networks: missing PUBLIC pseudo interface; ", "required for OpenStack Heat target");
+	['DATA1', 'DATA2', 'DATA3', 'DATA4'].forEach(function(name){
 		if(Networks.count('network', name) > 1)Networks.check += "\nNetworks: concurrent definitions of "+name+" detected";
 	});
 
 	result += '\n# ------------------------------- #';
 	result += '\n# Network interfaces definition   #';
 	result += '\n# ------------------------------- #';
+  var ethN=0;
 	for(var i=1; i < rowCount; i++){
 		var networkName=Networks.getAndSetSelection(table.rows[i], nameIndexes, 'network');
-		var networkDevice=Networks.getAndSetValue(table.rows[i], nameIndexes, 'interface');
+		var networkDevice=Networks.getAndSetValue(table.rows[i], nameIndexes, 'interface',networkName!='PUBLIC'?'eth'+ethN++:'');
 		var networkMask=Networks.getAndSetValue(table.rows[i], nameIndexes, 'mask');
 		var networkPortgroup=Networks.getAndSetValue(table.rows[i], nameIndexes, 'portgroup', target=='OVFapp' || target=='vmware' ? networkName:'');
 		if(networkName == ""){
@@ -930,8 +934,8 @@ Networks.build = function(target, engine){
 			Networks.masks.push(networkMask);
 			Networks.portgroups.push(networkPortgroup);
 			
-			if(target == 'azure' && engine == 'ansible' || target == 'Heat' || target == 'kubernetes'){
-				// Heat deployments: all networks have the same width: guess it from the first netmask proposed 
+			if(target == 'azure' && engine == 'ansible' || target == 'openstack' || target == 'kubernetes'){
+				// openstack deployments: all networks have the same width: guess it from the first netmask proposed 
 				if(Networks.heatWidth ==  undefined){
 					// Use the 4th byte of the mask as the source for network width
 					var cidr=Number(networkMask.split('.')[3]);
@@ -943,7 +947,7 @@ Networks.build = function(target, engine){
 					Networks.heatMask="255.255.255."+Number(256-Networks.heatMaxNodes).toString();
 					if(networkCount > Networks.heatMaxInterfaces)Networks.check += "\nNetworks: network count limited by the netmask "+Networks.heatMask+" for "+target+" target to " + Networks.heatMaxInterfaces + ": found " + networkCount;
 				}
-				// Heat networks should be named ethN, N integer
+				// openstack networks should be named ethN, N integer
 				var prefix='eth';
 				if(!networkDevice.startsWith(prefix))Networks.check += "\nNetworks: unsupported interface name for "+target+" target " + networkDevice + ": prefix " + prefix +" required";
 				var candidate = networkDevice.substr(prefix.length);
@@ -1069,9 +1073,11 @@ Examples:
 	help+="    ";
 	['openstack'].forEach(function(infrastructure){
 		['flavorStandard', 'flavorSmall','flavorPerformance'].forEach(function(flavor){
-		help+="\n"+infrastructure.padStart(colLength);
-		help+=flavor.padStart(colLength);
-		help+=Flavors[infrastructure][flavor].name.padStart(colLength)+"    ";
+      var name=Flavors[infrastructure][flavor].name;
+      if(!name)name="<undefined>";
+  		help+="\n"+infrastructure.padStart(colLength);
+  		help+=flavor.padStart(colLength);
+  		help+=name.padStart(colLength)+"    ";
 		});	
 	});
 	help+="\n";
@@ -1117,7 +1123,15 @@ var Nodes= new vnfResource("Nodes", [
 	{name:'MGMT fqdn', type:'text', width: '120px'}, 
 	{name:'MGMT IP addr', type:'text', width: '120px'},
 	{name:'PUBLIC IP addr', type:'text', width: '120px'},  
-	{name:'Master', type:'bool'},
+  {name:'DATA1 fqdn', type:'text'}, 
+  {name:'DATA1 IP addr', type:'text'}, 
+  {name:'DATA2 fqdn', type:'text'}, 
+  {name:'DATA2 IP addr', type:'text'}, 
+  {name:'DATA3 fqdn', type:'text'}, 
+  {name:'DATA3 IP addr', type:'text'}, 
+  {name:'DATA4 fqdn', type:'text'}, 
+  {name:'DATA4 IP addr', type:'text'}, 
+  {name:'Master', type:'bool'},
 	{name:'Etcd', type:'bool'},
 	{name:'Worker', type:'bool'},
 	{name:'Tester', type:'bool'},
@@ -1131,17 +1145,39 @@ Nodes.help = function(){
 - MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
 - MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
 - PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
-- Master/Etcd/Worker: the role(s) played by this node in the OpenShift cluster    
+- DATA1-4 fqdn: the name of this node on the DATA1-4 network interface
+- DATA1-4 IP addr: the IP address of this node on the DATA1-4 network interface; use a question mark on OpenStack (dynamic allocation)
+- Master/Etcd/Worker: the role(s) played by this node in the OpenShift 3.x cluster    
   If no box is checked, the node is instantiated but not part of the OpenShift cluster, available for any specific usage.
 - Tester: node hosting the nodejs application used as HPE network functions tester    
   This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
 - Flavor: shortcut defining the resources allocated for this node; mapping to the actual flavor for the target infrastructure is based on the Flavors section
 - Image: name of the qcow2 image or ID of the volume used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
+NOTE: all IP addresses dynamically allocated are available in the OpenStack Heat ouput, attribute ports, with the naming: "~<node>_<network>~": "IP address"
+Example with 3 nodes large, medium, small on 4 networks MGMT/DATA1-3
+{
+  "~large_mgmt~": "192.168.199.5", 
+  "~large_pub~": "30.118.0.22", 
+  "~medium_data2~": "192.168.199.73", 
+  "~small_data2~": "192.168.199.88", 
+  "~small_data3~": "192.168.199.102", 
+  "~medium_pub~": "30.118.0.77", 
+  "~medium_data3~": "192.168.199.121", 
+  "~small_pub~": "30.118.0.86", 
+  "~small_mgmt~": "192.168.199.13", 
+  "~large_data2~": "192.168.199.75", 
+  "~large_data3~": "192.168.199.103", 
+  "~small_data1~": "192.168.199.38", 
+  "~medium_mgmt~": "192.168.199.16", 
+  "~large_data1~": "192.168.199.44", 
+  "~medium_data1~": "192.168.199.49"
+} 
+-  
 `;
 }
 
 // Build the Nodes section of the descriptor
-// - target is the optional infrastructure: Heat
+// - target is the optional infrastructure: openstack
 // - engine is the optional underlying engine: ansible
 // If the target is set, the unknown ip addresses defined as question marks are prepared as place holders for replacement at deployment time 
 // The place holder format depends on the type of engine:
@@ -1178,7 +1214,15 @@ Nodes.build = function(target, engine){
 			Nodes.check += "\nNodes section: MGMT FQDN and IP address are required";
 			break;
 		}
-		
+    var nodeData1Name  = Nodes.getAndSetValue(row, nameIndexes, 'DATA1 fqdn');
+    var nodeData1IpAddr  = Nodes.getAndSetValue(row, nameIndexes, 'DATA1 IP addr');
+    var nodeData2Name  = Nodes.getAndSetValue(row, nameIndexes, 'DATA2 fqdn');
+    var nodeData2IpAddr  = Nodes.getAndSetValue(row, nameIndexes, 'DATA2 IP addr');
+    var nodeData3Name  = Nodes.getAndSetValue(row, nameIndexes, 'DATA3 fqdn');
+    var nodeData3IpAddr  = Nodes.getAndSetValue(row, nameIndexes, 'DATA3 IP addr');
+    var nodeData4Name  = Nodes.getAndSetValue(row, nameIndexes, 'DATA4 fqdn');
+    var nodeData4IpAddr  = Nodes.getAndSetValue(row, nameIndexes, 'DATA4 IP addr');
+
 		// Read the roles definition
 		var isMaster	=	Nodes.getAndSetChecked(row, nameIndexes, 'Master');
 		var isWorker	=	Nodes.getAndSetChecked(row, nameIndexes, 'Worker');
@@ -1195,17 +1239,24 @@ Nodes.build = function(target, engine){
 		// Tester requirements checks
 		Nodes.check += checkDependency(isTester, [Misc.search('Property','tester_nodejs_version') && Misc.search('Property','tester_git_url')], "Nodes vs Misc: on node "+nodeName,", the tester role requires two entries in Misc: tester_nodejs_version and tester_git_url"); 
 		
-		// Collect the short name of this node in the short names array for Heat template build
+    // Trace this new node as a comment
+    result+="\n# "+nodeName+"@"+nodeIpAddr+(nodePubIpAddr?"@"+nodePubIpAddr:"")+(isMaster||isWorker||isEtcd?" as OpenShift"+oc_version:"")+(isMaster?"-master":"")+(isWorker?"-worker":"")+(isEtcd?"-etcd":"")+(isTester?" tester":"")+" running "+image+" on flavor: "+(flavor?flavor:"default");
+    
+		// Collect the short name of this node in the short names array for openstack template build
 		var shortName = nodeName.substr(0, nodeName.indexOf('.'));
 		var theCloudNode = new cloudNode(shortName, nodeName);
 		
 		switch(target){
-		  case 'Heat': case 'vmware':
+		  case 'openstack': case 'vmware':
 			// IP addresses will be known at instantiation time: 
 			// Replace undefined values with place holders resolved later
 			// Push the network interface number in the interfaces list for this node
 			if(nodeIpAddr == "?")		{nodeIpAddr="~"+shortName+		"_mgmt~";	theCloudNode.interfaces.push(Networks.heatNetworks['MGMT']);}
 			if(nodePubIpAddr == "?")	{nodePubIpAddr="~"+shortName+	"_pub~";	theCloudNode.interfaces.push(heatPublicInterface);}
+      if(nodeData1IpAddr == "?") {nodeData1IpAddr="~"+shortName+  "_data1~"; theCloudNode.interfaces.push(Networks.heatNetworks['DATA1']);}
+      if(nodeData2IpAddr == "?") {nodeData2IpAddr="~"+shortName+  "_data2~"; theCloudNode.interfaces.push(Networks.heatNetworks['DATA2']);}
+      if(nodeData3IpAddr == "?") {nodeData3IpAddr="~"+shortName+  "_data3~"; theCloudNode.interfaces.push(Networks.heatNetworks['DATA3']);}
+      if(nodeData4IpAddr == "?") {nodeData4IpAddr="~"+shortName+  "_data4~"; theCloudNode.interfaces.push(Networks.heatNetworks['DATA4']);}
 			break;
 		}
 		
@@ -1213,7 +1264,15 @@ Nodes.build = function(target, engine){
 		var nodeIpAddresses	= new Array();
 		nodeNames['MGMT'] 		=	nodeName;
 		nodeIpAddresses['MGMT']	=	nodeIpAddr;
-		
+    nodeNames['DATA1']   = nodeData1Name;
+    nodeIpAddresses['DATA1'] = nodeData1IpAddr;
+		nodeNames['DATA2']   = nodeData2Name;
+    nodeIpAddresses['DATA2'] = nodeData2IpAddr;
+    nodeNames['DATA3']   = nodeData3Name;
+    nodeIpAddresses['DATA3'] = nodeData3IpAddr;
+    nodeNames['DATA4']   = nodeData4Name;
+    nodeIpAddresses['DATA4'] = nodeData4IpAddr;
+    
 		// Push this node as per the defined roles with the most demanding flavor, using the public IP address if defined, or the fqdn otherwise
 		// NOTE: the master is always a worker node but with specific labels
 		// Depending on the OpenShift version, the inventory varies
@@ -1229,7 +1288,7 @@ Nodes.build = function(target, engine){
 			return result;
 		}
 		var hostEntry=nodePubIpAddr;
-		if(hostEntry == undefined || hostEntry=='')hostEntry=nodeName
+		if(!hostEntry)hostEntry=nodeName
 		if(isEtcd){
 			if(!isWorker && !isMaster)workerNodes.push(oc_node(hostEntry, nodeIpAddr, 'node-config-infra'));
 			etcdNodes.push(hostEntry); 
@@ -1302,9 +1361,9 @@ Nodes.build = function(target, engine){
 	// Make the list of nodes for availableHeat template  
 	Nodes.cloudNodes = cloudNodes.slice();
 	
-	// check the network width limitation compared to the number of non VIP heat nodes
+	// check the network width limitation compared to the number of non VIP openstack nodes
 	var nonVipHeatNodes = cloudNodes.length;
-	if(nonVipHeatNodes > Networks.heatMaxNodes)Nodes.check += "\nNodes vs Networks section: too many nodes for Heat deployments: found: "+nonVipHeatNodes+"; with a netmask "+Networks.heatMask+", the limit is : "+Networks.heatMaxNodes;
+	if(nonVipHeatNodes > Networks.heatMaxNodes)Nodes.check += "\nNodes vs Networks section: too many nodes for openstack deployments: found: "+nonVipHeatNodes+"; with a netmask "+Networks.heatMask+", the limit is : "+Networks.heatMaxNodes;
 	
 	// local check
 	if(Nodes.check != "")result = Nodes.check;
@@ -1314,7 +1373,7 @@ Nodes.build = function(target, engine){
 
 // Hides unused networks columns
 Nodes.hideUnused = function(){
-	['PUBLIC'].forEach(function(interface){
+	['PUBLIC', 'DATA1', 'DATA2', 'DATA3', 'DATA4'].forEach(function(interface){
 		// Check consistency first: reject hiding Networks interfaces with non empty columns in Nodes
 		var fqdnColName=interface+' fqdn'; var ipAddrColName=interface+' IP addr';
 		var nUsed=Nodes.count(fqdnColName)+Nodes.count(ipAddrColName) ; 
@@ -1662,7 +1721,7 @@ Two types of OpenShift builds can be defined:
 
 //================================================================
 // Template fragment defining a build config 
-// either as a Jenkins pipeline or as a custom app
+// either as a Jenkins pipeline or as a custom app or any un templated deployment
 //================================================================
 Builds.makeTemplate = function(name, type, uri, dir, branch, sshKey){
 if(!uri)return;
@@ -1717,7 +1776,14 @@ result+=`
 		result+=' && oc expose svc/~NAME~ )';
 	break;
 	default:
-		return;
+    // Other deployments not available in template, only from oc CLI
+    // Make sure the template exists
+    if(!hpe5gResources.defaults[type] || !hpe5gResources.defaults[type]['template'])return;
+    // Build a one line shell script invoking this command if the parameter 'apply' is received or the related deletion if a parameter 'delete' is received
+    result+='oc $1 -f - << EOF'+name;
+    result+=hpe5gResources.defaults[type]['template'];
+    result+='EOF'+name;
+    result+='\n[ $? = 0 ]';
 	break;
 }
 	
@@ -1733,13 +1799,13 @@ Builds.getNames = function(type){
 	return Object.keys(Builds.templates[type]);
 }
 
+Builds.templates=new Object;
 Builds.build = function(target){
 	var nameIndexes = Builds.nameIndexes;
 	var result="";
 	
 	var table = document.getElementById("Builds");
 	var rowCount = table.rows.length;
-	Builds.templates=new Object;
 	Builds.templates['pipeline']=new Object;
 	Builds.templates['custom-app']=new Object;
 	Builds.check = checkDependency(Builds.search('Type', 'pipeline'), [IndirectServices.search('Type', 'jenkins')], "Builds section: ", "pipeline types require a jenkins IndirectService");
@@ -1802,7 +1868,6 @@ CustomApps.build = function(target){
 	CustomApps.check="";
 	var table = document.getElementById(this.title);
 	var rowCount = table.rows.length;
-	CustomApps.deployments = new Object;
 
 	for(var i=1; i < rowCount; i++){
 		if(result==""){
@@ -1820,10 +1885,10 @@ CustomApps.build = function(target){
 		var pipeline=this.getAndSetValue(row, nameIndexes, 'Pipeline');
 		var pipelineTemplate=Builds.getTemplate('pipeline', pipeline);
 		this.check += checkDependency(pipeline, [pipelineTemplate], this.title+" "+name+": pipeline "+pipeline, " is undefined in the Builds section");
-		if(pipeline)hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, undefined, project, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, pipelineTemplate));
+		if(pipeline)hpe5gResources.openshiftFunctions.push(new openshiftFunction(type, name, undefined, undefined, project, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, pipelineTemplate));
 		
-		if(!CustomApps.deployments[project])CustomApps.deployments[project]=new Array();
-		CustomApps.deployments[project].push(template.replace(/~NAME~/g,name));
+		if(!hpe5gResources.untemplatedDeployments[project])hpe5gResources.untemplatedDeployments[project]=new Array();
+		hpe5gResources.untemplatedDeployments[project].push(template.replace(/~NAME~/g,name));
 		result+="\n#- "+name+": "+type+" on project: "+project;
 	}
 	
@@ -1889,7 +1954,7 @@ hpe5gResource.prototype.build = function(target){
 		var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
 		if(!hpe5gResources.types[this.title] || hpe5gResources.types[this.title].indexOf(type) < 0){this.check += "\n"+this.title+": "+type+" is unknown in the catalog"; continue;}
 		var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
-		var project=this.getAndSetValue(row, nameIndexes, 'Project',Misc.getValue('default_project'));
+		var project=this.getAndSetValue(row, nameIndexes, 'Project',hpe5gResources.defaults[type]['Project']?hpe5gResources.defaults[type]['Project']:Misc.getValue('default_project'));
 		var URL=this.getAndSetValue(row, nameIndexes, 'URL',hpe5gResources.defaults[type]['URL']);
 		var insecure=Nodes.getAndSetChecked(row, nameIndexes, 'insecure');
 		var image=this.getAndSetValue(row, nameIndexes, 'Image',hpe5gResources.defaults[type]['image']);
@@ -1946,7 +2011,7 @@ hpe5gResource.prototype.build = function(target){
 		hpe5gResources.provides[type][project].push(name);
 		
 		hpe5gResources.openshiftFunctions.push(
-  		new openshiftFunction(type, name, image+":"+tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, pipelineTemplate));
+  		new openshiftFunction(type, name, image, tag, project, storage, volume, replicas, dependencies, URL, chart, values, chartOptions, pipelineTemplate));
 		
 		if(insecure && hpe5gResources.insecureRegistries.indexOf(URL) < 0)hpe5gResources.insecureRegistries.push(URL);
 		
@@ -1960,10 +2025,11 @@ hpe5gResource.prototype.build = function(target){
 };
 
 //Class implementing a network function: name, image (including the tag), URL (hosting the image), pipeline, Helm chart 
-var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVolume, aReplicas, aDependency, aURL, anHelmChart, anHelmChartValues, anHelmChartOptions, aPipeline){
+var openshiftFunction = function(aType, aName, anImage, aTag, aProject, aStorage, aVolume, aReplicas, aDependency, aURL, anHelmChart, anHelmChartValues, anHelmChartOptions, aPipeline){
 	this.type=aType;
 	this.name=aName;
 	this.image=anImage;
+  this.tag=aTag;
 	this.URL=aURL;
 	this.project=aProject;
 	this.storage=aStorage;
@@ -1977,9 +2043,11 @@ var openshiftFunction = function(aType, aName, anImage, aProject, aStorage, aVol
 	this.insecureURL = function(){return hpe5gResources.insecureRegistries.indexOf(this.URL) >= 0;}
 	this.imageStream = function(){
 		var _imageStream=this.URL;
-		if(_imageStream)_imageStream+='/';
+		if(_imageStream&&this.image)_imageStream+='/';
 		_imageStream+=this.image;
-		if(this.insecureURL())_imageStream='docker-registry.default.svc:5000/'+this.project+'/'+this.image;
+		if(this.tag)_imageStream+=':';
+    _imageStream+=this.tag;
+    if(this.insecureURL())_imageStream='docker-registry.default.svc:5000/'+this.project+'/'+this.image+':'+this.tag;
 		return _imageStream;
 	}
 }
@@ -2011,7 +2079,7 @@ openshiftFunction.prototype.resolve = function(requirement){
 // Composite object holding the deployed 5G resources
 var hpe5gResources=new Object;
 // Array of sections names holding 5G resources
-hpe5gResources.sections=['DirectServices','IndirectServices','Operators','NetworkFunctions','HelmCharts'];
+hpe5gResources.sections=['DirectServices','IndirectServices','OperatorSources','Operators','NetworkFunctions','HelmCharts'];
 // Array of types per section: hpe5gResources.types[section]:[types]
 // Array of types, each holding a boolean tracking the admin privilege requirement for this type: hpe5gResources.admin[type]:boolean
 hpe5gResources.admin=new Array();
@@ -2024,13 +2092,13 @@ hpe5gResources.init = function(){
 	hpe5gResources.adminList="";
 	hpe5gResources.insecureRegistries=new Array();	// array of URLs pointing to insecure registries
 	hpe5gResources.insecureRegistriesList="";
+  hpe5gResources.untemplatedDeployments=new Array();  // array of resources deployed out of an OpenShift application template, typically customApps, OperatorsCatalogs
 }
 
 // Compile the resources from the various resources sections: build the list of projects, registries, and cross check dependencies 
 hpe5gResources.compile = function(){
-  if(!hpe5gResources.openshiftFunctions.length)return '';
 	// Build the list of projects as a concatenation of hpe5g resources and custom apps projects, removing duplicates
-	hpe5gResources.projects=Array.from(new Set(hpe5gResources.openshiftFunctions.map(function(e){return e.project;}).concat(Object.keys(CustomApps.deployments))));
+	hpe5gResources.projects=Array.from(new Set(hpe5gResources.openshiftFunctions.map(function(e){return e.project;}).concat(Object.keys(hpe5gResources.untemplatedDeployments))));
 	if(hpe5gResources.insecureRegistries.length > 0)hpe5gResources.insecureRegistriesList += '"'+hpe5gResources.insecureRegistries.join('","')+'"';
 	
 	// Check cross functions dependencies
@@ -2128,6 +2196,62 @@ IndirectServices.help = function(){return hpe5gResource.prototype.help()+
 - grafana default admin password is the name of the instance.
  `;}
  
+//===========================
+//OperatorSources
+//===========================
+var OperatorSources = new vnfResource("OperatorSources", [
+  {name:'Type', type:'choice', width: '140px', choices: ['operator-source']}, 
+  {name:'Name', type:'text', width:'100px'},
+  {name:'Project', type:'text', width:'200px'},
+  {name:'URL', type:'text', width:'200px'}
+  ]
+);
+OperatorSources.help = function(){return `Operator sources instantiation:
+- Type: the type of the operator source to instantiate
+- Name: the name of the operator source, typically the account name in quay.io
+- Project: the OpenShift project where to deploy this source, typically openshift-marketplace
+- URL: location of the account, typically https://quay.io/cnr  
+`;
+}
+OperatorSources.build = function(target){
+  var nameIndexes = OperatorSources.nameIndexes;
+  var result = "";
+  OperatorSources.check="";
+  var table = document.getElementById(this.title);
+  var rowCount = table.rows.length;
+  OperatorSources.deployments = new Object;
+  Builds.templates['operator-source']=new Object;
+
+  for(var i=1; i < rowCount; i++){
+    if(result==""){
+      result += "\n"
+      result += "\n# --------------------------------";
+      result += "\n# OperatorSources definition           ";
+      result += "\n# -------------------------------- ";
+      }
+    var row = table.rows[i];
+    var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
+    if(!hpe5gResources.defaults[type] || !hpe5gResources.defaults[type]['template']){this.check += "\n"+this.title+": "+type+" template is unknown in the catalog"; continue;}
+    var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
+    var project=this.getAndSetValue(row, nameIndexes, 'Project','openshift-marketplace');
+    var URL=this.getAndSetValue(row, nameIndexes, 'URL',hpe5gResources.defaults[type]['URL']);
+    Builds.makeTemplate(name, type, URL);
+    var template=Builds.templates[type][name];
+    
+    if(!hpe5gResources.untemplatedDeployments[project])hpe5gResources.untemplatedDeployments[project]=new Array();
+    hpe5gResources.untemplatedDeployments[project].push(template
+    .replace(/~NAME~/g,name)
+    .replace(/~PROJECT~/g,project)
+    .replace(/~URL~/g,URL));
+    
+    result+="\n#- "+name+": "+type+" from "+URL+" on project: "+project;
+    if(hpe5gResources.admin && hpe5gResources.admin[type])hpe5gResources.adminList+="\n- "+name+":\tsection: OperatorSources\tproject: "+project+"\ttype: "+type;
+  }
+  
+  if(this.check != "")return this.check;
+  return result;
+};
+
 //===========================
 //Operators
 //===========================
@@ -2455,17 +2579,17 @@ return _shellTemplate
 	.replace(/~PROJECTS~/g,hpe5gResources.projects.join(' '))	// Resolve the list of projects
 	.replace(/~IMAGES_INSECURE_PROJECTS~/g,hpe5gResources.openshiftFunctions.map(function(e){if(e.insecureURL())return e.project;}).join(' '))	// Resolve the list of projects per image
 	.replace(/~IMAGES_INSECURE_URLS~/g,hpe5gResources.openshiftFunctions.map(function(e){if(e.insecureURL())return e.URL;}).join(' '))	// Resolve the list of URLs per image
-	.replace(/~IMAGES_INSECURE~/g,hpe5gResources.openshiftFunctions.map(function(e){if(e.insecureURL())return e.image;}).join(' '))	// Resolve the list of insecure images
+	.replace(/~IMAGES_INSECURE~/g,hpe5gResources.openshiftFunctions.map(function(e){if(e.insecureURL())return e.image+':'+e.tag;}).join(' '))	// Resolve the list of insecure images
 ;}
 
-// Return the CustomApps deployment scripts, one per project
+// Return the untemplated deployment scripts, one per project
 // File naming convention for custom apps scripts: openshift_project_<project>.sh
-function hpe5gCustomAppsScript(){
+function hpe5gUntemplatedDeploymentsScript(){
 	var result="\n# CustomApps deployment scripts";
-	Object.keys(CustomApps.deployments).forEach(function(project){
+	Object.keys(hpe5gResources.untemplatedDeployments).forEach(function(project){
 		result+="\ncat > openshift_project_"+project+".sh << 'EOF"+project+"'";
 		result+="\n#!/bin/bash";
-		result+="\n"+CustomApps.deployments[project].join(" && ")+" || exit 1";
+		result+="\n"+hpe5gResources.untemplatedDeployments[project].join(" && ")+" || exit 1";
 		result+="\nexit 0";
 		result+="\nEOF"+project;
 		result+="\nchmod a+x openshift_project_"+project+".sh\n";
@@ -2568,7 +2692,7 @@ function buildInventory(target, engine){
 	openshift += "\n";
 	openshift += "\nansible_become=yes";
 	// Immutable part from the environment
-	if(target == 'Heat'){
+	if(target == 'openstack'){
 	openshift += "\n# Openstack";
 	openshift += "\nopenshift_cloudprovider_kind=openstack";
 	openshift += "\nopenshift_cloudprovider_openstack_auth_url=\"{{ lookup('env','OS_AUTH_URL') }}\"";
@@ -2736,14 +2860,14 @@ function jsonSession(payload){
 }
 
 // =============================
-// OpenShift Heat template build
+// OpenShift openstack template build
 // =============================
 function buildHeatTemplate(){
 	var oc_version=document.getElementById("oc_version").value;
 	
-	// Build the inventory for Heat (or get the errors) and do not publish
-	// Required soon enough to get Heat specific variables properly setup
-  var openshift = buildInventory('Heat');
+	// Build the inventory for openstack (or get the errors) and do not publish
+	// Required soon enough to get openstack specific variables properly setup
+  var openshift = buildInventory('openstack');
 	if(openshift.length == 0)return '';
   var useHeatVolumes = Misc.getValue('openstack_volume_size');
     
@@ -2886,6 +3010,10 @@ function buildHeatTemplate(){
 	      	
 	      	// Resolve ip address for this port on this node
 	      	if(Networks.heatNetworks['MGMT'] == iNetwork)	addr+=n0+"~"+name+"_mgmt~: {get_attr: ["+name+"-"+interfaceName+"-port, fixed_ips, 0, ip_address]}";
+          if(Networks.heatNetworks['DATA1'] == iNetwork) addr+=n0+"~"+name+"_data1~: {get_attr: ["+name+"-"+interfaceName+"-port, fixed_ips, 0, ip_address]}";
+          if(Networks.heatNetworks['DATA2'] == iNetwork) addr+=n0+"~"+name+"_data2~: {get_attr: ["+name+"-"+interfaceName+"-port, fixed_ips, 0, ip_address]}";
+          if(Networks.heatNetworks['DATA3'] == iNetwork) addr+=n0+"~"+name+"_data3~: {get_attr: ["+name+"-"+interfaceName+"-port, fixed_ips, 0, ip_address]}";
+          if(Networks.heatNetworks['DATA4'] == iNetwork) addr+=n0+"~"+name+"_data4~: {get_attr: ["+name+"-"+interfaceName+"-port, fixed_ips, 0, ip_address]}";
       	}
       	if(Nodes.cloudNodes[indexNode].interfaces.indexOf(heatPublicInterface) != -1){
 	   		heat+=n0+"  "+name+"-"+mgmtName+"-floatingIP:";
@@ -2970,7 +3098,7 @@ function buildHeatTemplate(){
 
 		// Shell script dropped on the ems node ready to deploy the volumes, projects, and hpe5g network functions 
 		heat+=n0+"            cat > /home/centos/hpe5g.sh << 'EOFILE'";
-		heat+=n0.concat(shellHeader(),shellBody('oc'),hpe5gCustomAppsScript(),hpe5gDeploymentScript())
+		heat+=n0.concat(shellHeader(),shellBody('oc'),hpe5gUntemplatedDeploymentsScript(),hpe5gDeploymentScript())
 		.replace(/\n/g, "\n"+  
 	             '            ');	// fix the descriptor indentation as expected by Heat
 		heat+=n0+"            EOFILE";
@@ -3025,7 +3153,12 @@ function buildHeatTemplate(){
     if(Nodes.cloudNodes[indexNode].isEms){heat+=",ems";}
     if(Nodes.cloudNodes[indexNode].isTester){heat+=",tester";}
     });
-    // Misc section values
+    //  list of all ports with their ip addresses
+    heat+=n0+"  ports:";
+    heat+=n0+"    description: List of IP addresses for all ports on all hosts";
+    heat+=n0+"    value:"+addr.replace(/\n/g, "\n"+  
+                   "      "); // fix the descriptor indentation
+  // Misc section values
     heat+=n0+"  misc:";
     heat+=n0+"    description: set of miscellaneous properties used by the ansible deployment";
     heat+=n0+"    value:";
@@ -3626,6 +3759,8 @@ function buildNetworkFunctions(){
 	check += hpe5gResources.compile();
 	if(check){userOutput(check); return '';}
 	
+  if(!hpe5gResources.projects.length)return '';
+  
 	var shell='';
 	var warningMessage='';
 	
@@ -3646,13 +3781,13 @@ function buildNetworkFunctions(){
     	shell+=shellBody('oc');
     	shell+=hpe5gNetworkFunctions(catHeader, catFooter);
     	shell+=hpe5gHelmValues(catHelmValuesHeader, catFooter);
-		  shell+=hpe5gCustomAppsScript();
+		  shell+=hpe5gUntemplatedDeploymentsScript();
     	shell+=hpe5gDeploymentScript(warningMessage);
 	}else{
 		shell+=shellBody('curl');
 		
 		if(hpe5gHelmValues().length > 0){check+='\nHelm based deployments not supported on OpenShift REST API, only on CLI' ;}
-		if(Object.keys(CustomApps.deployments).length > 0){check+='\nCustom Apps deployments not supported on OpenShift REST API, only on CLI' ;}
+		if(Object.keys(hpe5gResources.untemplatedDeployments).length > 0){check+='\nCustom Apps deployments not supported on OpenShift REST API, only on CLI' ;}
 		if(check){userOutput(check); return '';}
 
 		Clusters.targeted.forEach(function(cluster){
@@ -3865,9 +4000,9 @@ function outputInstallerShell(){
     if(!shellTerraform)return false;
   }
 	// Add OpenShift resources if not included in a deployed OpenShift cluster part of the OpenStack resources and actually existing
-	if(!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}) && hpe5gResources.projects.length){
+	if(!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;})){
 		shellOpenShift=buildNetworkFunctions();
-		if(!shellOpenShift)return false;
+		if(hpe5gResources.projects.length && !shellOpenShift)return false;
 	}
 	var shell=shellHeader()+shellOpenStack+shellTerraform+shellOpenShift+"\nexit 0";
 	
@@ -4091,7 +4226,10 @@ var defaultCatalog=`
       "influxdb",
       "fluentd"
     ],
-    "Operators": [	
+    "OperatorSources": [  
+      "operator-source"
+    ],
+    "Operators": [  
       "jaeger-product",
       "cert-manager",
       "servicemeshoperator",
@@ -4158,7 +4296,8 @@ var defaultCatalog=`
 	    "grafana-operator": true,
       "etcd-operator": true,
       "ignite-operator": true,
-	    "prometheus-operator": true
+	    "prometheus-operator": true,
+      "operator-source": true
   },
   "values": {
     "jenkins": {
@@ -4299,6 +4438,7 @@ var defaultCatalog=`
     },
     "jaeger-product": {},
     "cert-manager": {},
+    "operator-source": {"URL": "https://quay.io/cnr", "Project": "openshift-marketplace"},
     "servicemeshoperator": {},
     "amq-streams": {},
     "elasticsearch-operator": {},
@@ -11980,6 +12120,20 @@ hpe5gResources.defaults['ignite-operator']['template']=
     to:
       kind: Service
       name: ~NAME~
+`;
+//================================================
+hpe5gResources.defaults['operator-source']['template']=
+//================================================
+`
+apiVersion: operators.coreos.com/v1
+kind: OperatorSource
+metadata:
+  name: ~NAME~-operators
+  namespace: ~PROJECT~
+spec:
+  type: appregistry
+  endpoint: ~URL~
+  registryNamespace: ~NAME~
 `;
 </script>
 </body>
