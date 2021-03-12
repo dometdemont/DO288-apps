@@ -569,22 +569,30 @@ Miscellaneous settings:
 - rhel_pullsecret: User secret provided by RedHat for deploying an OpenShift 4.x cluster; visit https://cloud.redhat.com/openshift/install/pull-secret
 - anyuid: true|false: relax security on the OpenShift cluster before deploying resources by granting all containers the root privilege and approving pending certificates (not recommended)
 - extnet: Name of the OpenStack external network used to connect the public addresses of the instances defined in the Nodes section
-- tester_nodejs_version: Nodejs version used to run the CMS5G Core Stack tester tool
-- tester_git_url: Git project URL delivering the CMS5G Core Stack tester tool
-- tester_deploy_key: Optional git deploy key to clone the project delivering the CMS5G Core Stack tester tool
+- UPFpassword: Encrypted password set in the Casa UPF startup configuration file; used to allow/deny the user entering the configuration mode
+- UPFNRFip: NRF ip address used by UPF; supports variable like \~myocp_API\~ where myocp is the name of an OpenShift instance defined in the OpenShiftNodes section
+- UPFNRFinterface: the network interface number to use to access NRF
+- UPFNRFport: NRF port used by UPF
+- UPFmcc: mobile country code used by UPF
+- UPFmnc: mobile network code used by UPF
 - headless: if not empty: do not assume a user for answering prompts and downloading files: use default values without prompting and do not save any file.
 - default_project: The default OpenShift project/namespace for deploying resources
 - default_action: The default installer action: deploy or undeploy
 - default_openstack_env: The default OpenStack environment file name
 - default_openstack_network_root: The default OpenStack network root as 3 unique digits like 192.168.199
+- openstack_security_group: Name of the OpenStack security group controlling network permissions to the instances
 - openstack_volume_size: Size in Gb of the specific volume allocated to each OpenStack instance:
     In that case, the OpenStack image must refer to a volume ID used for cloning.
     Default: local storage sized according to the flavor and initialiazed with the image.
+- tester_nodejs_version: Nodejs version used to run the CMS5G Core Stack tester tool
+- tester_git_url: Git project URL delivering the CMS5G Core Stack tester tool
+- tester_deploy_key: Optional git deploy key to clone the project delivering the CMS5G Core Stack tester tool
 ### Networks
 Network interfaces names and associated masks and resources 
 - network:
     - MGMT is mandatory: all nodes should be connected to the MGMT interface
     - PUBLIC: optional external IP address of nodes visible through an address translation (mandatory for OpenStack nodes)
+    - DATA1-4: optional private networks
 - interface: name of the network interface on the target
 - mask: Netmasks should be consistent across networks    
   The first netmask in the table sets the network width for all networks.     
@@ -596,6 +604,11 @@ Network interfaces names and associated masks and resources
 
 ### OpenShiftNodes
 OpenShift 4.x clusters definitions
+Prerequisites:
+- rhel_pullsecret: all OpenShift clusters are deployed using the RedHat secret provided in the Misc section
+- openshift-install and oc available at deployment time in the path with the target OpenShift version 
+
+Attributes:
 - Name : name of the OpenShift instance to deploy
 - Domain: domain name of the OpenShift instance to deploy; default: localdomain
 - OSenv: name of the file providing the OpenStack environment. Retrieved from the OpenStack GUI: Project/API access
@@ -611,38 +624,86 @@ OpenShift 4.x clusters definitions
       OS_SSH_KEY_PAIR
 - ext-net: name of the external network in the OpenStack infrastructure to connect this instance to; default: ext-net
 - ext-dns: external domain name server; default 8.8.8.8
+- FIPAPI/APP: floating IPs preallocated to the OpenShift cluster for the API and APP endpoints respectively. By default, those IPs are dynamically allocated if undefined or defined as a question mark(?). 
 - Masters: number of masters: default 3
 - Workers: number of workers : default 3
 - etc-hosts: boolean enabling /etc/hosts update (requires sudo privilege) 
-- Flavor: shortcut defining the resources allocated for these nodes; mapping to the actual flavor for the target infrastructure is based on the Flavors section
+- Flavor/Worker flavor: shortcut defining the resources allocated for this OpenShift instance nodes; mapping to the actual flavor for the target infrastructure is based on the Flavors section
+- #Volumes: quota of volumes on this OpenStack project; admin privileges required at run time if greater than the current quota; default 10
 
-All OpenShift clusters are deployed using the RedHat secret provided in the Misc section mandatory entry: rhel_pullsecret
+Outputs:
+For each OpenShift cluster, two floating IPs are exported as templated variables resolved at deployment time, available for other resources reference:
+- \~name_API\~: the cluster API floating IP
+- \~name_APP\~: the cluster Application floating IP
+Example:
+- myocp is an OpenShift cluster deployed in this section, hosting an NRF network function
+- a UPF node is defined in the Nodes section
+- the UPFNRFip entry in the Misc section can be set to \~myocp_API\~ to make the UPF instance pointing to the NRF instance deployed in myocp cluster.
+
+For each OpenShift cluster, the installer outputs an auth directory holding the kubeconfig file and kubeadmin password in a directory named like the cluster.
+Example:
+- myocp is an OpenShift cluster deployed in this section
+- kubeconfig is in ./myocp/auth/kubeconfig
+- kubadmin password is in ./myocp/auth/kubeadmin-password 
 
 ### Nodes
 Nodes and roles definition and assignment
 - MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
 - MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
 - PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
-- Master/Etcd/Worker: the role(s) played by this node in the OpenShift cluster    
+- DATA1-4 fqdn: the name of this node on the DATA1-4 network interface
+- DATA1-4 IP addr: the IP address of this node on the DATA1-4 network interface; use a question mark on OpenStack (dynamic allocation)
+- UPF: Casa UPF node: receives a specific configuration file /fdsk/startup-config defining network interfaces, NRF and mobile network and country codes
+  - network interfaces are retrieved at runtime from OpenStack resources instantiation
+  - NRF is defined in the Misc section as an IP address, a port and an interface number; 
+    the IP address specified in the Misc section can be a templated variable referring to an OpenShift API floating IP as \~ocp_API\~ where ocp is the name of the OpenShift cluster defined in the OpenShiftNodes section 
+  - mobile network and country codes are defined in the Misc section
+- Master/Etcd/Worker: the role(s) played by this node in the OpenShift 3.x cluster    
   If no box is checked, the node is instantiated but not part of the OpenShift cluster, available for any specific usage.
 - Tester: node hosting the nodejs application used as HPE network functions tester    
   This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
 - Flavor: shortcut defining the resources allocated for this node; mapping to the actual flavor for the target infrastructure is based on the Flavors section
-- Image: name of the qcow2 image or ID of the volume used to instantiate this node in OpenStack; must be available in the OpenStack project; default from the ansible terminal environment.
+- Image or Volume: depending on the Volume boolean: either 
+  - name of the qcow2 image if Volume is unchecked, or 
+  - ID of the volume used to instantiate this node in OpenStack. The volume size is set in the Misc section, openstack_volume_size property
+- Python3: check this box if this image is running Python3, so that ansible can manage the compatibility break
+
+NOTE: all IP addresses dynamically allocated are available in the OpenStack Heat ouput, attribute ports, with the naming: "\~node_network\~": "IP address"
+Example with 3 nodes large, medium, small on 4 networks MGMT/DATA1-3
+{
+  "\~large_mgmt\~": "192.168.199.5", 
+  "\~large_pub\~": "30.118.0.22", 
+  "\~medium_data2\~": "192.168.199.73", 
+  "\~small_data2\~": "192.168.199.88", 
+  "\~small_data3\~": "192.168.199.102", 
+  "\~medium_pub\~": "30.118.0.77", 
+  "\~medium_data3\~": "192.168.199.121", 
+  "\~small_pub\~": "30.118.0.86", 
+  "\~small_mgmt\~": "192.168.199.13", 
+  "\~large_data2\~": "192.168.199.75", 
+  "\~large_data3\~": "192.168.199.103", 
+  "\~small_data1\~": "192.168.199.38", 
+  "\~medium_mgmt\~": "192.168.199.16", 
+  "\~large_data1\~": "192.168.199.44", 
+  "\~medium_data1\~": "192.168.199.49"
+} 
+-  
 
 ### Flavors
 Infrastructure flavors:
 Default flavor of a node is defined by the roles played on this node:
 - Small: Etcd
 - Standard: Worker
-- Performance: Master    
+- Large: Master    
 Those default values can be overriden at the node level in the Nodes section.    
 Flavors are identified by name, made available by the infrastructure administrator    
 Examples:    
       Infrastructure              Flavor                Name    
+           openstack          flavorTiny               v1.m2    
            openstack      flavorStandard               v2.m8    
            openstack         flavorSmall               v2.m2    
-           openstack   flavorPerformance               v4.m8    
+           openstack         flavorLarge               v4.m8    
+           openstack   flavorPerformance              v4.m16    
 
 ### Clusters
 OpenShift clusters candidate for deployment through OpenShift RESTful API:
@@ -793,7 +854,7 @@ It consists in four sections:
 
 1. types:
   Define the name of each type of resource managed by the assistant.
-  Each name must fall in one of those categories: DirectServices,IndirectServices,Operators,NetworkFunctions,HelmCharts
+  Each name must fall in one of those categories: DirectServices,IndirectServices,OperatorSources,Operators,NetworkFunctions,HelmCharts
 2. dependencies:
   Define for each type the list of required resources by their type names.   
   If a dependency can be resolved by different types, a list can be provided as a json table.    

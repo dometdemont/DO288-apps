@@ -15,6 +15,7 @@ const
 	var job = null //keeping the job in memory to kill it
 	var jobStdout = '';
 	var jobStderr = '';
+  var jobCode=null;
 
 let args = minimist(process.argv.slice(2), {
     default: {
@@ -93,17 +94,17 @@ app.get(['/:session', '/:session/:target'], function (req, res, next) {
 			  catalog();
 		  break;
 		case 'job':
-			var message= '\nstdout:\n'+jobStdout+'\nstderr:\n'+jobStderr;
+			var message= '\nstdout:\n'+jobStdout+'\nstderr:\n'+jobStderr+'\njobCode:\n'+jobCode;
 			var returnCode=null;
 			if(job){
 				// The job is running: if it can receive a signal, return 202 accepted, otherwise an internal error with the caught exception 
 				try {job.kill(0) ; returnCode=202; message+='\nAsynchronous job is running: pid '+job.pid;} catch(e) {message=e ; returnCode=500; }
 			}else{
 				// The job is done or not started, depending on the stdout and stderr content
-				if(!jobStdout){returnCode=404; message='No asynchronous job found';}
+				if(jobCode==null){returnCode=404; message='No asynchronous job found';}
 				else{
 					// The job is ended
-					returnCode=jobStderr?400:200;
+					returnCode=jobCode!=0?400:200;
 				}
 			}
 			return res.status(returnCode).send(message).end()
@@ -160,7 +161,7 @@ app.use('/:session/:target', function (req, res, next) {
 								jobStdout = '';
 								jobStderr = '';
 								job = spawn(cmd);
-								job.on('close', function(code) {job = null})
+								job.on('close', function(code) {jobCode=code; job = null})
 								job.stdout.on('data', function(data){jobStdout += data.toString(); })
 								job.stderr.on('data', function(data){jobStderr += data.toString(); })
 								res.status(200).send(job.pid.toString()) //created
@@ -181,7 +182,7 @@ app.use('/:session/:target', function (req, res, next) {
 					success=undefined;
 					if(req.method != 'DELETE'){res.status(400).send(req.method+' unknown target '+req.params.target+'; expected: undeploy, hpe5g.sh or hpe5g.y(a)ml'); break;}
 					if(!job || !job.pid){res.status(404).send('No asynchronous job to stop'); break;}
-					var message='Job '+job.pid+' stopped\nstdout:\n'+jobStdout+'\nstderr:\n'+jobStderr;
+					var message='Job '+job.pid+' stopped\nstdout:\n'+jobStdout+'\nstderr:\n'+jobStderr+'\njobCode:\n'+jobCode;
 					job.kill('SIGTERM')
 					job = null
 					res.status(200).send(message);
