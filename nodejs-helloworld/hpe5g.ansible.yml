@@ -74,9 +74,10 @@
       ansible_ssh_host: "{{_host['ipaddress']}}"
       patched_files: "{{ lookup('env','PATCHED_FILES') or '{}' }}"
       yum_explicit_packages: "{{ lookup('env','YUM_EXPLICIT_PACKAGES') }}"
-      mandatory_services: "{{ lookup('env','MANDATORY_SERVICES') }}"
+      mandatory_services: "{{ lookup('env','MANDATORY_SERVICES') or '{}' }}"
       misc_value: '{{misc_value}}'
       openshift_templates_value: '{{openshift_templates_value}}'
+      ansible_python_interpreter: "{{_host['python']}}"
 
   - name: "Clone the git openshift-ansible project release-{{misc_value.oc_version}}"
     become: no
@@ -133,6 +134,7 @@
       yum:
         name: "{{ yum_explicit_packages }}"
       ignore_errors: yes
+      when: yum_explicit_packages
 
     - name: Start mandatory explicit services, if any
       with_items: "{{ mandatory_services }}"
