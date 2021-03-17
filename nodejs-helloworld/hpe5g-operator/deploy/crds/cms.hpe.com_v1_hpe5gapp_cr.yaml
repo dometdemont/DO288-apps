@@ -1,0 +1,7 @@
+apiVersion: cms.hpe.com/v1
+kind: HPE5gApp
+metadata:
+  name: example-hpe5gapp
+spec:
+  # Add fields here
+  size: 3

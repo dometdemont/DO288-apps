@@ -1,0 +1,52 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: hpe5gapps.cms.hpe.com
+spec:
+  group: cms.hpe.com
+  names:
+    kind: HPE5gApp
+    listKind: HPE5gAppList
+    plural: hpe5gapps
+    singular: hpe5gapp
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: HPE5gApp is the Schema for the hpe5gapps API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: HPE5gAppSpec defines the template to instantiate by name or by content
+          type: object
+          properties:
+            templateName:
+              type: string
+            templateContent:
+              type: object
+        status:
+          description: HPE5gAppSpec defines the observed state as a readiness boolean and a user oriented message feedback
+          type: object
+          properties:
+            feedback:
+              type: string
+            ready:
+              type: boolean
+      type: object
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true

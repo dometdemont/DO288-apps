@@ -1,0 +1,242 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "cms.hpe.com/v1",
+          "kind": "HPE5gApp",
+          "metadata": {
+            "name": "hpe5gapp"
+          },
+          "spec": {
+            "templateName": "hpe5g",
+            "templateContent": {
+              "apiVersion": "v1",
+              "kind": "Template",
+              "metadata": {
+                "name": "alpha",
+                "annotations": null,
+                "description": "network functions and backing services for project alpha"
+              },
+              "objects": [
+                {
+                  "kind": "ServiceAccount",
+                  "apiVersion": "v1",
+                  "metadata": {
+                    "name": "gridgain",
+                    "namespace": "alpha"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    capabilities: Basic Install
+  name: hpe5g-operator.v1.0.0
+  namespace: placeholder
+spec:
+  icon:
+    - base64data: iVBORw0KGgoAAAANSUhEUgAAAGUAAAAlCAIAAADURrD0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAC9SURBVGhD7dehDcJgFEXhjsBIjMBISFy3wKEweBJMJ8CwSjFXEN4LzUmqyjm57lfvc/8wG0kvll4svVh6sfRiNV7D9eRiUdKrXyxKevWLRUmvfrEo6dUvFqVlr8N0GV/T5re7jZ9Xx6K07HV83vOw6fRi6cXSi6UXSy+WXiy9WHqx9GLpxdKLpRdrNa/94/z1ld/kVvP6z8WipFe/WJT06heLkl79YlHSq18sSo2X/Ugvll4svVh6sfQizfMbu74fE85yMQgAAAAASUVORK5CYII=
+      mediatype: image/png
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: HPE5gApp operator deploys OpenShift application templates
+      kind: HPE5gApp
+      name: hpe5gapps.cms.hpe.com
+      version: v1
+  description: |-
+    The HPE5gApp operator deploys an instance of the template passed as parameter in the provided namespace. 
+    The template to instantiate can be defined by name (TemplateName) or by content (TemplateContent), the name being the first choice.
+    The status of this instantiation is watched by the operator's reconciliation logic and reported in the HPE5gApp status as:
+    - bool: Ready and 
+    - string: Feedback.
+  displayName: Hpe5g Operator
+  install:
+    spec:
+      deployments:
+      - name: hpe5g-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: hpe5g-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: hpe5g-operator
+            spec:
+              containers:
+              - command:
+                - hpe5g-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: hpe5g-operator
+                image: quay.io/dometdemont/hpe5g:1.0.0
+                imagePullPolicy: Always
+                name: hpe5g-operator
+                resources: {}
+              serviceAccountName: hpe5g-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - serviceaccounts
+          - services/finalizers
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          - templates
+          - templateinstances
+          - templateconfigs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - template.openshift.io
+          resources:
+          - templates
+          - templateinstances
+          - templateconfigs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - hpe5g-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - templates
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          - deployments
+          verbs:
+          - get
+        - apiGroups:
+          - authorization.openshift.io
+          resources:
+          - rolebindings
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - image.openshift.io
+          resources:
+          - imagestreams
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - apps.openshift.io
+          resources:
+          - deploymentconfigs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - route.openshift.io
+          resources:
+          - routes
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - cms.hpe.com
+          resources:
+          - '*'
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: hpe5g-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  version: 1.0.0
+  maintainers:
+  - email: dominique.domet-de-mont@hpe.com
+    name: Dominique Domet de Mont
+  provider:
+    name: D3M
