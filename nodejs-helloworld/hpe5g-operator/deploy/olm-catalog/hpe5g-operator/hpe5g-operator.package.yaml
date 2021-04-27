@@ -1,5 +1,0 @@
-channels:
-- currentCSV: hpe5g-operator.v1.0.0
-  name: alpha
-defaultChannel: alpha
-packageName: hpe5g-operator
