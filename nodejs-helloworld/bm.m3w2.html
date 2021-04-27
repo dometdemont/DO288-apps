@@ -10,7 +10,7 @@
 <p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2021-04-14 Version 0.92</a></p>
 <p>
 <label for="quickDescription">Description :</label>
-<input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description" value="Limited set of services">
+<input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description" value="An OpenShift cluster on 5 baremetal servers, 3 masters and 2 workers, one jenkins pipeline deployed.">
 </p>
 </td>
 <td valign="top" align="right">
@@ -21,7 +21,7 @@
 <h3>Summary: <a id="summary" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#OpenShiftNodes" onclick="OpenShiftNodes.display(true);"> / OpenShiftNodes</a><a href="#BaremetalNodes" onclick="BaremetalNodes.display(true);"> / BaremetalNodes</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#Builds" onclick="Builds.display(true);"> / Builds</a><a href="#CustomApps" onclick="CustomApps.display(true);"> / CustomApps</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#OperatorSources" onclick="OperatorSources.display(true);"> / OperatorSources</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></h3>
 
 <form>
-<div id="tableInsertionPoint"><div id="NetworksSection" style="display: none;"><a name="Networks"><h2>Networks</h2></a><table border="1" id="Networks"><tbody><tr><th><input type="button" value="Add" onclick="Networks.add();"></th><th class="Networksnetwork" style="width: 80px;">network</th><th class="Networksinterface" style="width: 80px;">interface</th><th class="Networksmask" style="width: 120px;">mask</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Networks.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Networks.help());"></div><div id="MiscSection" style="display: none;"><a name="Misc"><h2>Misc</h2></a><table border="1" id="Misc"><tbody><tr><th><input type="button" value="Add" onclick="Misc.add();"></th><th class="MiscProperty" style="width: 200px;">Property</th><th class="MiscValue" style="width: 400px;">Value</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Misc.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Misc.help());"></div><div id="FlavorsSection" style="display: none;"><a name="Flavors"><h2>Flavors</h2></a><table border="1" id="Flavors"><tbody><tr><th><input type="button" value="Add" onclick="Flavors.add();"></th><th class="FlavorsInfrastructure" style="width: 100px;">Infrastructure</th><th class="FlavorsFlavor" style="width: 120px;">Flavor</th><th class="Flavorsname" style="width: 200px;">name</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Flavors.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Flavors.help());"></div><div id="NodesSection" style="display: none;"><a name="Nodes"><h2>Nodes</h2></a><table border="1" id="Nodes"><tbody><tr><th><input type="button" value="Add" onclick="Nodes.add();"></th><th class="NodesMGMT fqdn" style="width: 120px;">MGMT fqdn</th><th class="NodesMGMT IP addr" style="width: 120px;">MGMT IP addr</th><th class="NodesPUBLIC IP addr" style="width: 120px;">PUBLIC IP addr</th><th class="NodesDATA1 fqdn" style="width: 85px;">DATA1 fqdn</th><th class="NodesDATA1 IP addr" style="width: 85px;">DATA1 IP addr</th><th class="NodesDATA2 fqdn" style="width: 85px;">DATA2 fqdn</th><th class="NodesDATA2 IP addr" style="width: 85px;">DATA2 IP addr</th><th class="NodesDATA3 fqdn" style="width: 85px;">DATA3 fqdn</th><th class="NodesDATA3 IP addr" style="width: 85px;">DATA3 IP addr</th><th class="NodesDATA4 fqdn" style="width: 85px;">DATA4 fqdn</th><th class="NodesDATA4 IP addr" style="width: 85px;">DATA4 IP addr</th><th class="NodesUPF" style="width: 15px;">UPF</th><th class="NodesUPFrouter" style="width: 15px;">UPFrouter</th><th class="NodesMaster" style="width: 15px;">Master</th><th class="NodesEtcd" style="width: 15px;">Etcd</th><th class="NodesWorker" style="width: 15px;">Worker</th><th class="NodesTester" style="width: 15px;">Tester</th><th class="NodesFlavor" style="width: 120px;">Flavor</th><th class="NodesImage" style="width: 200px;">Image</th><th class="NodesVolume" style="width: 15px;">Volume</th><th class="NodesPython3" style="width: 15px;">Python3</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Nodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Nodes.help());"></div><div id="OpenShiftNodesSection" style="display: none;"><a name="OpenShiftNodes"><h2>OpenShiftNodes</h2></a><table border="1" id="OpenShiftNodes"><tbody><tr><th><input type="button" value="Add" onclick="OpenShiftNodes.add();"></th><th class="OpenShiftNodesName" style="width: 80px;">Name</th><th class="OpenShiftNodesDomain" style="width: 80px;">Domain</th><th class="OpenShiftNodesOSenv" style="width: 100px;">OSenv</th><th class="OpenShiftNodesext-net" style="width: 120px;">ext-net</th><th class="OpenShiftNodesext-dns" style="width: 120px;">ext-dns</th><th class="OpenShiftNodesFIPAPI" style="width: 120px;">FIPAPI</th><th class="OpenShiftNodesFIPAPP" style="width: 120px;">FIPAPP</th><th class="OpenShiftNodesMasters" style="width: 60px;">Masters</th><th class="OpenShiftNodesWorkers" style="width: 60px;">Workers</th><th class="OpenShiftNodesetc-hosts" style="width: 60px;">etc-hosts</th><th class="OpenShiftNodesFlavor" style="width: 120px;">Flavor</th><th class="OpenShiftNodesWorker flavor" style="width: 120px;">Worker flavor</th><th class="OpenShiftNodes#Volumes" style="width: 60px;">#Volumes</th><th class="OpenShiftNodesUPF" style="width: 120px;">UPF</th><th class="OpenShiftNodesUPF router" style="width: 120px;">UPF router</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OpenShiftNodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OpenShiftNodes.help());"></div><div id="BaremetalNodesSection" style="display: none;"><a name="BaremetalNodes"><h2>BaremetalNodes</h2></a><table border="1" id="BaremetalNodes"><tbody><tr><th><input type="button" value="Add" onclick="BaremetalNodes.add();"></th><th class="BaremetalNodesFQDN" style="width: 200px;">FQDN</th><th class="BaremetalNodesRole" style="width: 120px;">Role</th><th class="BaremetalNodesIPMI address" style="width: 120px;">IPMI address</th><th class="BaremetalNodesIPMI user" style="width: 120px;">IPMI user</th><th class="BaremetalNodesIPMI password" style="width: 120px;">IPMI password</th><th class="BaremetalNodesAPI VIP" style="width: 120px;">API VIP</th><th class="BaremetalNodesIngress VIP" style="width: 120px;">Ingress VIP</th><th class="BaremetalNodesBaremetal CIDR" style="width: 120px;">Baremetal CIDR</th><th class="BaremetalNodesProvisioning CIDR" style="width: 120px;">Provisioning CIDR</th><th class="BaremetalNodesBoot MAC address" style="width: 120px;">Boot MAC address</th><th class="BaremetalNodesBoot interface" style="width: 120px;">Boot interface</th><th class="BaremetalNodesBoot device" style="width: 120px;">Boot device</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(BaremetalNodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(BaremetalNodes.help());"></div><div id="CinderVolumesSection" style="display: none;"><a name="CinderVolumes"><h2>CinderVolumes</h2></a><table border="1" id="CinderVolumes"><tbody><tr><th><input type="button" value="Add" onclick="CinderVolumes.add();"></th><th class="CinderVolumesName" style="width: 120px;">Name</th><th class="CinderVolumesSize" style="width: 80px;">Size</th><th class="CinderVolumesDescription" style="width: 300px;">Description</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CinderVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CinderVolumes.help());"></div><div id="PersistentVolumesSection" style="display: none;"><a name="PersistentVolumes"><h2>PersistentVolumes</h2></a><table border="1" id="PersistentVolumes"><tbody><tr><th><input type="button" value="Add" onclick="PersistentVolumes.add();"></th><th class="PersistentVolumesName" style="width: 120px;">Name</th><th class="PersistentVolumesSize" style="width: 80px;">Size</th><th class="PersistentVolumesType" style="width: 80px;">Type</th><th class="PersistentVolumesAccess" style="width: 120px;">Access</th><th class="PersistentVolumesReclaim" style="width: 120px;">Reclaim</th><th class="PersistentVolumesCinderVolume" style="width: 120px;">CinderVolume</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(PersistentVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(PersistentVolumes.help());"></div><div id="ClustersSection" style="display: none;"><a name="Clusters"><h2>Clusters</h2></a><table border="1" id="Clusters"><tbody><tr><th><input type="button" value="Add" onclick="Clusters.add();"></th><th class="ClustersName" style="width: 80px;">Name</th><th class="ClustersEndpoint" style="width: 300px;">Endpoint</th><th class="ClustersToken" style="width: 300px;">Token</th><th class="ClustersTargeted" style="width: 15px;">Targeted</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Clusters.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Clusters.help());"></div><div id="BuildsSection" style="display: none;"><a name="Builds"><h2>Builds</h2></a><table border="1" id="Builds"><tbody><tr><th><input type="button" value="Add" onclick="Builds.add();"></th><th class="BuildsType" style="width: 100px;">Type</th><th class="BuildsName" style="width: 100px;">Name</th><th class="BuildsGIT URL" style="width: 400px;">GIT URL</th><th class="Buildsdirectory" style="width: 200px;">directory</th><th class="Buildsbranch" style="width: 120px;">branch</th><th class="BuildssshKey" style="width: 120px;">sshKey</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Builds.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Builds.help());"></div><div id="CustomAppsSection" style="display: none;"><a name="CustomApps"><h2>CustomApps</h2></a><table border="1" id="CustomApps"><tbody><tr><th><input type="button" value="Add" onclick="CustomApps.add();"></th><th class="CustomAppsType" style="width: 140px;">Type</th><th class="CustomAppsName" style="width: 100px;">Name</th><th class="CustomAppsProject" style="width: 60px;">Project</th><th class="CustomAppsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CustomApps.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CustomApps.help());"></div><div id="NetworkFunctionsSection" style="display: none;"><a name="NetworkFunctions"><h2>NetworkFunctions</h2></a><table border="1" id="NetworkFunctions"><tbody><tr><th><input type="button" value="Add" onclick="NetworkFunctions.add();"></th><th class="NetworkFunctionsType" style="width: 100px;">Type</th><th class="NetworkFunctionsName" style="width: 80px;">Name</th><th class="NetworkFunctionsProject" style="width: 60px;">Project</th><th class="NetworkFunctionsURL" style="width: 200px;">URL</th><th class="NetworkFunctionsinsecure" style="width: 15px;">insecure</th><th class="NetworkFunctionsImage" style="width: 120px;">Image</th><th class="NetworkFunctionsTag" style="width: 120px;">Tag</th><th class="NetworkFunctionsStorage" style="width: 60px;">Storage</th><th class="NetworkFunctionsVolume" style="width: 60px;">Volume</th><th class="NetworkFunctionsReplicas" style="width: 40px;">Replicas</th><th class="NetworkFunctionsDependencies" style="width: 100px;">Dependencies</th><th class="NetworkFunctionsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(NetworkFunctions.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(NetworkFunctions.help());"></div><div id="DirectServicesSection" style=""><a name="DirectServices"><h2>DirectServices</h2></a><table border="1" id="DirectServices"><tbody><tr><th><input type="button" value="Add" onclick="DirectServices.add();"></th><th class="DirectServicesType" style="width: 100px;">Type</th><th class="DirectServicesName" style="width: 80px;">Name</th><th class="DirectServicesProject" style="width: 60px;">Project</th><th class="DirectServicesURL" style="width: 200px;">URL</th><th class="DirectServicesinsecure" style="width: 15px;">insecure</th><th class="DirectServicesImage" style="width: 120px;">Image</th><th class="DirectServicesTag" style="width: 120px;">Tag</th><th class="DirectServicesStorage" style="width: 60px;">Storage</th><th class="DirectServicesVolume" style="width: 60px;">Volume</th><th class="DirectServicesReplicas" style="width: 40px;">Replicas</th><th class="DirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="DirectServicesPipeline" style="width: 100px;">Pipeline</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton1" onclick="DirectServices.delete('delButton1');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite" selected="selected">ignite</option><option value="redis">redis</option><option value="redis-nopwd">redis-nopwd</option><option value="influxdb">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="gridgain" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/gridgain" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="community" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="8.7.14" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="250Mi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline" style="width: 100px;"><input class="DirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton2" onclick="DirectServices.delete('delButton2');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite">ignite</option><option value="redis">redis</option><option value="redis-nopwd">redis-nopwd</option><option value="influxdb" selected="selected">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="udsf-flux" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/bitnami" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="influxdb" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="1.7.10" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="1Gi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline" style="width: 100px;"><input class="DirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton3" onclick="DirectServices.delete('delButton3');"></td><td class="DirectServicesType" style="width: 100px;"><select class="DirectServicesType" style="width: 100px;"><option value="ignite">ignite</option><option value="redis" selected="selected">redis</option><option value="redis-nopwd">redis-nopwd</option><option value="influxdb">influxdb</option><option value="fluentd">fluentd</option></select></td><td class="DirectServicesName" style="width: 80px;"><input class="DirectServicesName" type="text" value="myredis" style="width: 80px;"></td><td class="DirectServicesProject" style="width: 60px;"><input class="DirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="DirectServicesURL" style="width: 200px;"><input class="DirectServicesURL" type="text" value="docker.io/bitnami" style="width: 200px;"></td><td class="DirectServicesinsecure" style="width: 15px;"><input class="DirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="DirectServicesImage" style="width: 120px;"><input class="DirectServicesImage" type="text" value="redis" style="width: 120px;"></td><td class="DirectServicesTag" style="width: 120px;"><input class="DirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="DirectServicesStorage" style="width: 60px;"><input class="DirectServicesStorage" type="text" value="100Mi" style="width: 60px;"></td><td class="DirectServicesVolume" style="width: 60px;"><input class="DirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="DirectServicesReplicas" style="width: 40px;"><input class="DirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="DirectServicesDependencies" style="width: 100px;"><input class="DirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="DirectServicesPipeline" style="width: 100px;"><input class="DirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(DirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(DirectServices.help());"></div><div id="IndirectServicesSection" style=""><a name="IndirectServices"><h2>IndirectServices</h2></a><table border="1" id="IndirectServices"><tbody><tr><th><input type="button" value="Add" onclick="IndirectServices.add();"></th><th class="IndirectServicesType" style="width: 100px;">Type</th><th class="IndirectServicesName" style="width: 80px;">Name</th><th class="IndirectServicesProject" style="width: 60px;">Project</th><th class="IndirectServicesURL" style="width: 200px;">URL</th><th class="IndirectServicesinsecure" style="width: 15px;">insecure</th><th class="IndirectServicesImage" style="width: 120px;">Image</th><th class="IndirectServicesTag" style="width: 120px;">Tag</th><th class="IndirectServicesStorage" style="width: 60px;">Storage</th><th class="IndirectServicesVolume" style="width: 60px;">Volume</th><th class="IndirectServicesReplicas" style="width: 40px;">Replicas</th><th class="IndirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="IndirectServicesPipeline" style="width: 100px;">Pipeline</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton4" onclick="IndirectServices.delete('delButton4');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins" selected="selected">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myjenkins" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="quay.io/openshift" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="origin-jenkins" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton5" onclick="IndirectServices.delete('delButton5');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager" selected="selected">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myalert" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="alertmanager" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v0.20.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="8Gi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton6" onclick="IndirectServices.delete('delButton6');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus" selected="selected">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="myprom" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="prometheus" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v2.16.0" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="200Mi" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton7" onclick="IndirectServices.delete('delButton7');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway" selected="selected">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="mygateway" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io/prom" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="pushgateway" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="v1.0.1" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="1" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton8" onclick="IndirectServices.delete('delButton8');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf" selected="selected">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="mygraf" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="docker.io" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="telegraf" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="1.14-alpine" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(IndirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(IndirectServices.help());"></div><div id="OperatorSourcesSection" style="display: none;"><a name="OperatorSources"><h2>OperatorSources</h2></a><table border="1" id="OperatorSources"><tbody><tr><th><input type="button" value="Add" onclick="OperatorSources.add();"></th><th class="OperatorSourcesType" style="width: 140px;">Type</th><th class="OperatorSourcesName" style="width: 100px;">Name</th><th class="OperatorSourcesProject" style="width: 200px;">Project</th><th class="OperatorSourcesURL" style="width: 400px;">URL</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OperatorSources.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OperatorSources.help());"></div><div id="OperatorsSection" style="display: none;"><a name="Operators"><h2>Operators</h2></a><table border="1" id="Operators"><tbody><tr><th><input type="button" value="Add" onclick="Operators.add();"></th><th class="OperatorsType" style="width: 200px;">Type</th><th class="OperatorsName" style="width: 140px;">Name</th><th class="OperatorsProject" style="width: 140px;">Project</th><th class="OperatorsReplicas" style="width: 40px;">Replicas</th><th class="OperatorsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Operators.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Operators.help());"></div><div id="HelmChartsSection" style="display: none;"><a name="HelmCharts"><h2>HelmCharts</h2></a><table border="1" id="HelmCharts"><tbody><tr><th><input type="button" value="Add" onclick="HelmCharts.add();"></th><th class="HelmChartsType" style="width: 140px;">Type</th><th class="HelmChartsName" style="width: 100px;">Name</th><th class="HelmChartsProject" style="width: 60px;">Project</th><th class="HelmChartsChart" style="width: 200px;">Chart</th><th class="HelmChartsValues" style="width: 200px;">Values</th><th class="HelmChartsVersion" style="width: 60px;">Version</th><th class="HelmChartsOptions" style="width: 120px;">Options</th><th class="HelmChartsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(HelmCharts.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(HelmCharts.help());"></div></div>
+<div id="tableInsertionPoint"><div id="NetworksSection" style="display: none;"><a name="Networks"><h2>Networks</h2></a><table border="1" id="Networks"><tbody><tr><th><input type="button" value="Add" onclick="Networks.add();"></th><th class="Networksnetwork" style="width: 80px;">network</th><th class="Networksinterface" style="width: 80px;">interface</th><th class="Networksmask" style="width: 120px;">mask</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Networks.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Networks.help());"></div><div id="MiscSection" style=""><a name="Misc"><h2>Misc</h2></a><table border="1" id="Misc"><tbody><tr><th><input type="button" value="Add" onclick="Misc.add();"></th><th class="MiscProperty" style="width: 200px;">Property</th><th class="MiscValue" style="width: 400px;">Value</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton1" onclick="Misc.delete('delButton1');"></td><td class="MiscProperty" style="width: 200px;"><select class="MiscProperty" style="width: 200px;"><option value="rhel_pullsecret" selected="selected">rhel_pullsecret</option><option value="public_sshKey">public_sshKey</option><option value="anyuid">anyuid</option><option value="extnet">extnet</option><option value="UPFpassword">UPFpassword</option><option value="UPFNRFip">UPFNRFip</option><option value="UPFNRFinterface">UPFNRFinterface</option><option value="UPFNRFport">UPFNRFport</option><option value="UPFmcc">UPFmcc</option><option value="UPFmnc">UPFmnc</option><option value="UPFtac">UPFtac</option><option value="UPFcidr">UPFcidr</option><option value="UPFnat">UPFnat</option><option value="UPFrouted">UPFrouted</option><option value="headless">headless</option><option value="default_project">default_project</option><option value="default_action">default_action</option><option value="default_openstack_env">default_openstack_env</option><option value="default_openstack_network_root">default_openstack_network_root</option><option value="openstack_security_group">openstack_security_group</option><option value="openstack_volume_size">openstack_volume_size</option><option value="tester_nodejs_version">tester_nodejs_version</option><option value="tester_git_url">tester_git_url</option><option value="tester_deploy_key">tester_deploy_key</option></select></td><td class="MiscValue" style="width: 400px;"><input class="MiscValue" type="text" value="{&quot;auths&quot;:{&quot;cloud.openshift.com&quot;:{&quot;auth&quot;:&quot;b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=&quot;,&quot;email&quot;:&quot;dominique.domet-de-mont@hpe.com&quot;},&quot;quay.io&quot;:{&quot;auth&quot;:&quot;b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=&quot;,&quot;email&quot;:&quot;dominique.domet-de-mont@hpe.com&quot;},&quot;registry.connect.redhat.com&quot;:{&quot;auth&quot;:&quot;NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWU...STBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB&quot;,&quot;email&quot;:&quot;dominique.domet-de-mont@hpe.com&quot;}}}" style="width: 400px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton2" onclick="Misc.delete('delButton2');"></td><td class="MiscProperty" style="width: 200px;"><select class="MiscProperty" style="width: 200px;"><option value="rhel_pullsecret">rhel_pullsecret</option><option value="public_sshKey" selected="selected">public_sshKey</option><option value="anyuid">anyuid</option><option value="extnet">extnet</option><option value="UPFpassword">UPFpassword</option><option value="UPFNRFip">UPFNRFip</option><option value="UPFNRFinterface">UPFNRFinterface</option><option value="UPFNRFport">UPFNRFport</option><option value="UPFmcc">UPFmcc</option><option value="UPFmnc">UPFmnc</option><option value="UPFtac">UPFtac</option><option value="UPFcidr">UPFcidr</option><option value="UPFnat">UPFnat</option><option value="UPFrouted">UPFrouted</option><option value="headless">headless</option><option value="default_project">default_project</option><option value="default_action">default_action</option><option value="default_openstack_env">default_openstack_env</option><option value="default_openstack_network_root">default_openstack_network_root</option><option value="openstack_security_group">openstack_security_group</option><option value="openstack_volume_size">openstack_volume_size</option><option value="tester_nodejs_version">tester_nodejs_version</option><option value="tester_git_url">tester_git_url</option><option value="tester_deploy_key">tester_deploy_key</option></select></td><td class="MiscValue" style="width: 400px;"><input class="MiscValue" type="text" value="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDD7NHyHQT3pfG6yfpmQFSBjYe0x7t3qosl0sd880GHDbOkEZy9q5qMxYkQS41QCNzbx6RLrfz5eQawyWx0ADfY/YHaCKrjtFjd1hsP/svOBycJcOscGRjgmHt5ONDxqQGNgIpPOk/HOZn5oJEeJ8Bmk8hFdrsfl5m5f3IHg29jXmfL6bjaGGuWhD1xTKQEAk12DzObqvngalTO5+JPNoxSn2M7bYKZykP+vWQICyHTc8IRnwExyEmI4wEONOrMh13S2AdDpP9aoVCoTk+1Q8sJCmjO49g/uJlusfVTiVTBHTGycxWCcGG2uQ1BfwYJ/vp/8y9A/LVXmjYzYUIjBiBT Generated-by-Nova" style="width: 400px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Misc.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Misc.help());"></div><div id="FlavorsSection" style="display: none;"><a name="Flavors"><h2>Flavors</h2></a><table border="1" id="Flavors"><tbody><tr><th><input type="button" value="Add" onclick="Flavors.add();"></th><th class="FlavorsInfrastructure" style="width: 100px;">Infrastructure</th><th class="FlavorsFlavor" style="width: 120px;">Flavor</th><th class="Flavorsname" style="width: 200px;">name</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Flavors.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Flavors.help());"></div><div id="NodesSection" style="display: none;"><a name="Nodes"><h2>Nodes</h2></a><table border="1" id="Nodes"><tbody><tr><th><input type="button" value="Add" onclick="Nodes.add();"></th><th class="NodesMGMT fqdn" style="width: 120px;">MGMT fqdn</th><th class="NodesMGMT IP addr" style="width: 120px;">MGMT IP addr</th><th class="NodesPUBLIC IP addr" style="width: 120px;">PUBLIC IP addr</th><th class="NodesDATA1 fqdn" style="width: 85px;">DATA1 fqdn</th><th class="NodesDATA1 IP addr" style="width: 85px;">DATA1 IP addr</th><th class="NodesDATA2 fqdn" style="width: 85px;">DATA2 fqdn</th><th class="NodesDATA2 IP addr" style="width: 85px;">DATA2 IP addr</th><th class="NodesDATA3 fqdn" style="width: 85px;">DATA3 fqdn</th><th class="NodesDATA3 IP addr" style="width: 85px;">DATA3 IP addr</th><th class="NodesDATA4 fqdn" style="width: 85px;">DATA4 fqdn</th><th class="NodesDATA4 IP addr" style="width: 85px;">DATA4 IP addr</th><th class="NodesUPF" style="width: 15px;">UPF</th><th class="NodesUPFrouter" style="width: 15px;">UPFrouter</th><th class="NodesMaster" style="width: 15px;">Master</th><th class="NodesEtcd" style="width: 15px;">Etcd</th><th class="NodesWorker" style="width: 15px;">Worker</th><th class="NodesTester" style="width: 15px;">Tester</th><th class="NodesFlavor" style="width: 120px;">Flavor</th><th class="NodesImage" style="width: 200px;">Image</th><th class="NodesVolume" style="width: 15px;">Volume</th><th class="NodesPython3" style="width: 15px;">Python3</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Nodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Nodes.help());"></div><div id="OpenShiftNodesSection" style="display: none;"><a name="OpenShiftNodes"><h2>OpenShiftNodes</h2></a><table border="1" id="OpenShiftNodes"><tbody><tr><th><input type="button" value="Add" onclick="OpenShiftNodes.add();"></th><th class="OpenShiftNodesName" style="width: 80px;">Name</th><th class="OpenShiftNodesDomain" style="width: 80px;">Domain</th><th class="OpenShiftNodesOSenv" style="width: 100px;">OSenv</th><th class="OpenShiftNodesext-net" style="width: 120px;">ext-net</th><th class="OpenShiftNodesext-dns" style="width: 120px;">ext-dns</th><th class="OpenShiftNodesFIPAPI" style="width: 120px;">FIPAPI</th><th class="OpenShiftNodesFIPAPP" style="width: 120px;">FIPAPP</th><th class="OpenShiftNodesMasters" style="width: 60px;">Masters</th><th class="OpenShiftNodesWorkers" style="width: 60px;">Workers</th><th class="OpenShiftNodesetc-hosts" style="width: 60px;">etc-hosts</th><th class="OpenShiftNodesFlavor" style="width: 120px;">Flavor</th><th class="OpenShiftNodesWorker flavor" style="width: 120px;">Worker flavor</th><th class="OpenShiftNodes#Volumes" style="width: 60px;">#Volumes</th><th class="OpenShiftNodesUPF" style="width: 120px;">UPF</th><th class="OpenShiftNodesUPF router" style="width: 120px;">UPF router</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OpenShiftNodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OpenShiftNodes.help());"></div><div id="BaremetalNodesSection" style=""><a name="BaremetalNodes"><h2>BaremetalNodes</h2></a><table border="1" id="BaremetalNodes"><tbody><tr><th><input type="button" value="Add" onclick="BaremetalNodes.add();"></th><th class="BaremetalNodesFQDN" style="width: 200px;">FQDN</th><th class="BaremetalNodesRole" style="width: 120px;">Role</th><th class="BaremetalNodesIPMI address" style="width: 120px;">IPMI address</th><th class="BaremetalNodesIPMI user" style="width: 120px;">IPMI user</th><th class="BaremetalNodesIPMI password" style="width: 120px;">IPMI password</th><th class="BaremetalNodesAPI VIP" style="width: 120px;">API VIP</th><th class="BaremetalNodesIngress VIP" style="width: 120px;">Ingress VIP</th><th class="BaremetalNodesBaremetal CIDR" style="width: 120px;">Baremetal CIDR</th><th class="BaremetalNodesProvisioning CIDR" style="width: 120px;">Provisioning CIDR</th><th class="BaremetalNodesBoot MAC address" style="width: 120px;">Boot MAC address</th><th class="BaremetalNodesBoot interface" style="width: 120px;">Boot interface</th><th class="BaremetalNodesBoot device" style="width: 120px;">Boot device</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton3" onclick="BaremetalNodes.delete('delButton3');"></td><td class="BaremetalNodesFQDN" style="width: 200px;"><input class="BaremetalNodesFQDN" type="text" value="zwei.steel.hpe5g.bm.fc" style="width: 200px;"></td><td class="BaremetalNodesRole" style="width: 120px;"><select class="BaremetalNodesRole" style="width: 120px;"><option value="master" selected="selected">master</option><option value="worker">worker</option></select></td><td class="BaremetalNodesIPMI address" style="width: 120px;"><input class="BaremetalNodesIPMI address" type="text" value="10.33.0.16" style="width: 120px;"></td><td class="BaremetalNodesIPMI user" style="width: 120px;"><input class="BaremetalNodesIPMI user" type="text" value="admin" style="width: 120px;"></td><td class="BaremetalNodesIPMI password" style="width: 120px;"><input class="BaremetalNodesIPMI password" type="text" value="HP1nvent" style="width: 120px;"></td><td class="BaremetalNodesAPI VIP" style="width: 120px;"><input class="BaremetalNodesAPI VIP" type="text" value="10.33.200.90" style="width: 120px;"></td><td class="BaremetalNodesIngress VIP" style="width: 120px;"><input class="BaremetalNodesIngress VIP" type="text" value="10.33.200.91" style="width: 120px;"></td><td class="BaremetalNodesBaremetal CIDR" style="width: 120px;"><input class="BaremetalNodesBaremetal CIDR" type="text" value="10.33.200.0/24" style="width: 120px;"></td><td class="BaremetalNodesProvisioning CIDR" style="width: 120px;"><input class="BaremetalNodesProvisioning CIDR" type="text" value="10.33.202.0/24" style="width: 120px;"></td><td class="BaremetalNodesBoot MAC address" style="width: 120px;"><input class="BaremetalNodesBoot MAC address" type="text" value="48:df:37:6b:e7:3c" style="width: 120px;"></td><td class="BaremetalNodesBoot interface" style="width: 120px;"><input class="BaremetalNodesBoot interface" type="text" value="ens1f0" style="width: 120px;"></td><td class="BaremetalNodesBoot device" style="width: 120px;"><input class="BaremetalNodesBoot device" type="text" value="/dev/sdb" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton4" onclick="BaremetalNodes.delete('delButton4');"></td><td class="BaremetalNodesFQDN" style="width: 200px;"><input class="BaremetalNodesFQDN" type="text" value="drei.steel.hpe5g.bm.fc" style="width: 200px;"></td><td class="BaremetalNodesRole" style="width: 120px;"><select class="BaremetalNodesRole" style="width: 120px;"><option value="master" selected="selected">master</option><option value="worker">worker</option></select></td><td class="BaremetalNodesIPMI address" style="width: 120px;"><input class="BaremetalNodesIPMI address" type="text" value="10.33.0.17" style="width: 120px;"></td><td class="BaremetalNodesIPMI user" style="width: 120px;"><input class="BaremetalNodesIPMI user" type="text" value="admin" style="width: 120px;"></td><td class="BaremetalNodesIPMI password" style="width: 120px;"><input class="BaremetalNodesIPMI password" type="text" value="HP1nvent" style="width: 120px;"></td><td class="BaremetalNodesAPI VIP" style="width: 120px;"><input class="BaremetalNodesAPI VIP" type="text" value="10.33.200.90" style="width: 120px;"></td><td class="BaremetalNodesIngress VIP" style="width: 120px;"><input class="BaremetalNodesIngress VIP" type="text" value="10.33.200.91" style="width: 120px;"></td><td class="BaremetalNodesBaremetal CIDR" style="width: 120px;"><input class="BaremetalNodesBaremetal CIDR" type="text" value="10.33.200.0/24" style="width: 120px;"></td><td class="BaremetalNodesProvisioning CIDR" style="width: 120px;"><input class="BaremetalNodesProvisioning CIDR" type="text" value="10.33.202.0/24" style="width: 120px;"></td><td class="BaremetalNodesBoot MAC address" style="width: 120px;"><input class="BaremetalNodesBoot MAC address" type="text" value="48:df:37:68:f4:c8" style="width: 120px;"></td><td class="BaremetalNodesBoot interface" style="width: 120px;"><input class="BaremetalNodesBoot interface" type="text" value="ens1f0" style="width: 120px;"></td><td class="BaremetalNodesBoot device" style="width: 120px;"><input class="BaremetalNodesBoot device" type="text" value="/dev/sdb" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton5" onclick="BaremetalNodes.delete('delButton5');"></td><td class="BaremetalNodesFQDN" style="width: 200px;"><input class="BaremetalNodesFQDN" type="text" value="funf.steel.hpe5g.bm.fc" style="width: 200px;"></td><td class="BaremetalNodesRole" style="width: 120px;"><select class="BaremetalNodesRole" style="width: 120px;"><option value="master" selected="selected">master</option><option value="worker">worker</option></select></td><td class="BaremetalNodesIPMI address" style="width: 120px;"><input class="BaremetalNodesIPMI address" type="text" value="10.33.0.19" style="width: 120px;"></td><td class="BaremetalNodesIPMI user" style="width: 120px;"><input class="BaremetalNodesIPMI user" type="text" value="admin" style="width: 120px;"></td><td class="BaremetalNodesIPMI password" style="width: 120px;"><input class="BaremetalNodesIPMI password" type="text" value="HP1nvent" style="width: 120px;"></td><td class="BaremetalNodesAPI VIP" style="width: 120px;"><input class="BaremetalNodesAPI VIP" type="text" value="10.33.200.90" style="width: 120px;"></td><td class="BaremetalNodesIngress VIP" style="width: 120px;"><input class="BaremetalNodesIngress VIP" type="text" value="10.33.200.91" style="width: 120px;"></td><td class="BaremetalNodesBaremetal CIDR" style="width: 120px;"><input class="BaremetalNodesBaremetal CIDR" type="text" value="10.33.200.0/24" style="width: 120px;"></td><td class="BaremetalNodesProvisioning CIDR" style="width: 120px;"><input class="BaremetalNodesProvisioning CIDR" type="text" value="10.33.202.0/24" style="width: 120px;"></td><td class="BaremetalNodesBoot MAC address" style="width: 120px;"><input class="BaremetalNodesBoot MAC address" type="text" value="48:df:37:c9:ab:a8" style="width: 120px;"></td><td class="BaremetalNodesBoot interface" style="width: 120px;"><input class="BaremetalNodesBoot interface" type="text" value="ens1f0" style="width: 120px;"></td><td class="BaremetalNodesBoot device" style="width: 120px;"><input class="BaremetalNodesBoot device" type="text" value="/dev/sdb" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton6" onclick="BaremetalNodes.delete('delButton6');"></td><td class="BaremetalNodesFQDN" style="width: 200px;"><input class="BaremetalNodesFQDN" type="text" value="eins.steel.hpe5g.bm.fc" style="width: 200px;"></td><td class="BaremetalNodesRole" style="width: 120px;"><select class="BaremetalNodesRole" style="width: 120px;"><option value="master">master</option><option value="worker" selected="selected">worker</option></select></td><td class="BaremetalNodesIPMI address" style="width: 120px;"><input class="BaremetalNodesIPMI address" type="text" value="10.33.0.15" style="width: 120px;"></td><td class="BaremetalNodesIPMI user" style="width: 120px;"><input class="BaremetalNodesIPMI user" type="text" value="admin" style="width: 120px;"></td><td class="BaremetalNodesIPMI password" style="width: 120px;"><input class="BaremetalNodesIPMI password" type="text" value="HP1nvent" style="width: 120px;"></td><td class="BaremetalNodesAPI VIP" style="width: 120px;"><input class="BaremetalNodesAPI VIP" type="text" value="10.33.200.90" style="width: 120px;"></td><td class="BaremetalNodesIngress VIP" style="width: 120px;"><input class="BaremetalNodesIngress VIP" type="text" value="10.33.200.91" style="width: 120px;"></td><td class="BaremetalNodesBaremetal CIDR" style="width: 120px;"><input class="BaremetalNodesBaremetal CIDR" type="text" value="10.33.200.0/24" style="width: 120px;"></td><td class="BaremetalNodesProvisioning CIDR" style="width: 120px;"><input class="BaremetalNodesProvisioning CIDR" type="text" value="10.33.202.0/24" style="width: 120px;"></td><td class="BaremetalNodesBoot MAC address" style="width: 120px;"><input class="BaremetalNodesBoot MAC address" type="text" value="48:df:37:6b:e7:38" style="width: 120px;"></td><td class="BaremetalNodesBoot interface" style="width: 120px;"><input class="BaremetalNodesBoot interface" type="text" value="ens1f0" style="width: 120px;"></td><td class="BaremetalNodesBoot device" style="width: 120px;"><input class="BaremetalNodesBoot device" type="text" value="/dev/sdh" style="width: 120px;"></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton7" onclick="BaremetalNodes.delete('delButton7');"></td><td class="BaremetalNodesFQDN" style="width: 200px;"><input class="BaremetalNodesFQDN" type="text" value="vier.steel.hpe5g.bm.fc" style="width: 200px;"></td><td class="BaremetalNodesRole" style="width: 120px;"><select class="BaremetalNodesRole" style="width: 120px;"><option value="master">master</option><option value="worker" selected="selected">worker</option></select></td><td class="BaremetalNodesIPMI address" style="width: 120px;"><input class="BaremetalNodesIPMI address" type="text" value="10.33.0.18" style="width: 120px;"></td><td class="BaremetalNodesIPMI user" style="width: 120px;"><input class="BaremetalNodesIPMI user" type="text" value="admin" style="width: 120px;"></td><td class="BaremetalNodesIPMI password" style="width: 120px;"><input class="BaremetalNodesIPMI password" type="text" value="HP1nvent" style="width: 120px;"></td><td class="BaremetalNodesAPI VIP" style="width: 120px;"><input class="BaremetalNodesAPI VIP" type="text" value="10.33.200.90" style="width: 120px;"></td><td class="BaremetalNodesIngress VIP" style="width: 120px;"><input class="BaremetalNodesIngress VIP" type="text" value="10.33.200.91" style="width: 120px;"></td><td class="BaremetalNodesBaremetal CIDR" style="width: 120px;"><input class="BaremetalNodesBaremetal CIDR" type="text" value="10.33.200.0/24" style="width: 120px;"></td><td class="BaremetalNodesProvisioning CIDR" style="width: 120px;"><input class="BaremetalNodesProvisioning CIDR" type="text" value="10.33.202.0/24" style="width: 120px;"></td><td class="BaremetalNodesBoot MAC address" style="width: 120px;"><input class="BaremetalNodesBoot MAC address" type="text" value="48:df:37:6b:e7:40" style="width: 120px;"></td><td class="BaremetalNodesBoot interface" style="width: 120px;"><input class="BaremetalNodesBoot interface" type="text" value="ens1f0" style="width: 120px;"></td><td class="BaremetalNodesBoot device" style="width: 120px;"><input class="BaremetalNodesBoot device" type="text" value="/dev/sdh" style="width: 120px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(BaremetalNodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(BaremetalNodes.help());"></div><div id="CinderVolumesSection" style="display: none;"><a name="CinderVolumes"><h2>CinderVolumes</h2></a><table border="1" id="CinderVolumes"><tbody><tr><th><input type="button" value="Add" onclick="CinderVolumes.add();"></th><th class="CinderVolumesName" style="width: 120px;">Name</th><th class="CinderVolumesSize" style="width: 80px;">Size</th><th class="CinderVolumesDescription" style="width: 300px;">Description</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CinderVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CinderVolumes.help());"></div><div id="PersistentVolumesSection" style="display: none;"><a name="PersistentVolumes"><h2>PersistentVolumes</h2></a><table border="1" id="PersistentVolumes"><tbody><tr><th><input type="button" value="Add" onclick="PersistentVolumes.add();"></th><th class="PersistentVolumesName" style="width: 120px;">Name</th><th class="PersistentVolumesSize" style="width: 80px;">Size</th><th class="PersistentVolumesType" style="width: 80px;">Type</th><th class="PersistentVolumesAccess" style="width: 120px;">Access</th><th class="PersistentVolumesReclaim" style="width: 120px;">Reclaim</th><th class="PersistentVolumesCinderVolume" style="width: 120px;">CinderVolume</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(PersistentVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(PersistentVolumes.help());"></div><div id="ClustersSection" style="display: none;"><a name="Clusters"><h2>Clusters</h2></a><table border="1" id="Clusters"><tbody><tr><th><input type="button" value="Add" onclick="Clusters.add();"></th><th class="ClustersName" style="width: 80px;">Name</th><th class="ClustersEndpoint" style="width: 300px;">Endpoint</th><th class="ClustersToken" style="width: 300px;">Token</th><th class="ClustersTargeted" style="width: 15px;">Targeted</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Clusters.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Clusters.help());"></div><div id="BuildsSection" style="display: none;"><a name="Builds"><h2>Builds</h2></a><table border="1" id="Builds"><tbody><tr><th><input type="button" value="Add" onclick="Builds.add();"></th><th class="BuildsType" style="width: 100px;">Type</th><th class="BuildsName" style="width: 100px;">Name</th><th class="BuildsGIT URL" style="width: 400px;">GIT URL</th><th class="Buildsdirectory" style="width: 200px;">directory</th><th class="Buildsbranch" style="width: 120px;">branch</th><th class="BuildssshKey" style="width: 120px;">sshKey</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Builds.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Builds.help());"></div><div id="CustomAppsSection" style="display: none;"><a name="CustomApps"><h2>CustomApps</h2></a><table border="1" id="CustomApps"><tbody><tr><th><input type="button" value="Add" onclick="CustomApps.add();"></th><th class="CustomAppsType" style="width: 140px;">Type</th><th class="CustomAppsName" style="width: 100px;">Name</th><th class="CustomAppsProject" style="width: 60px;">Project</th><th class="CustomAppsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CustomApps.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CustomApps.help());"></div><div id="NetworkFunctionsSection" style="display: none;"><a name="NetworkFunctions"><h2>NetworkFunctions</h2></a><table border="1" id="NetworkFunctions"><tbody><tr><th><input type="button" value="Add" onclick="NetworkFunctions.add();"></th><th class="NetworkFunctionsType" style="width: 100px;">Type</th><th class="NetworkFunctionsName" style="width: 80px;">Name</th><th class="NetworkFunctionsProject" style="width: 60px;">Project</th><th class="NetworkFunctionsURL" style="width: 200px;">URL</th><th class="NetworkFunctionsinsecure" style="width: 15px;">insecure</th><th class="NetworkFunctionsImage" style="width: 120px;">Image</th><th class="NetworkFunctionsTag" style="width: 120px;">Tag</th><th class="NetworkFunctionsStorage" style="width: 60px;">Storage</th><th class="NetworkFunctionsVolume" style="width: 60px;">Volume</th><th class="NetworkFunctionsReplicas" style="width: 40px;">Replicas</th><th class="NetworkFunctionsDependencies" style="width: 100px;">Dependencies</th><th class="NetworkFunctionsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(NetworkFunctions.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(NetworkFunctions.help());"></div><div id="DirectServicesSection" style="display: none;"><a name="DirectServices"><h2>DirectServices</h2></a><table border="1" id="DirectServices"><tbody><tr><th><input type="button" value="Add" onclick="DirectServices.add();"></th><th class="DirectServicesType" style="width: 100px;">Type</th><th class="DirectServicesName" style="width: 80px;">Name</th><th class="DirectServicesProject" style="width: 60px;">Project</th><th class="DirectServicesURL" style="width: 200px;">URL</th><th class="DirectServicesinsecure" style="width: 15px;">insecure</th><th class="DirectServicesImage" style="width: 120px;">Image</th><th class="DirectServicesTag" style="width: 120px;">Tag</th><th class="DirectServicesStorage" style="width: 60px;">Storage</th><th class="DirectServicesVolume" style="width: 60px;">Volume</th><th class="DirectServicesReplicas" style="width: 40px;">Replicas</th><th class="DirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="DirectServicesPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(DirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(DirectServices.help());"></div><div id="IndirectServicesSection" style=""><a name="IndirectServices"><h2>IndirectServices</h2></a><table border="1" id="IndirectServices"><tbody><tr><th><input type="button" value="Add" onclick="IndirectServices.add();"></th><th class="IndirectServicesType" style="width: 100px;">Type</th><th class="IndirectServicesName" style="width: 80px;">Name</th><th class="IndirectServicesProject" style="width: 60px;">Project</th><th class="IndirectServicesURL" style="width: 200px;">URL</th><th class="IndirectServicesinsecure" style="width: 15px;">insecure</th><th class="IndirectServicesImage" style="width: 120px;">Image</th><th class="IndirectServicesTag" style="width: 120px;">Tag</th><th class="IndirectServicesStorage" style="width: 60px;">Storage</th><th class="IndirectServicesVolume" style="width: 60px;">Volume</th><th class="IndirectServicesReplicas" style="width: 40px;">Replicas</th><th class="IndirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="IndirectServicesPipeline" style="width: 100px;">Pipeline</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton8" onclick="IndirectServices.delete('delButton8');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins" selected="selected">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="mypipes" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="sanity" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="quay.io/openshift" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="origin-jenkins" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(IndirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(IndirectServices.help());"></div><div id="OperatorSourcesSection" style="display: none;"><a name="OperatorSources"><h2>OperatorSources</h2></a><table border="1" id="OperatorSources"><tbody><tr><th><input type="button" value="Add" onclick="OperatorSources.add();"></th><th class="OperatorSourcesType" style="width: 140px;">Type</th><th class="OperatorSourcesName" style="width: 100px;">Name</th><th class="OperatorSourcesProject" style="width: 200px;">Project</th><th class="OperatorSourcesURL" style="width: 400px;">URL</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OperatorSources.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OperatorSources.help());"></div><div id="OperatorsSection" style="display: none;"><a name="Operators"><h2>Operators</h2></a><table border="1" id="Operators"><tbody><tr><th><input type="button" value="Add" onclick="Operators.add();"></th><th class="OperatorsType" style="width: 200px;">Type</th><th class="OperatorsName" style="width: 140px;">Name</th><th class="OperatorsProject" style="width: 140px;">Project</th><th class="OperatorsReplicas" style="width: 40px;">Replicas</th><th class="OperatorsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Operators.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Operators.help());"></div><div id="HelmChartsSection" style="display: none;"><a name="HelmCharts"><h2>HelmCharts</h2></a><table border="1" id="HelmCharts"><tbody><tr><th><input type="button" value="Add" onclick="HelmCharts.add();"></th><th class="HelmChartsType" style="width: 140px;">Type</th><th class="HelmChartsName" style="width: 100px;">Name</th><th class="HelmChartsProject" style="width: 60px;">Project</th><th class="HelmChartsChart" style="width: 200px;">Chart</th><th class="HelmChartsValues" style="width: 200px;">Values</th><th class="HelmChartsVersion" style="width: 60px;">Version</th><th class="HelmChartsOptions" style="width: 120px;">Options</th><th class="HelmChartsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(HelmCharts.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(HelmCharts.help());"></div></div>
 </form>
 
 <hr>
@@ -74,18 +74,560 @@
 <!-- Link to the end of the user area, useful to focus the user on the result on long pages -->
 <p>Quick links: <a id="endOfUserArea" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#OpenShiftNodes" onclick="OpenShiftNodes.display(true);"> / OpenShiftNodes</a><a href="#BaremetalNodes" onclick="BaremetalNodes.display(true);"> / BaremetalNodes</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#Builds" onclick="Builds.display(true);"> / Builds</a><a href="#CustomApps" onclick="CustomApps.display(true);"> / CustomApps</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#OperatorSources" onclick="OperatorSources.display(true);"> / OperatorSources</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></p>
 <p>
-<textarea readonly="" rows="20" cols="200" id="userArea">Import summary
-VNF description: Limited set of services
-DirectServices
-	ignite	gridgain	docker.io/gridgain	community	8.7.14	250Mi	1
-	influxdb	udsf-flux	docker.io/bitnami	influxdb	1.7.10	1Gi	1
-	redis	myredis	docker.io/bitnami	redis	latest	100Mi	1
-IndirectServices
-	jenkins	myjenkins	quay.io/openshift	origin-jenkins	latest	1
-	prometheus-alertmanager	myalert	docker.io/prom	alertmanager	v0.20.0	8Gi	1
-	prometheus	myprom	docker.io/prom	prometheus	v2.16.0	200Mi	1
-	pushgateway	mygateway	docker.io/prom	pushgateway	v1.0.1	1
-	telegraf	mygraf	docker.io	telegraf	1.14-alpine</textarea>
+<textarea readonly="" rows="20" cols="200" id="userArea">#! /bin/bash
+_usage() {
+    echo "
+HPE 5G resources automated deployer: 2021-04-14 Version 0.92
+This client deploys and undeploys 
+- OpenShift clusters hosted on OpenStack 
+- Individual OpenStack resources as a stack
+- HPE 5g resources 
+ 
+Usage: $0 
+    -d|--deploy &lt;name&gt; : name of the OpenShift instance and OpenStack stack to deploy; default: hpe5g
+    -o|--domain &lt;domain name&gt; : domain name of the OpenShift instance to deploy; default: localdomain
+    -n|--OSnetwork &lt;network root&gt;: default OpenStack network root as 3 unique digits like 192.168.199
+    -e|--OSenv &lt;OpenStackEnvironmentFile&gt; : name of the file providing the OpenStack environment. Retrieved from the OpenStack GUI: Project/API access
+      By default, this file prompts the user for his password; to make the deployment unattended, replace the prompt with the actual password in the variable OS_PASSWORD
+      Mandatory additional variables:
+      - OS_CACERT: path to a file providing a specific cacert in case the SSL cert is signed by an unknown CA
+      - OS_SSH_KEY_PAIR: name of the ssh key pair defined in the OpenStack project, pushed to the OpenShift nodes for remote access
+      - CLOUD_SSH_KEY: (ansible deployments only) ssh private key used to reach the deployed nodes, matching the public OS_SSH_KEY_PAIR
+      - CLOUD_DEFAULT_USER: (ansible deployments only) user name used to log in the deployed nodes
+
+      Extensions supported as additional variables: 
+      - Proxy URLs for OpenShift cluster
+      OPENSHIFT_HTTP_PROXY
+      OPENSHIFT_HTTPS_PROXY
+      OPENSHIFT_NO_PROXY
+    -x|--ext-net &lt;external network&gt; : name of the external network in the OpenStack infrastructure to connect this instance to; default: ext-net
+    -s|--dns &lt;external DNS&gt; : external domain name server; default 8.8.8.8
+    -f|--flavor &lt;OpenStack flavor&gt; : name of the OpenStack flavor used for master instances. Minimum 4vCPUs, 25Gb disk, 16Gb RAM; default: v4.m16.d25
+    -fw|--flavorWorker &lt;OpenStack flavor&gt; : name of the OpenStack flavor used for worker instances. Minimum 4vCPUs, 25Gb disk, 16Gb RAM; default: master flavor
+    --fipapi preallocated OpenShift API floating IPs
+    --fipapp preallocated OpenShift APP floating IPs
+    -m|--masters &lt;number of masters&gt; : default 3
+    -w|--workers &lt;number of workers&gt; : default 3
+    -v|--volumes &lt;mininimum quota of OpenStack volumes&gt;
+    -t|--etc-hosts [true|false] : boolean enabling /etc/hosts update (requires sudo privilege) ; default: true
+    -p|--pull-secret &lt;file&gt; : name of the file delivering the RedHat pull secret
+    -l|--log logfile 
+    -u|--undeploy|--destroy &lt;name&gt;: name of the OpenShift instance to undeploy; default: hpe5g
+    --preview: no openshift installer invocation, display only 
+    --headless: no log on stdout, only logfile is populated
+    
+Example: 
+$0 -d hpe5g -o localdomain -s 8.8.8.8 -x ext-net -f v4.m16.d25 -m 3 -w 3 -t true -c openstack
+
+To deploy several OpenShift clusters, all parameters are lists of space separated values. 
+For example, to deploy two clusters ocp1 and ocp2 with specific flavors and a common external network:
+$0 -n \"ocp1 ocp2\" -f \"flavor1 flavor2\" -x ext-net
+"
+}
+
+# Default parameters
+default_stack=hpe5g
+oc_stack=$default_stack
+oc_network=192.168.199
+OS_env=RHOS12.env
+_deploy=$([[ "deploy" != "undeploy" ]] &amp;&amp; echo true || echo false)
+_displayedAction=$($_deploy &amp;&amp; echo Deploying || echo Undeploying)
+state=$($_deploy &amp;&amp; echo present || echo absent)
+_headless=
+_preview=
+
+_defaultName=$default_stack
+unset OCP FIPAPI FIPAPP
+ETCHOSTS=true
+EXTNET=ext-net
+DOMAIN=localdomain
+WORKERS=3
+MASTERS=3
+FLAVOR=v4.m16.d25
+FLAVORWORKER=$FLAVOR
+EXTDNS=8.8.8.8
+NBVOLUMES=10
+
+_defaultName=(steel)
+OCPBM=(steel)
+OCPBMOFF=("ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.16 power off &amp;&amp; ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.17 power off &amp;&amp; ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.19 power off &amp;&amp; ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.15 power off &amp;&amp; ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.18 power off")
+RHELSECRET='{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"registry.connect.redhat.com":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"},"registry.redhat.io":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"}}}'
+
+while [[ "$#" -gt 0 ]]; do case $1 in
+  -d|--deploy) _deploy=true; _displayedAction="Deploying"; state=present ; OCP=(${2:-${OCP[@]:-$_defaultName}}) ; shift;;
+  -u|--undeploy|--destroy) _deploy=false ; _displayedAction="Undeploying"; state=absent ; OCP=(${2:-${OCP[@]:-$_defaultName}}); shift;;
+  -e|--OSenv) OS_env=($2); shift;;
+  -n|--OSnetwork) oc_network="$2"; shift;;
+  -o|--domain) DOMAIN=($2); shift;;
+  -x|--ext-net) EXTNET=($2); shift;;
+  -f|--flavor) FLAVOR=($2); shift;;
+  -fw|--flavorWorker) FLAVORWORKER=($2); shift;;
+  --fipapi) FIPAPI=($2); shift;;
+  --fipapp) FIPAPP=($2); shift;;
+  -m|--masters) MASTERS=($2); shift;;
+  -w|--workers) WORKERS=($2); shift;;
+  -v|--volumes) NBVOLUMES=($2); shift;;
+  -t|--etc-hosts) ETCHOSTS=($2); shift;;
+  -l|--log) logfile=($2); shift;;
+  -s|--dns) EXTDNS=($2); shift;;
+  -p|--pull-secret) test -f $2 &amp;&amp; RHELSECRET=$(cat $2) || exit 1; shift;;
+  -h|--help) _usage; exit 0 ;;
+  --headless) _headless=true;;
+  --preview) _preview="_log_ Preview: ";;
+  *) echo "Unknown parameter passed: $1." ; exit 1;;
+esac; shift; done
+
+# Force a log file in headless mode named as the stack, otherwise keep stdout
+if ! test -n "$logfile" ; then test -n "$_headless" &amp;&amp; logfile=$oc_stack.log || logfile="/dev/stdout" ; fi
+
+# Cosmetic: ellipsize too long strings to keep cute logs: keep _max characters
+_cutTooLong() {
+  local _cut="$*"
+  local _max=150
+  if (( ${#_cut} &gt; $_max )) ; then
+    _cut=$(echo $* | cut -c1-$_max)
+    _cut+="..."
+  fi
+  echo $_cut
+}
+
+_log_() {
+    # echo a cute time stamped log on stdout except in headless mode, and append the full log to the logfile
+    test -n "$_headless" || echo -e $(date) $(_cutTooLong $*)
+    if [ "$logfile" != "/dev/stdout" ] ; then echo -e $(date) $* &amp;&gt;&gt; $logfile ; fi
+    return 0
+}
+
+_warn_() {
+  local RED='\033[0;31m'
+  local NC='\033[0m' # No Color
+  _log_ "${RED}WARNING${NC}: $*"
+}
+
+_fail_() {
+  _log_ "FATAL ERROR: $*.  Now exiting... Check $logfile"
+  test -f $logfile &amp;&amp; echo Last lines of $logfile &gt;&amp;2 &amp;&amp; tail $logfile &gt;&amp;2
+  exit 1
+}
+
+# Clean log file
+&gt; $logfile
+
+# Reference documentation for OpenShift deployment on bare metal: https://openshift-kni.github.io/baremetal-deploy/4.6/Deployment.html
+# Deployment
+# Input parameters: cluster name and command to power off all nodes part of this cluster
+deployOCPBM() {
+  local _name=$1
+  local _powerOff=$2
+  
+  # Check openshift deployments CLIs
+  which oc &gt; /dev/null &amp;&amp; _log_ "oc CLI available version $(oc version 2&gt; /dev/null | grep 'Client Version'  | awk '{print $3}')" || _fail_ "Missing oc CLI "
+  which openshift-baremetal-install &gt; /dev/null &amp;&amp; _log_ "openshift-baremetal-install CLI available version $(openshift-baremetal-install version | grep openshift-baremetal-install | awk '{print $2}')" || _fail_ "Missing openshift-baremetal-install CLI"
+  which ipmitool &gt; /dev/null &amp;&amp; _log_ "$(ipmitool -V) CLI available" || _fail_ "Missing ipmitool CLI"
+  
+  # Save a copy of the install-config.yaml consumed by the OpenShift installer
+  cp -f $_name/install-config.yaml $_name/install-config.saved.yaml &amp;&gt;&gt; $logfile || _fail_ "Cannot save $_name/install-config.yaml to $_name/install-config.saved.yaml"
+  
+  # Power off all nodes
+  _log_ "Shuting down all servers part of $_name "
+  eval $_powerOff &amp;&gt;&gt; $logfile || _fail_ "Cannot shutdown $_name nodes with: $_powerOff"
+  
+  # Deploy the cluster
+  _log_ "Deploying the OpenShift cluster $_name"
+  if [ "$logfile" != "/dev/stdout" ] ; then _log_ "This takes a while, follow-up available in $logfile" ; fi
+  $_preview openshift-baremetal-install create cluster --dir $_name --log-level debug &amp;&gt;&gt; $logfile || _fail_ "Cannot create OpenShift cluster $_name"
+
+  _log_ "Checking deployment completion" 
+  $_preview openshift-baremetal-install wait-for install-complete --dir $_name --log-level debug &amp;&gt;&gt; $logfile || _fail_ "OpenShift cluster $_name creation did not complete"
+  
+  _log_ "Checking OCP login as kubeadmin on $_name with KUBECONFIG=$_name/auth/kubeconfig and kubeadmin-password $(cat $_name/auth/kubeadmin-password)"
+  export KUBECONFIG=$_name/auth/kubeconfig
+  oc login -u kubeadmin -p $(cat $_name/auth/kubeadmin-password) &amp;&gt;&gt; $logfile || _fail_ "Cannot login to OCP cluster $_name as kubeadmin"
+
+# Prerequisites:
+# - OpenShift command line interface installed (oc)
+if ! which oc  &gt; /dev/null ; then  echo Please install oc utility to submit OpenShift requests ; exit 1 ; fi
+# - current user logged in the target OpenShift cluster: oc login -u &lt;user&gt; -p &lt;password&gt;
+
+_getTemplateInstanceStatus() {
+	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3 TEMPLATEINSTANCE=$4
+	curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$TEMPLATEINSTANCE | jq -e '.status.conditions[] | select(.status == "True") | .type'
+	return $?
+}
+_getTemplateInstanceMessage() {
+	local TOKEN=$1 ENDPOINT=$2 NAMESPACE=$3 TEMPLATEINSTANCE=$4
+	local status=$(curl -s -k -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" https://$ENDPOINT/apis/template.openshift.io/v1/namespaces/$NAMESPACE/templateinstances/$TEMPLATEINSTANCE )
+	echo $status &gt;&gt; $logfile
+	echo $status | jq -e '.status.conditions[] | select(.status == "True") | .message'
+}
+
+# Submit a command until success or timeout, log a current status after each retry
+# Parameters:
+# $1: the command
+# $2: (optional) the command description, displayed at each retried iteration, appended to the command output, defaults to the command
+# $3: (optional) the timeout in seconds
+# $4: (optional) the retry period in seconds
+_cmd_with_retry() {
+	local _cmd="$1"
+	local _cmdDescription="${2:-$_cmd}"
+	local _timeout=${3:-60}
+	local _retryPeriod=${4:-10}
+	
+	[ "$_cmd" = "" ] &amp;&amp; echo "_cmd_with_retry &lt;command&gt; &lt;description&gt; &lt;timeout[$_timeout]&gt; &lt;retry period[$_retryPeriod]&gt;" &amp;&amp; return 1
+	 
+	local _countMax=$(( $_timeout/$_retryPeriod + 1 ))
+	local _count=0
+    until _cmdOutput=$(eval "$_cmd" &gt;&gt; $logfile) || (( $_count &gt;= $_countMax )) ; do
+    	((_count++))
+    	_log_ "$_cmdDescription: attempt $_count of $_countMax, retrying in $_retryPeriod seconds"
+        sleep $_retryPeriod
+    done
+   if (( $_count &gt;= $_countMax )) ; then
+   	return 1
+   else
+   	test -n "$_cmdOutput" &amp;&amp; echo $_cmdOutput &gt;&gt; $logfile
+   fi
+   return 0
+}
+
+cat &gt; openshift_project_sanity.yaml &lt;&lt; 'EOFILE'
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: sanity
+  annotations:
+    description: network functions and backing services for project sanity
+objects:
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: mypipes
+      namespace: sanity
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+      - annotations:
+        from:
+          kind: DockerImage
+          name: quay.io/openshift/origin-jenkins:latest
+        generation: 1
+        importPolicy: {}
+        name: ""
+        referencePolicy:
+          type: Source
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      annotations:
+        haproxy.router.openshift.io/timeout: 4m
+        template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
+      name: mypipes
+    spec:
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: mypipes
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      annotations:
+        template.alpha.openshift.io/wait-for-ready: "true"
+      name: mypipes
+    spec:
+      replicas: 1
+      selector:
+        name: mypipes
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            name: mypipes
+        spec:
+          containers:
+          - capabilities: {}
+            env:
+            - name: OPENSHIFT_ENABLE_OAUTH
+              value: "true"
+            - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+              value: "true"
+            - name: KUBERNETES_MASTER
+              value: https://kubernetes.default:443
+            - name: KUBERNETES_TRUST_CERTIFICATES
+              value: "true"
+            - name: JENKINS_SERVICE_NAME
+              value: mypipes
+            - name: JNLP_SERVICE_NAME
+              value: mypipes-jnlp
+            image: quay.io/openshift/origin-jenkins:latest
+            imagePullPolicy: IfNotPresent
+            livenessProbe:
+              failureThreshold: 2
+              httpGet:
+                path: /login
+                port: 8080
+              initialDelaySeconds: 420
+              periodSeconds: 360
+              timeoutSeconds: 240
+            name: jenkins
+            readinessProbe:
+              httpGet:
+                path: /login
+                port: 8080
+              initialDelaySeconds: 3
+              timeoutSeconds: 240
+            resources:
+              limits:
+                memory: 2048Mi
+            securityContext:
+              capabilities: {}
+              privileged: false
+            terminationMessagePath: /dev/termination-log
+            volumeMounts:
+            - mountPath: /var/lib/jenkins
+              name: mypipes-data
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          serviceAccountName: mypipes
+          volumes:
+          - emptyDir:
+              medium: ""
+            name: mypipes-data
+  - kind: ServiceAccount
+    apiVersion: v1
+    metadata:
+      annotations:
+        serviceaccounts.openshift.io/oauth-redirectreference.jenkins: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"mypipes"}}'
+      name: mypipes
+  - apiVersion: v1
+    groupNames: null
+    kind: RoleBinding
+    metadata:
+      name: mypipes_edit
+    roleRef:
+      name: edit
+    subjects:
+    - kind: ServiceAccount
+      name: mypipes
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: mypipes-jnlp
+    spec:
+      ports:
+      - name: agent
+        nodePort: 0
+        port: 50000
+        protocol: TCP
+        targetPort: 50000
+      selector:
+        name: mypipes
+      sessionAffinity: None
+      type: ClusterIP
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      annotations:
+        service.alpha.openshift.io/dependencies: '[{"name": "mypipes-jnlp", "namespace": "", "kind": "Service"}]'
+        service.openshift.io/infrastructure: "true"
+      name: mypipes
+    spec:
+      ports:
+      - name: web
+        nodePort: 0
+        port: 80
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        name: mypipes
+      sessionAffinity: None
+      type: ClusterIP
+  
+EOFILE
+# CustomApps deployment scripts
+if $_deploy ; then 
+	_ocAction="apply"
+	_helmAction() { helm upgrade --install $_HPE5G_name $_HPE5G_template --values _tmp_$_helmValues $_HPE5G_options; }
+else
+	_helmAction() { helm delete $_HPE5G_name ; }
+	_ocAction="delete"
+fi
+
+# checking user logged in
+oc_user=$(oc whoami)
+test -n "$oc_user" &amp;&amp; [ "$oc_user" != "system:admin" ] || _fail_ "Current user is ${oc_user:-unknown}: please log as user: oc login -u user"
+_log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
+_log_ "Checking projects"
+oc_projects="sanity"
+for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &amp;&gt;&gt; $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-04-14 Version 0.92 on: Thu Apr 15 2021 10:50:12 GMT+0200 (Central European Summer Time) An OpenShift cluster on 5 baremetal servers, 3 masters and 2 workers, one jenkins pipeline deployed.' &amp;&gt;&gt; $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+if echo guess | oc login -u system:admin &amp;&gt;&gt; $logfile ; then
+_log_ "Listing nodes as system:admin"
+oc get nodes -o wide &amp;&gt;&gt; $logfile
+oc login -u $oc_user &amp;&gt;&gt; $logfile
+
+fi
+_log_ "Listing pods as $oc_user"
+oc get pods -o wide  -n default  &amp;&gt;&gt; $logfile
+oc_image_projects=()
+oc_image_urls=()
+oc_images=()
+[[ ${#oc_images[@]} != 0 ]] &amp;&amp; _log_ "Populating the docker registry with services images: pull, tag and push"
+  for _iImage in ${!oc_images[@]} ; do
+    sudo docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry.default.svc:5000 &amp;&gt;&gt; $logfile || _fail_ "Cannot connect to the internal docker registry as user $oc_user"
+    sudo docker pull ${oc_image_urls[$_iImage]}/${oc_images[$_iImage]} || _fail_ "Cannot pull ${oc_image_urls[$_iImage]}/${oc_images[$_iImage]}"
+    sudo docker tag ${oc_image_urls[$_iImage]}/${oc_images[$_iImage]} docker-registry.default.svc:5000/${oc_image_projects[$_iImage]}/${oc_images[$_iImage]} || _fail_ "Cannot tag ${oc_image_urls[$_iImage]}/${oc_images[$_iImage]}"
+	sudo docker push docker-registry.default.svc:5000/${oc_image_projects[$_iImage]}/${oc_images[$_iImage]} || _fail_ "Cannot push docker-registry.default.svc:5000/${oc_image_projects[$_iImage]}/${oc_images[$_iImage]}"
+  done
+if false &amp;&amp; echo guess | oc login -u system:admin &amp;&gt;&gt; $logfile ; then
+_log_ "Relaxing security policy to match network functions requirements, approving pending certificates"
+oc adm policy add-scc-to-user anyuid system:serviceaccount  &amp;&gt;&gt; $logfile &amp;&amp;
+oc adm policy add-scc-to-user privileged system:serviceaccount  &amp;&gt;&gt; $logfile &amp;&amp;
+oc adm policy add-scc-to-group anyuid system:authenticated  &amp;&gt;&gt; $logfile &amp;&amp;
+oc adm policy add-role-to-group view system:serviceaccounts &amp;&gt;&gt; $logfile &amp;&amp;
+oc policy add-role-to-user view system:serviceaccount &amp;&gt;&gt; $logfile || _fail_ "Cannot relax security settings"
+if test -n "$(oc get csr -o name)" ; then oc get csr -o name | xargs oc adm certificate approve &amp;&gt;&gt; $logfile || _fail_ "Cannot approve pending certificates" ; fi
+if test -f openshift_volumes.yaml ; then _log_ "$_displayedAction the persistent volumes with idempotence" &amp;&amp; oc process -f openshift_volumes.yaml | oc $_ocAction -f - &amp;&gt;&gt; $logfile &amp;&amp; oc get persistentvolumes -o wide || _fail_ "Cannot create persistent volumes" ; fi
+fi
+_log_ "$_displayedAction the network functions and Helm instances"
+for _project in $oc_projects; do 
+	oc project $_project &amp;&gt;&gt; $logfile || _fail_ "Cannot switch to project $_project"
+	# Deploy custom apps if any
+	if test -f openshift_project_$_project.sh ; then _log_ "$_displayedAction openshift_project_$_project.sh on project $_project" &amp;&amp; ./openshift_project_$_project.sh $_ocAction &amp;&gt;&gt; $logfile &amp;&amp; rm -f openshift_project_$_project.sh &amp;&gt;&gt; $logfile || _fail_ "$_displayedAction openshift_project_$_project.sh "; fi
+	# File naming convention for Network functions: openshift_project_&lt;project&gt;.yaml
+	# File naming convention for Helm instances: openshift_helm_&lt;project&gt;_&lt;name&gt;.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
+	if test -f openshift_project_$_project.yaml ; then _log_ "$_displayedAction openshift_project_$_project.yaml on project $_project" &amp;&amp; _cmd_with_retry "oc process -f openshift_project_$_project.yaml | oc $_ocAction -f -" "Processing" &amp;&amp; rm -f openshift_project_$_project.yaml &amp;&gt;&gt; $logfile || _fail_ "$_displayedAction openshift_project_$_project.yaml "; fi
+	for _helmValues in $(ls openshift_helm_${_project}_*.yaml 2&gt; /dev/null) ; do eval $(head -1 $_helmValues) &amp;&amp; _log_ "$_displayedAction $_HPE5G_name with chart $_HPE5G_template $_HPE5G_options on project $_project" &amp;&amp; tail -n +2 $_helmValues &gt; _tmp_$_helmValues &amp;&amp; _helmAction &amp;&gt;&gt; $logfile &amp;&amp; rm -f $_helmValues _tmp_$_helmValues &amp;&gt;&gt; $logfile || _fail_ "$_displayedAction Helm instance on project $_project" ; done
+	# Undeployment: wait for pods termination  
+	while [[ "$_ocAction" == "delete" ]] &amp;&amp; _log_ "Waiting 30s for terminating pods on project $_project" &amp;&amp; sleep 30 &amp;&amp; oc get pods 2&gt; /dev/null | grep -e Terminating &amp;&gt;&gt; $logfile ; do : ; done
+	# If undeployment, indulge 5 seconds to stabilize, then delete the project if no pods, otherwise log a status
+	[[ "$_ocAction" == "delete" ]] &amp;&amp; sleep 5s &amp;&amp; test -n "$(oc get pods --namespace $_project 2&gt;&amp;1 &gt;/dev/null)" &amp;&amp; _log_ "No remaining pods in project $_project: deleting" &amp;&amp; oc delete project $_project &amp;&gt;&gt; $logfile || oc get all --namespace $_project &amp;&gt;&gt; $logfile 
+done
+oc login -u $oc_user &amp;&gt;&gt; $logfile || _fail_ "Cannot log as $oc_user"
+_log_ "$_displayedAction completed: check $logfile"
+
+}
+
+# Undeployment
+undeployOCPBM() {
+  local _name=$1
+  
+  # Delete cluster
+  _log_ "Destroying OpenShift cluster $_name"
+  $_preview openshift-baremetal-install destroy cluster --dir $_name --log-level debug &amp;&gt;&gt; $logfile || rm -Rf $_name  &amp;&gt;&gt; $logfile || _fail_ "Cannot destroy cluster $_name"
+}
+
+_log_ "OpenShift installer internal cleanup"
+for i in $(sudo virsh pool-list --all | tail -n +3 | grep cluster | awk {'print $1'}); do   
+  virsh pool-destroy $i &amp;&gt;&gt; $logfile   
+  rm -Rf /var/lib/libvirt/openshift-images/$i &amp;&gt;&gt; $logfile   
+  virsh pool-delete $i &amp;&gt;&gt; $logfile   
+  virsh pool-undefine $i &amp;&gt;&gt; $logfile 
+done
+for i in $(sudo virsh list | tail -n +3 | grep bootstrap | awk {'print $2'}); do   
+  sudo virsh destroy $i &amp;&gt;&gt; $logfile   
+  sudo virsh undefine $i &amp;&gt;&gt; $logfile   
+  sudo virsh vol-delete $i --pool default &amp;&gt;&gt; $logfile   
+  sudo virsh vol-delete $i.ign --pool default &amp;&gt;&gt; $logfile 
+done
+
+# If deployment, create one directory per OCP cluster, and drop install-config files
+if $_deploy ; then
+_name=steel
+mkdir -p $_name || _fail_ "Cannot create installation directory $_name"
+# Build install-config.yaml
+cat &gt; $_name/install-config.yaml &lt;&lt; EOF || _fail_ "Cannot build $_name/install-config.yaml"
+apiVersion: v1
+baseDomain: hpe5g.bm.fc
+metadata:
+  name: steel
+networking:
+  machineCIDR: 10.33.200.0/24
+  networkType: OVNKubernetes
+compute:
+- name: worker
+  replicas: 2
+controlPlane:
+  name: master
+  replicas: 3
+  platform:
+    baremetal: {}
+platform:
+  baremetal:
+    apiVIP: 10.33.200.90
+    ingressVIP: 10.33.200.91
+    disableCertificateVerification: True
+    provisioningBridge: provisioning
+    provisioningNetworkCIDR: 10.33.202.0/24
+    provisioningNetworkInterface: ens1f0
+
+    hosts:
+      - name: zwei
+        role: master
+        bmc:
+          address: ipmi://10.33.0.16/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:6b:e7:3c
+        rootDeviceHints:
+         deviceName: "/dev/sdb"
+      - name: drei
+        role: master
+        bmc:
+          address: ipmi://10.33.0.17/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:68:f4:c8
+        rootDeviceHints:
+         deviceName: "/dev/sdb"
+      - name: funf
+        role: master
+        bmc:
+          address: ipmi://10.33.0.19/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:c9:ab:a8
+        rootDeviceHints:
+         deviceName: "/dev/sdb"
+      - name: eins
+        role: worker
+        bmc:
+          address: ipmi://10.33.0.15/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:6b:e7:38
+        rootDeviceHints:
+         deviceName: "/dev/sdh"
+      - name: vier
+        role: worker
+        bmc:
+          address: ipmi://10.33.0.18/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:6b:e7:40
+        rootDeviceHints:
+         deviceName: "/dev/sdh"
+pullSecret: '{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"registry.connect.redhat.com":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"},"registry.redhat.io":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"}}}'
+sshKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDD7NHyHQT3pfG6yfpmQFSBjYe0x7t3qosl0sd880GHDbOkEZy9q5qMxYkQS41QCNzbx6RLrfz5eQawyWx0ADfY/YHaCKrjtFjd1hsP/svOBycJcOscGRjgmHt5ONDxqQGNgIpPOk/HOZn5oJEeJ8Bmk8hFdrsfl5m5f3IHg29jXmfL6bjaGGuWhD1xTKQEAk12DzObqvngalTO5+JPNoxSn2M7bYKZykP+vWQICyHTc8IRnwExyEmI4wEONOrMh13S2AdDpP9aoVCoTk+1Q8sJCmjO49g/uJlusfVTiVTBHTGycxWCcGG2uQ1BfwYJ/vp/8y9A/LVXmjYzYUIjBiBT Generated-by-Nova' 
+
+EOF
+
+fi  # If deployment, create one directory per OCP cluster, and drop install-config files
+
+# For all instance names, deploy or undeploy
+i=0 &amp;&amp; while (( i &lt;  ${#OCPBM[@]} )) ; do 
+  $_deploy &amp;&amp; deployOCPBM ${OCPBM[i]:-$OCPBM} "${OCPBMOFF[i]}" || undeployOCPBM ${OCPBM[i]:-$OCPBM}  
+  ((i+=1))
+done
+
+exit 0</textarea>
 <a name="endOfUserArea"></a>
 </p>
 <iframe width="1500" height="200" name="importedDocument" style="display:none"></iframe>

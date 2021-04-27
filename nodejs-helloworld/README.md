@@ -567,6 +567,7 @@ This chapter is a compilation of the detailed sections specifications.
 ### Misc
 Miscellaneous settings:
 - rhel_pullsecret: User secret provided by RedHat for deploying an OpenShift 4.x cluster; visit https://cloud.redhat.com/openshift/install/pull-secret
+- public_sshKey: Public SSH key injected in baremetal nodes part of an OpenShift cluster, for debugging purpose
 - anyuid: true|false: relax security on the OpenShift cluster before deploying resources by granting all containers the root privilege and approving pending certificates (not recommended)
 - extnet: Name of the OpenStack external network used to connect the public addresses of the instances defined in the Nodes section
 - UPFpassword: Encrypted password set in the Casa UPF startup configuration file; used to allow/deny the user entering the configuration mode
@@ -575,6 +576,10 @@ Miscellaneous settings:
 - UPFNRFport: NRF port used by UPF
 - UPFmcc: mobile country code used by UPF
 - UPFmnc: mobile network code used by UPF
+- UPFtac: Comma separated list of tac provisioned for the UPF
+- UPFcidr: UPF PDU session ip address range as a CIDR
+- UPFnat: UPF network name for network address translation from UPF router to UPF
+- UPFrouted: UPF instance short name target of the address translation performed by the UPF router(s)
 - headless: if not empty: do not assume a user for answering prompts and downloading files: use default values without prompting and do not save any file.
 - default_project: The default OpenShift project/namespace for deploying resources
 - default_action: The default installer action: deploy or undeploy
@@ -593,14 +598,14 @@ Network interfaces names and associated masks and resources
     - MGMT is mandatory: all nodes should be connected to the MGMT interface
     - PUBLIC: optional external IP address of nodes visible through an address translation (mandatory for OpenStack nodes)
     - DATA1-4: optional private networks
-- interface: name of the network interface on the target
+- interface: name of the network interface on the target, consisting in a common root text and a positif integer, typically eth1, eth2, etc. or ens3, ens4, ens5...
+  All interfaces must have a common root name, typically mixing eth and ens is not supported.
 - mask: Netmasks should be consistent across networks    
   The first netmask in the table sets the network width for all networks.     
   This width defines the maximum number of nodes and networks; it should be in the range 0 to 8, ie:    
     - from mask 255.255.255.0: width: 8, 1 network, 256 nodes
     - to mask 255.255.255.255: width: 1, 256 networks, 1 node
     - recommended: 255.255.255.224: width: 5, 8 networks, 32 nodes
-- portgroup: VMware specific; unused on OpenStack
 
 ### OpenShiftNodes
 OpenShift 4.x clusters definitions
@@ -630,6 +635,7 @@ Attributes:
 - etc-hosts: boolean enabling /etc/hosts update (requires sudo privilege) 
 - Flavor/Worker flavor: shortcut defining the resources allocated for this OpenShift instance nodes; mapping to the actual flavor for the target infrastructure is based on the Flavors section
 - #Volumes: quota of volumes on this OpenStack project; admin privileges required at run time if greater than the current quota; default 10
+- UPF/UPF router: names of the nodes defined in the Nodes section, playing the UPF and UPF router roles for this OpenShift cluster respectively
 
 Outputs:
 For each OpenShift cluster, two floating IPs are exported as templated variables resolved at deployment time, available for other resources reference:
@@ -646,8 +652,24 @@ Example:
 - kubeconfig is in ./myocp/auth/kubeconfig
 - kubadmin password is in ./myocp/auth/kubeadmin-password 
 
+### BaremetalNodes
+Hardware servers part of an OpenShift cluster on bare metal
+Each server must be connected to 2 networks on the same interfaces:
+- baremetal network: a rootable network
+- provisioning network: non-routable network used for provisioning the underlying operating system;  no other DHCP servers should run on the same broadcast domain.  
+FQDN: the fully qualified domain name of this server on the baremetal network: this name must be resolved by a domain name server. It consists in three parts:
+- the node short name
+- the OpenShift cluster name
+- the domain
+Role: 3 masters minimum per OpenShift cluster; workers are optional: if missing, master nodes play both master and worker roles
+IPMI address, user and password: ILO remote control for this server
+API/Ingress VIP: virtual IP addresses for the API endpoint and wildcard ingress endpoint respectively
+Baremetal/Provisioning CIDR: The public CIDR (Classless Inter-Domain Routing) of the networks. For example, 10.0.0.0/24
+Boot MAC address and interface: IP address and network interface of this node on the provisioning network
+Boot device: Linux path to the block device used for installing the OS, eg /dev/sdb
+
 ### Nodes
-Nodes and roles definition and assignment
+OpenStack Nodes and roles definition and assignment
 - MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
 - MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
 - PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
@@ -826,7 +848,7 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Pipeline: create a Jenkins pipeline for this operator instance from the Builds section definition
   
 
-Operators supported types: jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,etcd-operator,ignite-operator,prometheus-operator
+Operators supported types: jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,etcd-operator,local-storage-operator,container-storage-operator,prometheus-operator
 
 ### HelmCharts
 HelmCharts
@@ -916,12 +938,12 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
     - connect to this VM as user centos with the saved ssh key eg:   
     ssh -i mykey.pem centos@30.118.0.26
     - install git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository:     
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y epel-release     
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
+     sudo  yum install -y epel-release     
+     sudo  yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
     - install openstack client, ansible, shade, passlib, decorator and cryptography:    
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
+     sudo  pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
     - clone the CMS5G Core Stack automated deployer from git:     
-     http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone git@10.74.128.22:CMS-5GCS/automated-deployer.git
+     git clone git@github.hpe.com:CMS-5GCS/automated-deployer.git
     - move to this directory    
      cd automated-deployer
     - retrieve in this directory the private ssh key file and set ssh compliant access rights eg :    

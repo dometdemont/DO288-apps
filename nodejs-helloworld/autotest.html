@@ -3,11 +3,11 @@
     <title>CMS5G Core Stack</title>
 <style>{font-family: arial; font-size: small}body {font: 12px arial, sans-serif; color: #C6C9CA; background-color: black;}th, table { font: 12px arial, sans-serif; color: #C6C9CA; background-color: black;}h1, {color: #FF8300;}h2, h3, h4, h5 {color: #C6C9CA;}input, select {border: none; font: 12px arial, sans-serif; color: #01a982; background-color: black;}.buildButton { background-color: #FF8300; border: none; color: black; text-align: center; text-decoration: none; display: inline-block; border-radius: 2px;}.buildButton:hover { background-color: #4CAF50; color: white;}.helpButton { background-color: #32DAC8; border: none; color: black; text-align: center; text-decoration: none; display: inline-block; border-radius: 2px;}.helpButton:hover { background-color: blue; color: white;}.delButton { background-color: #0D5265; border: none; color: white; text-align: center; text-decoration: none; display: inline-block; border-radius: 2px;}.delButton:hover { background-color: #FF8300; color: black;}a:link, a:visited { text-decoration: none; color: #80746E;}</style><link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAAAAD///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////AYe0AP+ItAD/h7QA/4e0AP+ItAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4i0AP+HtAD/h7QA/4e0AP+ItAD/h7QA/4e0AP+HtAD/iLQA/4e0AP+HtAD/h7QA/4e0AP////8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wGHtAD/h7QA/4e0AP+HtAD/////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8Bh7QA/4i0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4i0AP+HtAD/iLQA/4i0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/h7QA/4e0AP+HtAD/iLQA/4e0AP+ItAD/h7QA/4e0AP+HtAD/iLQA/4e0AP+HtAD/h7QA/4e0AP+HtAD/iLQA/////wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8B////Af///wH///8BAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//w==" rel="icon" type="image/x-icon"></head>
 <body>
-<input id="_uniqueInputId" value="6" type="hidden" placeholder="Hidden input recording the html id for dynamic delete buttons">
+<input id="_uniqueInputId" value="7" type="hidden" placeholder="Hidden input recording the html id for dynamic delete buttons">
 <table border="0" width="100%">
 <tbody><tr><td valign="top" align="left">
 <h1>CMS5G Core Stack</h1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2021-03-04 Version 0.91</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2021-04-14 Version 0.92</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description" value="Deploy an automated deployer as a custom app with a jenkins pipeline running autotests">
@@ -18,10 +18,10 @@
 </td>
 </tr></tbody></table>
 
-<h3>Summary: <a id="summary" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#OpenShiftNodes" onclick="OpenShiftNodes.display(true);"> / OpenShiftNodes</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#Builds" onclick="Builds.display(true);"> / Builds</a><a href="#CustomApps" onclick="CustomApps.display(true);"> / CustomApps</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#OperatorSources" onclick="OperatorSources.display(true);"> / OperatorSources</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></h3>
+<h3>Summary: <a id="summary" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#OpenShiftNodes" onclick="OpenShiftNodes.display(true);"> / OpenShiftNodes</a><a href="#BaremetalNodes" onclick="BaremetalNodes.display(true);"> / BaremetalNodes</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#Builds" onclick="Builds.display(true);"> / Builds</a><a href="#CustomApps" onclick="CustomApps.display(true);"> / CustomApps</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#OperatorSources" onclick="OperatorSources.display(true);"> / OperatorSources</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></h3>
 
 <form>
-<div id="tableInsertionPoint"><div id="NetworksSection" style="display: none;"><a name="Networks"><h2>Networks</h2></a><table border="1" id="Networks"><tbody><tr><th><input type="button" value="Add" onclick="Networks.add();"></th><th class="Networksnetwork" style="width: 80px;">network</th><th class="Networksinterface" style="width: 80px;">interface</th><th class="Networksmask" style="width: 120px;">mask</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Networks.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Networks.help());"></div><div id="MiscSection" style="display: none;"><a name="Misc"><h2>Misc</h2></a><table border="1" id="Misc"><tbody><tr><th><input type="button" value="Add" onclick="Misc.add();"></th><th class="MiscProperty" style="width: 200px;">Property</th><th class="MiscValue" style="width: 400px;">Value</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Misc.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Misc.help());"></div><div id="FlavorsSection" style="display: none;"><a name="Flavors"><h2>Flavors</h2></a><table border="1" id="Flavors"><tbody><tr><th><input type="button" value="Add" onclick="Flavors.add();"></th><th class="FlavorsInfrastructure" style="width: 100px;">Infrastructure</th><th class="FlavorsFlavor" style="width: 120px;">Flavor</th><th class="Flavorsname" style="width: 200px;">name</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Flavors.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Flavors.help());"></div><div id="NodesSection" style="display: none;"><a name="Nodes"><h2>Nodes</h2></a><table border="1" id="Nodes"><tbody><tr><th><input type="button" value="Add" onclick="Nodes.add();"></th><th class="NodesMGMT fqdn" style="width: 120px;">MGMT fqdn</th><th class="NodesMGMT IP addr" style="width: 120px;">MGMT IP addr</th><th class="NodesPUBLIC IP addr" style="width: 120px;">PUBLIC IP addr</th><th class="NodesDATA1 fqdn" style="width: 85px;">DATA1 fqdn</th><th class="NodesDATA1 IP addr" style="width: 85px;">DATA1 IP addr</th><th class="NodesDATA2 fqdn" style="width: 85px;">DATA2 fqdn</th><th class="NodesDATA2 IP addr" style="width: 85px;">DATA2 IP addr</th><th class="NodesDATA3 fqdn" style="width: 85px;">DATA3 fqdn</th><th class="NodesDATA3 IP addr" style="width: 85px;">DATA3 IP addr</th><th class="NodesDATA4 fqdn" style="width: 85px;">DATA4 fqdn</th><th class="NodesDATA4 IP addr" style="width: 85px;">DATA4 IP addr</th><th class="NodesUPF" style="width: 15px;">UPF</th><th class="NodesUPFrouter" style="width: 15px;">UPFrouter</th><th class="NodesMaster" style="width: 15px;">Master</th><th class="NodesEtcd" style="width: 15px;">Etcd</th><th class="NodesWorker" style="width: 15px;">Worker</th><th class="NodesTester" style="width: 15px;">Tester</th><th class="NodesFlavor" style="width: 120px;">Flavor</th><th class="NodesImage" style="width: 200px;">Image</th><th class="NodesVolume" style="width: 15px;">Volume</th><th class="NodesPython3" style="width: 15px;">Python3</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Nodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Nodes.help());"></div><div id="OpenShiftNodesSection" style="display: none;"><a name="OpenShiftNodes"><h2>OpenShiftNodes</h2></a><table border="1" id="OpenShiftNodes"><tbody><tr><th><input type="button" value="Add" onclick="OpenShiftNodes.add();"></th><th class="OpenShiftNodesName" style="width: 80px;">Name</th><th class="OpenShiftNodesDomain" style="width: 80px;">Domain</th><th class="OpenShiftNodesOSenv" style="width: 100px;">OSenv</th><th class="OpenShiftNodesext-net" style="width: 120px;">ext-net</th><th class="OpenShiftNodesext-dns" style="width: 120px;">ext-dns</th><th class="OpenShiftNodesFIPAPI" style="width: 120px;">FIPAPI</th><th class="OpenShiftNodesFIPAPP" style="width: 120px;">FIPAPP</th><th class="OpenShiftNodesMasters" style="width: 60px;">Masters</th><th class="OpenShiftNodesWorkers" style="width: 60px;">Workers</th><th class="OpenShiftNodesetc-hosts" style="width: 60px;">etc-hosts</th><th class="OpenShiftNodesFlavor" style="width: 120px;">Flavor</th><th class="OpenShiftNodesWorker flavor" style="width: 120px;">Worker flavor</th><th class="OpenShiftNodes#Volumes" style="width: 60px;">#Volumes</th><th class="OpenShiftNodesUPF" style="width: 120px;">UPF</th><th class="OpenShiftNodesUPF router" style="width: 120px;">UPF router</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OpenShiftNodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OpenShiftNodes.help());"></div><div id="CinderVolumesSection" style="display: none;"><a name="CinderVolumes"><h2>CinderVolumes</h2></a><table border="1" id="CinderVolumes"><tbody><tr><th><input type="button" value="Add" onclick="CinderVolumes.add();"></th><th class="CinderVolumesName" style="width: 120px;">Name</th><th class="CinderVolumesSize" style="width: 80px;">Size</th><th class="CinderVolumesDescription" style="width: 300px;">Description</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CinderVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CinderVolumes.help());"></div><div id="PersistentVolumesSection" style="display: none;"><a name="PersistentVolumes"><h2>PersistentVolumes</h2></a><table border="1" id="PersistentVolumes"><tbody><tr><th><input type="button" value="Add" onclick="PersistentVolumes.add();"></th><th class="PersistentVolumesName" style="width: 120px;">Name</th><th class="PersistentVolumesSize" style="width: 80px;">Size</th><th class="PersistentVolumesType" style="width: 80px;">Type</th><th class="PersistentVolumesAccess" style="width: 120px;">Access</th><th class="PersistentVolumesReclaim" style="width: 120px;">Reclaim</th><th class="PersistentVolumesCinderVolume" style="width: 120px;">CinderVolume</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(PersistentVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(PersistentVolumes.help());"></div><div id="ClustersSection" style="display: none;"><a name="Clusters"><h2>Clusters</h2></a><table border="1" id="Clusters"><tbody><tr><th><input type="button" value="Add" onclick="Clusters.add();"></th><th class="ClustersName" style="width: 80px;">Name</th><th class="ClustersEndpoint" style="width: 300px;">Endpoint</th><th class="ClustersToken" style="width: 300px;">Token</th><th class="ClustersTargeted" style="width: 15px;">Targeted</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Clusters.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Clusters.help());"></div><div id="BuildsSection" style=""><a name="Builds"><h2>Builds</h2></a><table border="1" id="Builds"><tbody><tr><th><input type="button" value="Add" onclick="Builds.add();"></th><th class="BuildsType" style="width: 100px;">Type</th><th class="BuildsName" style="width: 100px;">Name</th><th class="BuildsGIT URL" style="width: 400px;">GIT URL</th><th class="Buildsdirectory" style="width: 200px;">directory</th><th class="Buildsbranch" style="width: 120px;">branch</th><th class="BuildssshKey" style="width: 120px;">sshKey</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton1" onclick="Builds.delete('delButton1');"></td><td class="BuildsType" style="width: 100px;"><select class="BuildsType" style="width: 100px;"><option value="pipeline">pipeline</option><option value="custom-app" selected="selected">custom-app</option></select></td><td class="BuildsName" style="width: 100px;"><input class="BuildsName" type="text" value="mad" style="width: 100px;"></td><td class="BuildsGIT URL" style="width: 400px;"><input class="BuildsGIT URL" type="text" value="git@github.hpe.com:CMS-5GCS/automated-deployer.git" style="width: 400px;"></td><td class="Buildsdirectory" style="width: 200px;"><input class="Buildsdirectory" type="text" value="" style="width: 200px;"></td><td class="Buildsbranch" style="width: 120px;"><input class="Buildsbranch" type="text" value="" style="width: 120px;"></td><td class="BuildssshKey"><table class="BuildssshKey userLoadedFile" id="Builds_sshKey_delButton1"><tr><td valign="top"><input type="file" id="Builds_sshKey_delButton1_inputId" class="buildButton" onchange="Builds_sshKey_delButton1.load(event)"></td><td valign="top"><input type="button" class="helpButton" value="Review" onclick="Builds_sshKey_delButton1.view(event)"></td><td valign="top"><input type="button" class="delButton" value="Clear" onclick="Builds_sshKey_delButton1.clear(event)"></td></tr></table></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton2" onclick="Builds.delete('delButton2');"></td><td class="BuildsType" style="width: 100px;"><select class="BuildsType" style="width: 100px;"><option value="pipeline" selected="selected">pipeline</option><option value="custom-app">custom-app</option></select></td><td class="BuildsName" style="width: 100px;"><input class="BuildsName" type="text" value="autotest" style="width: 100px;"></td><td class="BuildsGIT URL" style="width: 400px;"><input class="BuildsGIT URL" type="text" value="git@github.hpe.com:CMS-5GCS/automated-deployer.git" style="width: 400px;"></td><td class="Buildsdirectory" style="width: 200px;"><input class="Buildsdirectory" type="text" value="pipelines/autotest" style="width: 200px;"></td><td class="Buildsbranch" style="width: 120px;"><input class="Buildsbranch" type="text" value="" style="width: 120px;"></td><td class="BuildssshKey"><table class="BuildssshKey userLoadedFile" id="Builds_sshKey_delButton2"><tr><td valign="top"><input type="file" id="Builds_sshKey_delButton2_inputId" class="buildButton" onchange="Builds_sshKey_delButton2.load(event)"></td><td valign="top"><input type="button" class="helpButton" value="Review" onclick="Builds_sshKey_delButton2.view(event)"></td><td valign="top"><input type="button" class="delButton" value="Clear" onclick="Builds_sshKey_delButton2.clear(event)"></td></tr></table></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Builds.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Builds.help());"></div><div id="CustomAppsSection" style=""><a name="CustomApps"><h2>CustomApps</h2></a><table border="1" id="CustomApps"><tbody><tr><th><input type="button" value="Add" onclick="CustomApps.add();"></th><th class="CustomAppsType" style="width: 140px;">Type</th><th class="CustomAppsName" style="width: 100px;">Name</th><th class="CustomAppsProject" style="width: 60px;">Project</th><th class="CustomAppsPipeline" style="width: 100px;">Pipeline</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton3" onclick="CustomApps.delete('delButton3');"></td><td class="CustomAppsType" style="width: 140px;"><select class="CustomAppsType" style="width: 140px;"><option value="mad" selected="selected">mad</option></select></td><td class="CustomAppsName" style="width: 100px;"><input class="CustomAppsName" type="text" value="assistant" style="width: 100px;"></td><td class="CustomAppsProject" style="width: 60px;"><input class="CustomAppsProject" type="text" value="automated-deployer" style="width: 60px;"></td><td class="CustomAppsPipeline" style="width: 100px;"><input class="CustomAppsPipeline" type="text" value="autotest" style="width: 100px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CustomApps.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CustomApps.help());"></div><div id="NetworkFunctionsSection" style="display: none;"><a name="NetworkFunctions"><h2>NetworkFunctions</h2></a><table border="1" id="NetworkFunctions"><tbody><tr><th><input type="button" value="Add" onclick="NetworkFunctions.add();"></th><th class="NetworkFunctionsType" style="width: 100px;">Type</th><th class="NetworkFunctionsName" style="width: 80px;">Name</th><th class="NetworkFunctionsProject" style="width: 60px;">Project</th><th class="NetworkFunctionsURL" style="width: 200px;">URL</th><th class="NetworkFunctionsinsecure" style="width: 15px;">insecure</th><th class="NetworkFunctionsImage" style="width: 120px;">Image</th><th class="NetworkFunctionsTag" style="width: 120px;">Tag</th><th class="NetworkFunctionsStorage" style="width: 60px;">Storage</th><th class="NetworkFunctionsVolume" style="width: 60px;">Volume</th><th class="NetworkFunctionsReplicas" style="width: 40px;">Replicas</th><th class="NetworkFunctionsDependencies" style="width: 100px;">Dependencies</th><th class="NetworkFunctionsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(NetworkFunctions.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(NetworkFunctions.help());"></div><div id="DirectServicesSection" style="display: none;"><a name="DirectServices"><h2>DirectServices</h2></a><table border="1" id="DirectServices"><tbody><tr><th><input type="button" value="Add" onclick="DirectServices.add();"></th><th class="DirectServicesType" style="width: 100px;">Type</th><th class="DirectServicesName" style="width: 80px;">Name</th><th class="DirectServicesProject" style="width: 60px;">Project</th><th class="DirectServicesURL" style="width: 200px;">URL</th><th class="DirectServicesinsecure" style="width: 15px;">insecure</th><th class="DirectServicesImage" style="width: 120px;">Image</th><th class="DirectServicesTag" style="width: 120px;">Tag</th><th class="DirectServicesStorage" style="width: 60px;">Storage</th><th class="DirectServicesVolume" style="width: 60px;">Volume</th><th class="DirectServicesReplicas" style="width: 40px;">Replicas</th><th class="DirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="DirectServicesPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(DirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(DirectServices.help());"></div><div id="IndirectServicesSection" style=""><a name="IndirectServices"><h2>IndirectServices</h2></a><table border="1" id="IndirectServices"><tbody><tr><th><input type="button" value="Add" onclick="IndirectServices.add();"></th><th class="IndirectServicesType" style="width: 100px;">Type</th><th class="IndirectServicesName" style="width: 80px;">Name</th><th class="IndirectServicesProject" style="width: 60px;">Project</th><th class="IndirectServicesURL" style="width: 200px;">URL</th><th class="IndirectServicesinsecure" style="width: 15px;">insecure</th><th class="IndirectServicesImage" style="width: 120px;">Image</th><th class="IndirectServicesTag" style="width: 120px;">Tag</th><th class="IndirectServicesStorage" style="width: 60px;">Storage</th><th class="IndirectServicesVolume" style="width: 60px;">Volume</th><th class="IndirectServicesReplicas" style="width: 40px;">Replicas</th><th class="IndirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="IndirectServicesPipeline" style="width: 100px;">Pipeline</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton4" onclick="IndirectServices.delete('delButton4');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins" selected="selected">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="pipelines" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="automated-deployer" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="quay.io/openshift" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="origin-jenkins" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(IndirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(IndirectServices.help());"></div><div id="OperatorSourcesSection" style=""><a name="OperatorSources"><h2>OperatorSources</h2></a><table border="1" id="OperatorSources"><tbody><tr><th><input type="button" value="Add" onclick="OperatorSources.add();"></th><th class="OperatorSourcesType" style="width: 140px;">Type</th><th class="OperatorSourcesName" style="width: 100px;">Name</th><th class="OperatorSourcesProject" style="width: 200px;">Project</th><th class="OperatorSourcesURL" style="width: 200px;">URL</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton5" onclick="OperatorSources.delete('delButton5');"></td><td class="OperatorSourcesType" style="width: 140px;"><select class="OperatorSourcesType" style="width: 140px;"><option value="operator-source" selected="selected">operator-source</option></select></td><td class="OperatorSourcesName" style="width: 100px;"><input class="OperatorSourcesName" type="text" value="dometdemont" style="width: 100px;"></td><td class="OperatorSourcesProject" style="width: 200px;"><input class="OperatorSourcesProject" type="text" value="openshift-marketplace" style="width: 200px;"></td><td class="OperatorSourcesURL" style="width: 200px;"><input class="OperatorSourcesURL" type="text" value="https://quay.io/cnr" style="width: 200px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OperatorSources.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OperatorSources.help());"></div><div id="OperatorsSection" style="display: none;"><a name="Operators"><h2>Operators</h2></a><table border="1" id="Operators"><tbody><tr><th><input type="button" value="Add" onclick="Operators.add();"></th><th class="OperatorsType" style="width: 140px;">Type</th><th class="OperatorsName" style="width: 100px;">Name</th><th class="OperatorsProject" style="width: 60px;">Project</th><th class="OperatorsReplicas" style="width: 40px;">Replicas</th><th class="OperatorsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Operators.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Operators.help());"></div><div id="HelmChartsSection" style="display: none;"><a name="HelmCharts"><h2>HelmCharts</h2></a><table border="1" id="HelmCharts"><tbody><tr><th><input type="button" value="Add" onclick="HelmCharts.add();"></th><th class="HelmChartsType" style="width: 140px;">Type</th><th class="HelmChartsName" style="width: 100px;">Name</th><th class="HelmChartsProject" style="width: 60px;">Project</th><th class="HelmChartsChart" style="width: 200px;">Chart</th><th class="HelmChartsValues" style="width: 200px;">Values</th><th class="HelmChartsVersion" style="width: 60px;">Version</th><th class="HelmChartsOptions" style="width: 120px;">Options</th><th class="HelmChartsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(HelmCharts.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(HelmCharts.help());"></div></div>
+<div id="tableInsertionPoint"><div id="NetworksSection" style="display: none;"><a name="Networks"><h2>Networks</h2></a><table border="1" id="Networks"><tbody><tr><th><input type="button" value="Add" onclick="Networks.add();"></th><th class="Networksnetwork" style="width: 80px;">network</th><th class="Networksinterface" style="width: 80px;">interface</th><th class="Networksmask" style="width: 120px;">mask</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Networks.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Networks.help());"></div><div id="MiscSection" style="display: none;"><a name="Misc"><h2>Misc</h2></a><table border="1" id="Misc"><tbody><tr><th><input type="button" value="Add" onclick="Misc.add();"></th><th class="MiscProperty" style="width: 200px;">Property</th><th class="MiscValue" style="width: 400px;">Value</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Misc.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Misc.help());"></div><div id="FlavorsSection" style="display: none;"><a name="Flavors"><h2>Flavors</h2></a><table border="1" id="Flavors"><tbody><tr><th><input type="button" value="Add" onclick="Flavors.add();"></th><th class="FlavorsInfrastructure" style="width: 100px;">Infrastructure</th><th class="FlavorsFlavor" style="width: 120px;">Flavor</th><th class="Flavorsname" style="width: 200px;">name</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Flavors.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Flavors.help());"></div><div id="NodesSection" style="display: none;"><a name="Nodes"><h2>Nodes</h2></a><table border="1" id="Nodes"><tbody><tr><th><input type="button" value="Add" onclick="Nodes.add();"></th><th class="NodesMGMT fqdn" style="width: 120px;">MGMT fqdn</th><th class="NodesMGMT IP addr" style="width: 120px;">MGMT IP addr</th><th class="NodesPUBLIC IP addr" style="width: 120px;">PUBLIC IP addr</th><th class="NodesDATA1 fqdn" style="width: 85px;">DATA1 fqdn</th><th class="NodesDATA1 IP addr" style="width: 85px;">DATA1 IP addr</th><th class="NodesDATA2 fqdn" style="width: 85px;">DATA2 fqdn</th><th class="NodesDATA2 IP addr" style="width: 85px;">DATA2 IP addr</th><th class="NodesDATA3 fqdn" style="width: 85px;">DATA3 fqdn</th><th class="NodesDATA3 IP addr" style="width: 85px;">DATA3 IP addr</th><th class="NodesDATA4 fqdn" style="width: 85px;">DATA4 fqdn</th><th class="NodesDATA4 IP addr" style="width: 85px;">DATA4 IP addr</th><th class="NodesUPF" style="width: 15px;">UPF</th><th class="NodesUPFrouter" style="width: 15px;">UPFrouter</th><th class="NodesMaster" style="width: 15px;">Master</th><th class="NodesEtcd" style="width: 15px;">Etcd</th><th class="NodesWorker" style="width: 15px;">Worker</th><th class="NodesTester" style="width: 15px;">Tester</th><th class="NodesFlavor" style="width: 120px;">Flavor</th><th class="NodesImage" style="width: 200px;">Image</th><th class="NodesVolume" style="width: 15px;">Volume</th><th class="NodesPython3" style="width: 15px;">Python3</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Nodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Nodes.help());"></div><div id="OpenShiftNodesSection" style="display: none;"><a name="OpenShiftNodes"><h2>OpenShiftNodes</h2></a><table border="1" id="OpenShiftNodes"><tbody><tr><th><input type="button" value="Add" onclick="OpenShiftNodes.add();"></th><th class="OpenShiftNodesName" style="width: 80px;">Name</th><th class="OpenShiftNodesDomain" style="width: 80px;">Domain</th><th class="OpenShiftNodesOSenv" style="width: 100px;">OSenv</th><th class="OpenShiftNodesext-net" style="width: 120px;">ext-net</th><th class="OpenShiftNodesext-dns" style="width: 120px;">ext-dns</th><th class="OpenShiftNodesFIPAPI" style="width: 120px;">FIPAPI</th><th class="OpenShiftNodesFIPAPP" style="width: 120px;">FIPAPP</th><th class="OpenShiftNodesMasters" style="width: 60px;">Masters</th><th class="OpenShiftNodesWorkers" style="width: 60px;">Workers</th><th class="OpenShiftNodesetc-hosts" style="width: 60px;">etc-hosts</th><th class="OpenShiftNodesFlavor" style="width: 120px;">Flavor</th><th class="OpenShiftNodesWorker flavor" style="width: 120px;">Worker flavor</th><th class="OpenShiftNodes#Volumes" style="width: 60px;">#Volumes</th><th class="OpenShiftNodesUPF" style="width: 120px;">UPF</th><th class="OpenShiftNodesUPF router" style="width: 120px;">UPF router</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OpenShiftNodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OpenShiftNodes.help());"></div><div id="BaremetalNodesSection" style="display: none;"><a name="BaremetalNodes"><h2>BaremetalNodes</h2></a><table border="1" id="BaremetalNodes"><tbody><tr><th><input type="button" value="Add" onclick="BaremetalNodes.add();"></th><th class="BaremetalNodesFQDN" style="width: 200px;">FQDN</th><th class="BaremetalNodesRole" style="width: 120px;">Role</th><th class="BaremetalNodesIPMI address" style="width: 120px;">IPMI address</th><th class="BaremetalNodesIPMI user" style="width: 120px;">IPMI user</th><th class="BaremetalNodesIPMI password" style="width: 120px;">IPMI password</th><th class="BaremetalNodesAPI VIP" style="width: 120px;">API VIP</th><th class="BaremetalNodesIngress VIP" style="width: 120px;">Ingress VIP</th><th class="BaremetalNodesBaremetal CIDR" style="width: 120px;">Baremetal CIDR</th><th class="BaremetalNodesProvisioning CIDR" style="width: 120px;">Provisioning CIDR</th><th class="BaremetalNodesBoot MAC address" style="width: 120px;">Boot MAC address</th><th class="BaremetalNodesBoot interface" style="width: 120px;">Boot interface</th><th class="BaremetalNodesBoot device" style="width: 120px;">Boot device</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(BaremetalNodes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(BaremetalNodes.help());"></div><div id="CinderVolumesSection" style="display: none;"><a name="CinderVolumes"><h2>CinderVolumes</h2></a><table border="1" id="CinderVolumes"><tbody><tr><th><input type="button" value="Add" onclick="CinderVolumes.add();"></th><th class="CinderVolumesName" style="width: 120px;">Name</th><th class="CinderVolumesSize" style="width: 80px;">Size</th><th class="CinderVolumesDescription" style="width: 300px;">Description</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CinderVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CinderVolumes.help());"></div><div id="PersistentVolumesSection" style="display: none;"><a name="PersistentVolumes"><h2>PersistentVolumes</h2></a><table border="1" id="PersistentVolumes"><tbody><tr><th><input type="button" value="Add" onclick="PersistentVolumes.add();"></th><th class="PersistentVolumesName" style="width: 120px;">Name</th><th class="PersistentVolumesSize" style="width: 80px;">Size</th><th class="PersistentVolumesType" style="width: 80px;">Type</th><th class="PersistentVolumesAccess" style="width: 120px;">Access</th><th class="PersistentVolumesReclaim" style="width: 120px;">Reclaim</th><th class="PersistentVolumesCinderVolume" style="width: 120px;">CinderVolume</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(PersistentVolumes.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(PersistentVolumes.help());"></div><div id="ClustersSection" style="display: none;"><a name="Clusters"><h2>Clusters</h2></a><table border="1" id="Clusters"><tbody><tr><th><input type="button" value="Add" onclick="Clusters.add();"></th><th class="ClustersName" style="width: 80px;">Name</th><th class="ClustersEndpoint" style="width: 300px;">Endpoint</th><th class="ClustersToken" style="width: 300px;">Token</th><th class="ClustersTargeted" style="width: 15px;">Targeted</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Clusters.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Clusters.help());"></div><div id="BuildsSection" style=""><a name="Builds"><h2>Builds</h2></a><table border="1" id="Builds"><tbody><tr><th><input type="button" value="Add" onclick="Builds.add();"></th><th class="BuildsType" style="width: 100px;">Type</th><th class="BuildsName" style="width: 100px;">Name</th><th class="BuildsGIT URL" style="width: 400px;">GIT URL</th><th class="Buildsdirectory" style="width: 200px;">directory</th><th class="Buildsbranch" style="width: 120px;">branch</th><th class="BuildssshKey" style="width: 120px;">sshKey</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton1" onclick="Builds.delete('delButton1');"></td><td class="BuildsType" style="width: 100px;"><select class="BuildsType" style="width: 100px;"><option value="pipeline">pipeline</option><option value="custom-app" selected="selected">custom-app</option></select></td><td class="BuildsName" style="width: 100px;"><input class="BuildsName" type="text" value="mad" style="width: 100px;"></td><td class="BuildsGIT URL" style="width: 400px;"><input class="BuildsGIT URL" type="text" value="git@github.hpe.com:CMS-5GCS/automated-deployer.git" style="width: 400px;"></td><td class="Buildsdirectory" style="width: 200px;"><input class="Buildsdirectory" type="text" value="" style="width: 200px;"></td><td class="Buildsbranch" style="width: 120px;"><input class="Buildsbranch" type="text" value="" style="width: 120px;"></td><td class="BuildssshKey"><table class="BuildssshKey userLoadedFile" id="Builds_sshKey_delButton1"><tr><td valign="top"><input type="file" id="Builds_sshKey_delButton1_inputId" class="buildButton" onchange="Builds_sshKey_delButton1.load(event)"></td><td valign="top"><input type="button" class="helpButton" value="Review" onclick="Builds_sshKey_delButton1.view(event)"></td><td valign="top"><input type="button" class="delButton" value="Clear" onclick="Builds_sshKey_delButton1.clear(event)"></td></tr></table></td></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton2" onclick="Builds.delete('delButton2');"></td><td class="BuildsType" style="width: 100px;"><select class="BuildsType" style="width: 100px;"><option value="pipeline" selected="selected">pipeline</option><option value="custom-app">custom-app</option></select></td><td class="BuildsName" style="width: 100px;"><input class="BuildsName" type="text" value="autotest" style="width: 100px;"></td><td class="BuildsGIT URL" style="width: 400px;"><input class="BuildsGIT URL" type="text" value="git@github.hpe.com:CMS-5GCS/automated-deployer.git" style="width: 400px;"></td><td class="Buildsdirectory" style="width: 200px;"><input class="Buildsdirectory" type="text" value="pipelines/autotest" style="width: 200px;"></td><td class="Buildsbranch" style="width: 120px;"><input class="Buildsbranch" type="text" value="" style="width: 120px;"></td><td class="BuildssshKey"><table class="BuildssshKey userLoadedFile" id="Builds_sshKey_delButton2"><tr><td valign="top"><input type="file" id="Builds_sshKey_delButton2_inputId" class="buildButton" onchange="Builds_sshKey_delButton2.load(event)"></td><td valign="top"><input type="button" class="helpButton" value="Review" onclick="Builds_sshKey_delButton2.view(event)"></td><td valign="top"><input type="button" class="delButton" value="Clear" onclick="Builds_sshKey_delButton2.clear(event)"></td></tr></table></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Builds.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Builds.help());"></div><div id="CustomAppsSection" style=""><a name="CustomApps"><h2>CustomApps</h2></a><table border="1" id="CustomApps"><tbody><tr><th><input type="button" value="Add" onclick="CustomApps.add();"></th><th class="CustomAppsType" style="width: 140px;">Type</th><th class="CustomAppsName" style="width: 100px;">Name</th><th class="CustomAppsProject" style="width: 60px;">Project</th><th class="CustomAppsPipeline" style="width: 100px;">Pipeline</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton3" onclick="CustomApps.delete('delButton3');"></td><td class="CustomAppsType" style="width: 140px;"><select class="CustomAppsType" style="width: 140px;"><option value="mad" selected="selected">mad</option></select></td><td class="CustomAppsName" style="width: 100px;"><input class="CustomAppsName" type="text" value="assistant" style="width: 100px;"></td><td class="CustomAppsProject" style="width: 60px;"><input class="CustomAppsProject" type="text" value="automated-deployer" style="width: 60px;"></td><td class="CustomAppsPipeline" style="width: 100px;"><input class="CustomAppsPipeline" type="text" value="autotest" style="width: 100px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(CustomApps.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(CustomApps.help());"></div><div id="NetworkFunctionsSection" style="display: none;"><a name="NetworkFunctions"><h2>NetworkFunctions</h2></a><table border="1" id="NetworkFunctions"><tbody><tr><th><input type="button" value="Add" onclick="NetworkFunctions.add();"></th><th class="NetworkFunctionsType" style="width: 100px;">Type</th><th class="NetworkFunctionsName" style="width: 80px;">Name</th><th class="NetworkFunctionsProject" style="width: 60px;">Project</th><th class="NetworkFunctionsURL" style="width: 200px;">URL</th><th class="NetworkFunctionsinsecure" style="width: 15px;">insecure</th><th class="NetworkFunctionsImage" style="width: 120px;">Image</th><th class="NetworkFunctionsTag" style="width: 120px;">Tag</th><th class="NetworkFunctionsStorage" style="width: 60px;">Storage</th><th class="NetworkFunctionsVolume" style="width: 60px;">Volume</th><th class="NetworkFunctionsReplicas" style="width: 40px;">Replicas</th><th class="NetworkFunctionsDependencies" style="width: 100px;">Dependencies</th><th class="NetworkFunctionsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(NetworkFunctions.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(NetworkFunctions.help());"></div><div id="DirectServicesSection" style="display: none;"><a name="DirectServices"><h2>DirectServices</h2></a><table border="1" id="DirectServices"><tbody><tr><th><input type="button" value="Add" onclick="DirectServices.add();"></th><th class="DirectServicesType" style="width: 100px;">Type</th><th class="DirectServicesName" style="width: 80px;">Name</th><th class="DirectServicesProject" style="width: 60px;">Project</th><th class="DirectServicesURL" style="width: 200px;">URL</th><th class="DirectServicesinsecure" style="width: 15px;">insecure</th><th class="DirectServicesImage" style="width: 120px;">Image</th><th class="DirectServicesTag" style="width: 120px;">Tag</th><th class="DirectServicesStorage" style="width: 60px;">Storage</th><th class="DirectServicesVolume" style="width: 60px;">Volume</th><th class="DirectServicesReplicas" style="width: 40px;">Replicas</th><th class="DirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="DirectServicesPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(DirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(DirectServices.help());"></div><div id="IndirectServicesSection" style=""><a name="IndirectServices"><h2>IndirectServices</h2></a><table border="1" id="IndirectServices"><tbody><tr><th><input type="button" value="Add" onclick="IndirectServices.add();"></th><th class="IndirectServicesType" style="width: 100px;">Type</th><th class="IndirectServicesName" style="width: 80px;">Name</th><th class="IndirectServicesProject" style="width: 60px;">Project</th><th class="IndirectServicesURL" style="width: 200px;">URL</th><th class="IndirectServicesinsecure" style="width: 15px;">insecure</th><th class="IndirectServicesImage" style="width: 120px;">Image</th><th class="IndirectServicesTag" style="width: 120px;">Tag</th><th class="IndirectServicesStorage" style="width: 60px;">Storage</th><th class="IndirectServicesVolume" style="width: 60px;">Volume</th><th class="IndirectServicesReplicas" style="width: 40px;">Replicas</th><th class="IndirectServicesDependencies" style="width: 100px;">Dependencies</th><th class="IndirectServicesPipeline" style="width: 100px;">Pipeline</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton4" onclick="IndirectServices.delete('delButton4');"></td><td class="IndirectServicesType" style="width: 100px;"><select class="IndirectServicesType" style="width: 100px;"><option value="jenkins" selected="selected">jenkins</option><option value="elasticsearch">elasticsearch</option><option value="telegraf">telegraf</option><option value="prometheus-alertmanager">prometheus-alertmanager</option><option value="prometheus">prometheus</option><option value="kube-state-metrics">kube-state-metrics</option><option value="pushgateway">pushgateway</option><option value="grafana">grafana</option></select></td><td class="IndirectServicesName" style="width: 80px;"><input class="IndirectServicesName" type="text" value="pipelines" style="width: 80px;"></td><td class="IndirectServicesProject" style="width: 60px;"><input class="IndirectServicesProject" type="text" value="automated-deployer" style="width: 60px;"></td><td class="IndirectServicesURL" style="width: 200px;"><input class="IndirectServicesURL" type="text" value="quay.io/openshift" style="width: 200px;"></td><td class="IndirectServicesinsecure" style="width: 15px;"><input class="IndirectServicesinsecure" type="checkbox" style="width: 15px;"></td><td class="IndirectServicesImage" style="width: 120px;"><input class="IndirectServicesImage" type="text" value="origin-jenkins" style="width: 120px;"></td><td class="IndirectServicesTag" style="width: 120px;"><input class="IndirectServicesTag" type="text" value="latest" style="width: 120px;"></td><td class="IndirectServicesStorage" style="width: 60px;"><input class="IndirectServicesStorage" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesVolume" style="width: 60px;"><input class="IndirectServicesVolume" type="text" value="" style="width: 60px;"></td><td class="IndirectServicesReplicas" style="width: 40px;"><input class="IndirectServicesReplicas" type="text" value="" style="width: 40px;"></td><td class="IndirectServicesDependencies" style="width: 100px;"><input class="IndirectServicesDependencies" type="text" value="" style="width: 100px;"></td><td class="IndirectServicesPipeline" style="width: 100px;"><input class="IndirectServicesPipeline" type="text" value="" style="width: 100px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(IndirectServices.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(IndirectServices.help());"></div><div id="OperatorSourcesSection" style=""><a name="OperatorSources"><h2>OperatorSources</h2></a><table border="1" id="OperatorSources"><tbody><tr><th><input type="button" value="Add" onclick="OperatorSources.add();"></th><th class="OperatorSourcesType" style="width: 140px;">Type</th><th class="OperatorSourcesName" style="width: 100px;">Name</th><th class="OperatorSourcesProject" style="width: 200px;">Project</th><th class="OperatorSourcesURL" style="width: 400px;">URL</th></tr><tr><td><input type="button" value="Del" class="delButton" id="delButton6" onclick="OperatorSources.delete('delButton6');"></td><td class="OperatorSourcesType" style="width: 140px;"><select class="OperatorSourcesType" style="width: 140px;"><option value="catalog-source" selected="selected">catalog-source</option><option value="operator-source">operator-source</option></select></td><td class="OperatorSourcesName" style="width: 100px;"><input class="OperatorSourcesName" type="text" value="hpe5gcs-operator" style="width: 100px;"></td><td class="OperatorSourcesProject" style="width: 200px;"><input class="OperatorSourcesProject" type="text" value="openshift-marketplace" style="width: 200px;"></td><td class="OperatorSourcesURL" style="width: 400px;"><input class="OperatorSourcesURL" type="text" value="quay.io/dometdemont/hpe5gcs-operator-index:v0.1.0" style="width: 400px;"></td></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(OperatorSources.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(OperatorSources.help());"></div><div id="OperatorsSection" style="display: none;"><a name="Operators"><h2>Operators</h2></a><table border="1" id="Operators"><tbody><tr><th><input type="button" value="Add" onclick="Operators.add();"></th><th class="OperatorsType" style="width: 200px;">Type</th><th class="OperatorsName" style="width: 140px;">Name</th><th class="OperatorsProject" style="width: 140px;">Project</th><th class="OperatorsReplicas" style="width: 40px;">Replicas</th><th class="OperatorsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(Operators.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(Operators.help());"></div><div id="HelmChartsSection" style="display: none;"><a name="HelmCharts"><h2>HelmCharts</h2></a><table border="1" id="HelmCharts"><tbody><tr><th><input type="button" value="Add" onclick="HelmCharts.add();"></th><th class="HelmChartsType" style="width: 140px;">Type</th><th class="HelmChartsName" style="width: 100px;">Name</th><th class="HelmChartsProject" style="width: 60px;">Project</th><th class="HelmChartsChart" style="width: 200px;">Chart</th><th class="HelmChartsValues" style="width: 200px;">Values</th><th class="HelmChartsVersion" style="width: 60px;">Version</th><th class="HelmChartsOptions" style="width: 120px;">Options</th><th class="HelmChartsPipeline" style="width: 100px;">Pipeline</th></tr></tbody></table><table></table><input type="button" value="Apply" class="buildButton" onclick="userOutput(HelmCharts.build());"><input type="button" value="Help" class="helpButton" onclick="userOutput(HelmCharts.help());"></div></div>
 </form>
 
 <hr>
@@ -32,7 +32,7 @@
 <table>
 <tbody><tr><td valign="top">Get help on the environment setup and topology definition</td><td valign="top"><input class="helpButton" type="button" value="Help" onclick="deploymentHelp()"></td>
 </tr><tr><td valign="top">Build the installer</td><td valign="top"><input class="buildButton" type="button" value="Installer" onclick="outputInstallerShell()"></td></tr>
-<tr><td valign="top">Build the application for HPE5gApp operator</td><td valign="top"><input class="buildButton" type="button" value="hpe5gApp" onclick="outputAppHpe5g()"></td></tr>
+<tr><td valign="top">Build the kubernetes application template</td><td valign="top"><input class="buildButton" type="button" value="hpe5gApp" onclick="outputAppHpe5g()"></td></tr>
 <tr><td valign="top">Build the OpenStack Heat template</td><td valign="top"><input class="buildButton" type="button" value="Stack" onclick="outputHeatTemplate()"></td></tr>
 <tr><td valign="top">OpenShift target version</td><td valign="top"><select id="oc_version" onchange="Nodes.hideUnused()">
 <option name="4" selected="">4.x</option>
@@ -72,12 +72,12 @@
 </tr></tbody></table>
 
 <!-- Link to the end of the user area, useful to focus the user on the result on long pages -->
-<p>Quick links: <a id="endOfUserArea" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#OpenShiftNodes" onclick="OpenShiftNodes.display(true);"> / OpenShiftNodes</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#Builds" onclick="Builds.display(true);"> / Builds</a><a href="#CustomApps" onclick="CustomApps.display(true);"> / CustomApps</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#OperatorSources" onclick="OperatorSources.display(true);"> / OperatorSources</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></p>
+<p>Quick links: <a id="endOfUserArea" href="#endOfUserArea">Outputs and Result<a href="#Networks" onclick="Networks.display(true);"> / Networks</a><a href="#Misc" onclick="Misc.display(true);"> / Misc</a><a href="#Flavors" onclick="Flavors.display(true);"> / Flavors</a><a href="#Nodes" onclick="Nodes.display(true);"> / Nodes</a><a href="#OpenShiftNodes" onclick="OpenShiftNodes.display(true);"> / OpenShiftNodes</a><a href="#BaremetalNodes" onclick="BaremetalNodes.display(true);"> / BaremetalNodes</a><a href="#CinderVolumes" onclick="CinderVolumes.display(true);"> / CinderVolumes</a><a href="#PersistentVolumes" onclick="PersistentVolumes.display(true);"> / PersistentVolumes</a><a href="#Clusters" onclick="Clusters.display(true);"> / Clusters</a><a href="#Builds" onclick="Builds.display(true);"> / Builds</a><a href="#CustomApps" onclick="CustomApps.display(true);"> / CustomApps</a><a href="#NetworkFunctions" onclick="NetworkFunctions.display(true);"> / NetworkFunctions</a><a href="#DirectServices" onclick="DirectServices.display(true);"> / DirectServices</a><a href="#IndirectServices" onclick="IndirectServices.display(true);"> / IndirectServices</a><a href="#OperatorSources" onclick="OperatorSources.display(true);"> / OperatorSources</a><a href="#Operators" onclick="Operators.display(true);"> / Operators</a><a href="#HelmCharts" onclick="HelmCharts.display(true);"> / HelmCharts</a></a></p>
 <p>
 <textarea readonly="" rows="20" cols="200" id="userArea">#! /bin/bash
 _usage() {
     echo "
-HPE 5G resources automated deployer: 2021-03-04 Version 0.91
+HPE 5G resources automated deployer: 2021-04-14 Version 0.92
 This client deploys and undeploys 
 - OpenShift clusters hosted on OpenStack 
 - Individual OpenStack resources as a stack
@@ -243,7 +243,7 @@ _cmd_with_retry() {
 	 
 	local _countMax=$(( $_timeout/$_retryPeriod + 1 ))
 	local _count=0
-    until _cmdOutput=$(eval "$_cmd" 2&gt;&gt; $logfile) || (( $_count &gt;= $_countMax )) ; do
+    until _cmdOutput=$(eval "$_cmd" &gt;&gt; $logfile) || (( $_count &gt;= $_countMax )) ; do
     	((_count++))
     	_log_ "$_cmdDescription: attempt $_count of $_countMax, retrying in $_retryPeriod seconds"
         sleep $_retryPeriod
@@ -257,7 +257,7 @@ _cmd_with_retry() {
 }
 
 cat &gt; openshift_project_automated-deployer.yaml &lt;&lt; 'EOFILE'
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: automated-deployer
@@ -475,17 +475,16 @@ chmod a+x openshift_project_automated-deployer.sh
 
 cat &gt; openshift_project_openshift-marketplace.sh &lt;&lt; 'EOFopenshift-marketplace'
 #!/bin/bash
-oc $1 -f - &lt;&lt; EOFdometdemont
-apiVersion: operators.coreos.com/v1
-kind: OperatorSource
+oc $1 -f - &lt;&lt; EOFhpe5gcs-operator
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
 metadata:
-  name: dometdemont-operators
+  name: hpe5gcs-operator
   namespace: openshift-marketplace
 spec:
-  type: appregistry
-  endpoint: https://quay.io/cnr
-  registryNamespace: dometdemont
-EOFdometdemont
+  sourceType: grpc
+  image: quay.io/dometdemont/hpe5gcs-operator-index:v0.1.0
+EOFhpe5gcs-operator
 [ $? = 0 ] || exit 1
 exit 0
 EOFopenshift-marketplace
@@ -505,14 +504,14 @@ test -n "$oc_user" &amp;&amp; [ "$oc_user" != "system:admin" ] || _fail_ "Curren
 _log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="automated-deployer openshift-marketplace"
-for _project in $oc_projects ; do oc project $_project &amp;&gt;&gt; $logfile || oc new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-03-04 Version 0.91 on: Thu Mar 04 2021 14:07:29 GMT+0100 (Central European Standard Time) Deploy an automated deployer as a custom app with a jenkins pipeline running autotests' &amp;&gt;&gt; $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &amp;&gt;&gt; $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-04-14 Version 0.92 on: Thu Apr 15 2021 10:24:48 GMT+0200 (Central European Summer Time) Deploy an automated deployer as a custom app with a jenkins pipeline running autotests' &amp;&gt;&gt; $logfile || _fail_ "Cannot find or create project $_project missing" ; done
 if echo guess | oc login -u system:admin &amp;&gt;&gt; $logfile ; then
 _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &amp;&gt;&gt; $logfile
 oc login -u $oc_user &amp;&gt;&gt; $logfile
 else
  _warn_ "Resource(s) requiring special privileges might jeopardize the deployment:"
- _warn_ "- dometdemont:	section: OperatorSources	project: openshift-marketplace	type: operator-source"
+ _warn_ "- hpe5gcs-operator:	section: OperatorSources	project: openshift-marketplace	type: catalog-source"
 fi
 _log_ "Listing pods as $oc_user"
 oc get pods -o wide  -n default  &amp;&gt;&gt; $logfile
@@ -593,6 +592,7 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2021-04-14 0.92 OpenShift 4 on bare metal ; Catalog Source for operators
 2021-03-04 0.91 UPF router support; automatic link between UPF and the OCP hosting the NRF if any; more UPF attributes in Misc section; network interfaces naming more flexible to address ubuntu targets 
 2021-02-12 0.90 OpenShift 4.x deployment: support preallocated floating IPs for API and APP endpoints
 2021-02-03 0.89 OpenShift 4.x deployment: export APP and API floating IPs for UPF automatic link; UPF: make mcc and mnc variables in Misc section
@@ -1489,6 +1489,7 @@ Networks.build = function(target, engine){
 //===========================
 var MiscItems = [
   {name: 'rhel_pullsecret', comment: "User secret provided by RedHat for deploying an OpenShift 4.x cluster; visit https://cloud.redhat.com/openshift/install/pull-secret", value:'{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"registry.connect.redhat.com":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"},"registry.redhat.io":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"}}}'},
+  {name: 'public_sshKey', comment: "Public SSH key injected in baremetal nodes part of an OpenShift cluster, for debugging purpose", value:'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDD7NHyHQT3pfG6yfpmQFSBjYe0x7t3qosl0sd880GHDbOkEZy9q5qMxYkQS41QCNzbx6RLrfz5eQawyWx0ADfY/YHaCKrjtFjd1hsP/svOBycJcOscGRjgmHt5ONDxqQGNgIpPOk/HOZn5oJEeJ8Bmk8hFdrsfl5m5f3IHg29jXmfL6bjaGGuWhD1xTKQEAk12DzObqvngalTO5+JPNoxSn2M7bYKZykP+vWQICyHTc8IRnwExyEmI4wEONOrMh13S2AdDpP9aoVCoTk+1Q8sJCmjO49g/uJlusfVTiVTBHTGycxWCcGG2uQ1BfwYJ/vp/8y9A/LVXmjYzYUIjBiBT Generated-by-Nova'},
   {name: 'anyuid', value: 'false', comment: "true|false: relax security on the OpenShift cluster before deploying resources by granting all containers the root privilege and approving pending certificates (not recommended)"},
   {name: 'extnet', value: 'ext-net', comment: "Name of the OpenStack external network used to connect the public addresses of the instances defined in the Nodes section"},
   {name: 'UPFpassword', value: 'R7VgbZPass.y4yDukYdA8/', comment: "Encrypted password set in the Casa UPF startup configuration file; used to allow/deny the user entering the configuration mode"},
@@ -1668,7 +1669,7 @@ var Nodes= new vnfResource("Nodes", [
 	);
 	
 Nodes.help = function(){
-	return `Nodes and roles definition and assignment
+	return `OpenStack Nodes and roles definition and assignment
 - MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
 - MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
 - PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
@@ -2059,6 +2060,7 @@ interface gige 0/`+i+`
 `;
 }
 
+    
 // ===========================
 // OpenShiftNodes resource
 // ===========================
@@ -2223,6 +2225,192 @@ OpenShiftNodes.build = function(target){
   OpenShiftNodes.instances=null;
   return OpenShiftNodes.check;
 };
+
+// ===========================
+// BaremetalNodes resource
+// ===========================
+var BaremetalNodes= new vnfResource("BaremetalNodes", [
+  {name:'FQDN', type:'text', width: '200px'}, 
+  {name:'Role', width:'120px', type:'choice', choices:['master','worker']},
+  {name:'IPMI address', type:'text', width: '120px'},
+  {name:'IPMI user', type:'text', width: '120px'},
+  {name:'IPMI password', type:'text', width: '120px'},
+  {name:'API VIP', type:'text', width: '120px'},
+  {name:'Ingress VIP', type:'text', width: '120px'},
+  {name:'Baremetal CIDR', type:'text', width: '120px'},
+  {name:'Provisioning CIDR', type:'text', width: '120px'},
+  {name:'Boot MAC address', type:'text', width: '120px'},
+  {name:'Boot interface', type:'text', width: '120px'},
+  {name:'Boot device', type:'text', width: '120px'}
+  ]
+  );
+  
+BaremetalNodes.help = function(){
+  return `Hardware servers part of an OpenShift cluster on bare metal
+Each server must be connected to 2 networks on the same interfaces:
+- baremetal network: a rootable network
+- provisioning network: non-routable network used for provisioning the underlying operating system;  no other DHCP servers should run on the same broadcast domain.  
+FQDN: the fully qualified domain name of this server on the baremetal network: this name must be resolved by a domain name server. It consists in three parts:
+- the node short name
+- the OpenShift cluster name
+- the domain
+Role: 3 masters minimum per OpenShift cluster; workers are optional: if missing, master nodes play both master and worker roles
+IPMI address, user and password: ILO remote control for this server
+API/Ingress VIP: virtual IP addresses for the API endpoint and wildcard ingress endpoint respectively
+Baremetal/Provisioning CIDR: The public CIDR (Classless Inter-Domain Routing) of the networks. For example, 10.0.0.0/24
+Boot MAC address and interface: IP address and network interface of this node on the provisioning network
+Boot device: Linux path to the block device used for installing the OS, eg /dev/sdb
+`;
+}
+  
+BaremetalNodes.build = function(target){
+  var nameIndexes = BaremetalNodes.nameIndexes;
+  var result = "";
+  BaremetalNodes.check="";
+  var table = document.getElementById("BaremetalNodes");
+  var rowCount = table.rows.length;
+  // For each OpenShift cluster
+  BaremetalNodes.clusters=new Array();
+  var nodes=new Array();
+  var powerOff=new Array();
+  var masters=new Array();
+  var workers=new Array();
+  var domains=new Array();
+  var apiVIPs=new Array();
+  var ingressVIPs=new Array();
+  var baremetalCIDRs=new Array();
+  var provisioningCIDRs=new Array();
+  var bootInterfaces=new Array();
+  
+  for(var i=1; i < rowCount; i++){
+    if(result==""){
+      result += "\n"
+      result += "\n# ------------------------------- #";
+      result += "\n# BaremetalNodes definition       #";
+      result += "\n# ------------------------------- #";
+      }
+    var row = table.rows[i];
+    // nodes attributes
+    var fqdn=BaremetalNodes.getAndSetValue(row, nameIndexes, 'FQDN', 'node-'+i+'.steel.bm.fc');
+    var role=BaremetalNodes.getAndSetSelection(row, nameIndexes, 'Role',0);
+    var ipmi=BaremetalNodes.getAndSetValue(row, nameIndexes, 'IPMI address', '10.33.0.'+(14+i));
+    var user=BaremetalNodes.getAndSetValue(row, nameIndexes, 'IPMI user', 'admin');
+    var password=BaremetalNodes.getAndSetValue(row, nameIndexes, 'IPMI password', 'HP1nvent');
+    var mac=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Boot MAC address', '48:df:37:xx:yy:zz');
+    var device=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Boot device', '/dev/sdb');
+    
+    var name=fqdn.split('.'); var shortname=name[0]; var ocp=name[1]; var domain=fqdn.substring((shortname+'.'+ocp+'.').length);
+    if(name.length < 3)BaremetalNodes.check+="\nBaremetalNodes: Invalid FQDN "+fqdn+": expecting <node name>.<cluster name>.<domain>";
+    if(!masters[ocp])masters[ocp]=new Array();
+    if(!workers[ocp])workers[ocp]=new Array();
+    if(masters[ocp].indexOf(shortname)<0 && workers[ocp].indexOf(shortname)<0)switch(role){
+      case 'master': masters[ocp].push(shortname); break;
+      case 'worker': workers[ocp].push(shortname); break;
+      default: BaremetalNodes.check+="\nBaremetalNodes: unsupported role "+role+" for "+fqdn+": expecting master or worker";
+    }else{
+      BaremetalNodes.check+="\nBaremetalNodes: "+shortname+" is duplicated in cluster "+ocp;
+    }
+    
+    if(!powerOff[ocp])powerOff[ocp]=new Array();
+    powerOff[ocp].push("ipmitool -I lanplus -U "+user+" -P "+password+" -H "+ipmi+" power off");
+    
+    if(!domains[ocp]){
+      domains[ocp]=domain;
+    }else {
+      if(domains[ocp] != domain)BaremetalNodes.check+="\nBaremetalNodes: inconsistent domain "+domain+" for node "+shortname+" on cluster "+ocp+" expecting consistent value across nodes: "+domains[ocp];
+    }
+    var macT=mac.split(':');
+    isTwoHex = function(mac_addr){return mac_addr.length == 2 && mac_addr.match("^[0-9a-fA-F]+$")};
+    if(macT.length < 6 || !macT.every(isTwoHex))BaremetalNodes.check+="\nBaremetalNodes: Invalid Boot MAC address "+mac+": expecting 6 column separated hex values 00-ff";
+    
+    // Cluster wide attributes, common to all nodes in one given cluster
+    var apiVIP=BaremetalNodes.getAndSetValue(row, nameIndexes, 'API VIP', apiVIPs[ocp]?apiVIPs[ocp]:'10.33.200.'+(90+2*i));
+    if(!apiVIPs[ocp])apiVIPs[ocp]=apiVIP;
+    if(apiVIPs[ocp] != apiVIP)BaremetalNodes.check+="\nBaremetalNodes: inconsistent apiVIP on node "+fqdn+" for cluster "+ocp+": "+apiVIP+": expecting consistent value across nodes: "+apiVIPs[ocp];
+    var ingressVIP=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Ingress VIP', ingressVIPs[ocp]?ingressVIPs[ocp]:'10.33.200.'+(91+2*i));
+    if(!ingressVIPs[ocp])ingressVIPs[ocp]=ingressVIP;
+    if(ingressVIPs[ocp] != ingressVIP)BaremetalNodes.check+="\nBaremetalNodes: inconsistent ingressVIP on node "+fqdn+" for cluster "+ocp+": "+ingressVIP+": expecting consistent value across nodes: "+ingressVIPs[ocp];
+    var baremetalCIDR=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Baremetal CIDR', baremetalCIDRs[ocp]?baremetalCIDRs[ocp]:'10.33.200.0/24');
+    if(!baremetalCIDRs[ocp])baremetalCIDRs[ocp]=baremetalCIDR;
+    if(baremetalCIDRs[ocp] != baremetalCIDR)BaremetalNodes.check+="\nBaremetalNodes: inconsistent baremetalCIDR on node "+fqdn+" for cluster "+ocp+": "+baremetalCIDR+": expecting consistent value across nodes: "+baremetalCIDRs[ocp];
+    var provisioningCIDR=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Provisioning CIDR', provisioningCIDRs[ocp]?provisioningCIDRs[ocp]:'10.33.202.0/24');
+    if(!provisioningCIDRs[ocp])provisioningCIDRs[ocp]=provisioningCIDR;
+    if(provisioningCIDRs[ocp] != provisioningCIDR)BaremetalNodes.check+="\nBaremetalNodes: inconsistent provisioningCIDR on node "+fqdn+" for cluster "+ocp+": "+provisioningCIDR+": expecting consistent value across nodes: "+provisioningCIDRs[ocp];
+    var bootInterface=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Boot interface', bootInterfaces[ocp]?bootInterfaces[ocp]:'ens1f0');
+    if(!bootInterfaces[ocp])bootInterfaces[ocp]=bootInterface;
+    if(bootInterfaces[ocp] != bootInterface)BaremetalNodes.check+="\nBaremetalNodes: inconsistent bootInterface on node "+fqdn+" for cluster "+ocp+": "+bootInterface+": expecting consistent value across nodes: "+bootInterfaces[ocp];
+    
+    result+='\n# '+(role+' '+fqdn).padEnd(40)+'IPMI: '+ipmi+'/'+ user+'/'+password+ ' MAC: '+mac+' boot disk: '+device;
+    
+    if(!BaremetalNodes.clusters[ocp]){
+      BaremetalNodes.clusters[ocp] = new Object;
+      BaremetalNodes.clusters[ocp].installConfig="apiVersion: v1";
+    }
+    if(!nodes[ocp])nodes[ocp]="\nhosts:";
+    nodes[ocp]+=`
+  - name: `+shortname+`
+    role: `+role+`
+    bmc:
+      address: ipmi://`+ipmi+`/
+      username: `+user+`
+      password: `+password+`
+      disableCertificateVerification: True
+    bootMACAddress: `+mac+`
+    rootDeviceHints:
+     deviceName: "`+device+`"`;
+  }
+  
+  // OCP on bare metal requires the RedHat pull secret and a public ssh key
+  if(Object.keys(BaremetalNodes.clusters).length){
+    if(!Misc.search('Property','rhel_pullsecret'))BaremetalNodes.check+="\nBaremetalNodes section: missing the RedHat secret definition in Misc section rhel_pullsecret";
+    if(!Misc.search('Property','public_sshKey'))BaremetalNodes.check+="\nBaremetalNodes section: missing the public ssh key definition in Misc section public_sshKey";
+  }
+  
+  result+='\n# OpenShift clusters summary:';
+  // Build the OpenShift installConfig yaml files
+  Object.keys(BaremetalNodes.clusters).forEach(function(ocp){
+    if(masters[ocp].length<3)BaremetalNodes.check+="\nBaremetalNodes: on cluster "+ocp+", found "+masters[ocp].length+" master(s), expecting three or more.";
+    BaremetalNodes.clusters[ocp].powerOff=powerOff[ocp].join(" && ");
+    BaremetalNodes.clusters[ocp].installConfig+=
+`
+baseDomain: `+domains[ocp]+`
+metadata:
+  name: `+ocp+`
+networking:
+  machineCIDR: `+baremetalCIDRs[ocp]+`
+  networkType: OVNKubernetes
+compute:
+- name: worker
+  replicas: `+workers[ocp].length+`
+controlPlane:
+  name: master
+  replicas: `+masters[ocp].length+`
+  platform:
+    baremetal: {}
+platform:
+  baremetal:
+    apiVIP: `+apiVIPs[ocp]+`
+    ingressVIP: `+ingressVIPs[ocp]+`
+    disableCertificateVerification: True
+    provisioningBridge: provisioning
+    provisioningNetworkCIDR: `+provisioningCIDRs[ocp]+`
+    provisioningNetworkInterface: `+bootInterfaces[ocp]+`
+`+nodes[ocp].replace(/\n/g, "\n    ")+
+`
+pullSecret: '`+Misc.getValue('rhel_pullsecret')+`'
+sshKey: '`+Misc.getValue('public_sshKey')+`' 
+`;
+
+    result+='\n# '+ocp.padEnd(15)+':'+masters[ocp].length+' masters and '+workers[ocp].length+' worker(s) on domain '+domains[ocp]+' API VIP '+apiVIPs[ocp]+' ingress VIP '+ingressVIPs[ocp]+' CIDRs '+provisioningCIDRs[ocp]+'/'+baremetalCIDRs[ocp]+' boot on '+bootInterfaces[ocp];
+  });
+  
+  if(!BaremetalNodes.check)return result;
+  
+  // Errors: cleanup and report
+  BaremetalNodes.clusters=null;
+  return BaremetalNodes.check;
+};
+
 // ===========================
 // CinderVolumes settings
 // ===========================
@@ -2677,7 +2865,7 @@ hpe5gResource.prototype.build = function(target){
 		var row = table.rows[i];
 		var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
 		if(!hpe5gResources.types[this.title] || hpe5gResources.types[this.title].indexOf(type) < 0){this.check += "\n"+this.title+": "+type+" is unknown in the catalog"; continue;}
-		var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
+    var name=this.getAndSetValue(row, nameIndexes, 'Name', hpe5gResources.defaults[type]['Name']?hpe5gResources.defaults[type]['Name']:type+"-"+i);
 		var project=this.getAndSetValue(row, nameIndexes, 'Project',hpe5gResources.defaults[type]['Project']?hpe5gResources.defaults[type]['Project']:Misc.getValue('default_project'));
 		var URL=this.getAndSetValue(row, nameIndexes, 'URL',hpe5gResources.defaults[type]['URL']);
 		var insecure=Nodes.getAndSetChecked(row, nameIndexes, 'insecure');
@@ -2696,7 +2884,7 @@ hpe5gResource.prototype.build = function(target){
 		if(chartOptions)displayChart+=" "+chartOptions;
 		this.check += checkDependency(this.title=='HelmCharts', [values!=undefined && values.content!=undefined && chart.length>0], this.title+" "+name,", Helm chart and values are required");
 		var displayVolume="";
-		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas');
+		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas', hpe5gResources.defaults[type]['Replicas']?hpe5gResources.defaults[type]['Replicas']:"");
 		if(!replicas)replicas="1";
 		var dependenciesList=this.getAndSetValue(row, nameIndexes, 'Dependencies');
 		var dependencies=undefined;
@@ -2924,17 +3112,19 @@ IndirectServices.help = function(){return hpe5gResource.prototype.help()+
 //OperatorSources
 //===========================
 var OperatorSources = new vnfResource("OperatorSources", [
-  {name:'Type', type:'choice', width: '140px', choices: ['operator-source']}, 
+  {name:'Type', type:'choice', width: '140px', choices: ['catalog-source','operator-source',]}, 
   {name:'Name', type:'text', width:'100px'},
   {name:'Project', type:'text', width:'200px'},
-  {name:'URL', type:'text', width:'200px'}
+  {name:'URL', type:'text', width:'400px'}
   ]
 );
 OperatorSources.help = function(){return `Operator sources instantiation:
-- Type: the type of the operator source to instantiate
-- Name: the name of the operator source, typically the account name in quay.io
+- Type: the type of the operator source to instantiate:
+  operator-source is supported until OpenShift 4.5 included (kind OperatorSource)
+  catalog-source is mandatory starting with OpenShift 4.6 (kind CatalogSource)
+- Name: the name of the operator source, typically the account name in quay.io for OperatorSource, the name of the operator for CatalogSource
 - Project: the OpenShift project where to deploy this source, typically openshift-marketplace
-- URL: location of the account, typically https://quay.io/cnr  
+- URL: location of the account, typically https://quay.io/cnr for OperatorSource, quay.io/<user account>/<operator index>:<version> for CatalogSource
 `;
 }
 OperatorSources.build = function(target){
@@ -2945,6 +3135,7 @@ OperatorSources.build = function(target){
   var rowCount = table.rows.length;
   OperatorSources.deployments = new Object;
   Builds.templates['operator-source']=new Object;
+  Builds.templates['catalog-source']=new Object;
 
   for(var i=1; i < rowCount; i++){
     if(result==""){
@@ -2954,11 +3145,11 @@ OperatorSources.build = function(target){
       result += "\n# -------------------------------- ";
       }
     var row = table.rows[i];
-    var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
+    var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type', 0);
     if(!hpe5gResources.defaults[type] || !hpe5gResources.defaults[type]['template']){this.check += "\n"+this.title+": "+type+" template is unknown in the catalog"; continue;}
-    var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
-    var project=this.getAndSetValue(row, nameIndexes, 'Project','openshift-marketplace');
-    var URL=this.getAndSetValue(row, nameIndexes, 'URL',hpe5gResources.defaults[type]['URL']);
+    var name=this.getAndSetValue(row, nameIndexes, 'Name', hpe5gResources.defaults[type]['Name']);
+    var project=this.getAndSetValue(row, nameIndexes, 'Project',hpe5gResources.defaults[type]['Project']);
+    var URL=this.getAndSetValue(row, nameIndexes, 'URL', hpe5gResources.defaults[type]['URL']);
     Builds.makeTemplate(name, type, URL);
     var template=Builds.templates[type][name];
     
@@ -2980,9 +3171,9 @@ OperatorSources.build = function(target){
 //Operators
 //===========================
 var Operators = new hpe5gResource("Operators", [
-	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.types['Operators']}}, 
-	{name:'Name', type:'text', width:'100px'},
-	{name:'Project', type:'text', width:'60px'},
+	{name:'Type', type:'choice', width: '200px', choices: function(){return hpe5gResources.types['Operators']}}, 
+	{name:'Name', type:'text', width:'140px'},
+	{name:'Project', type:'text', width:'140px'},
 	{name:'Replicas', type:'text', width:'40px'},
 	{name:'Pipeline', type:'text', width:'100px'}
 	]
@@ -3054,12 +3245,12 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
     - connect to this VM as user centos with the saved ssh key eg:   
     ssh -i mykey.pem centos@30.118.0.26
     - install git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository:     
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y epel-release     
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
+     sudo  yum install -y epel-release     
+     sudo  yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
     - install openstack client, ansible, shade, passlib, decorator and cryptography:    
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
+     sudo  pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
     - clone the CMS5G Core Stack automated deployer from git:     
-     http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone git@10.74.128.22:CMS-5GCS/automated-deployer.git
+     git clone git@github.hpe.com:CMS-5GCS/automated-deployer.git
     - move to this directory    
      cd automated-deployer
     - retrieve in this directory the private ssh key file and set ssh compliant access rights eg :    
@@ -3114,7 +3305,7 @@ function deploymentDoc(){
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 `;
-	['Misc', 'Networks','OpenShiftNodes','Nodes','Flavors','Clusters','Builds', 'CustomApps', 'NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
+	['Misc', 'Networks','OpenShiftNodes','BaremetalNodes','Nodes','Flavors','Clusters','Builds', 'CustomApps', 'NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
 		result+="\n### "+section+"\n"+window[section].help();
 		if(hpe5gResources.types[section])result+="\n"+section+" supported types: "+hpe5gResources.types[section]+"\n";
 	});
@@ -3183,7 +3374,7 @@ _cmd_with_retry() {
 	 
 	local _countMax=$(( $_timeout/$_retryPeriod + 1 ))
 	local _count=0
-    until _cmdOutput=$(eval "$_cmd" 2>> $logfile) || (( $_count >= $_countMax )) ; do
+    until _cmdOutput=$(eval "$_cmd" >> $logfile) || (( $_count >= $_countMax )) ; do
     	((_count++))
     	_log_ "$_cmdDescription: attempt $_count of $_countMax, retrying in $_retryPeriod seconds"
         sleep $_retryPeriod
@@ -3214,7 +3405,7 @@ test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user i
 _log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="~PROJECTS~"
-for _project in $oc_projects ; do oc project $_project &>> $logfile || oc new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
 if echo guess | oc login -u system:admin &>> $logfile ; then
 _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &>> $logfile
@@ -3308,7 +3499,7 @@ function hpe5gHelmValues(header, footer, tab){
 function hpe5gNetworkFunctions(header, footer, tab, singleProject){
 	var templateHeader=
 `
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: ~PROJECT~
@@ -3805,7 +3996,7 @@ function buildHeatTemplate(){
 	    heat+=n0+"            cat > /home/centos/openshift_volumes.yaml << 'EOFILE'";
 	    // OpenShift system level functions: volumes
 	    heat+=n0+'            kind: Template';
-	    heat+=n0+'            apiVersion: v1';
+	    heat+=n0+'            apiVersion: template.openshift.io/v1';
 	    heat+=n0+'            metadata:';
 	    heat+=n0+'              name: system';
 	    heat+=n0+'              annotations:';
@@ -4064,15 +4255,16 @@ disableSecurityPortsForInstance() {
     subnet=$(openstack network list -f json | jq -r -c '.[] | select( .Name | startswith("'$\{_name}-'")) | .Subnets')
     [[ "$subnet" =~ "[" ]] && subnet=$(echo $subnet | jq -r .[0])
     [[ $subnet =~ "-" ]] || continue
-    subnetname=$(openstack subnet show $subnet -f json | jq -r .name)
-    # Get the ports IDs on this subnet
-    ports=$(openstack port list --fixed-ip subnet=$subnet -f json | jq -r -c '.[].ID' )
-    # Reset security on each port
-    for p in $ports ; do 
-      # if port security enabled => disable
-      $(openstack port show $p -f json | jq .port_security_enabled) &&
-      echo BACKGROUND Disabling security on port $p subnet $subnetname &>> $logfile && 
-      openstack port set $p --no-allowed-address --no-security-group --disable-port-security &>> $logfile 
+    for _subnet in $subnet ; do subnetname=$(openstack subnet show $_subnet -f json | jq -r .name) 
+      # Get the ports IDs on this subnet
+      ports=$(openstack port list --fixed-ip subnet=$subnet -f json | jq -r -c '.[].ID' )
+      # Reset security on each port
+      for p in $ports ; do 
+        # if port security enabled => disable
+        $(openstack port show $p -f json | jq .port_security_enabled) &&
+        echo BACKGROUND Disabling security on port $p subnet $subnetname &>> $logfile && 
+        openstack port set $p --no-allowed-address --no-security-group --disable-port-security &>> $logfile 
+      done
     done
   done
 }
@@ -4355,6 +4547,103 @@ i=0 && while (( i <  $\{#OCP[@]} )) ; do
   fi
   
   $_deploy && deployOCP $\{OCP[i]:-$OCP} $\{DOMAIN[i]:-$DOMAIN} $\{FLAVOR[i]:-$FLAVOR} $\{MASTERS[i]:-$MASTERS} $\{WORKERS[i]:-$WORKERS} $\{EXTNET[i]:-$EXTNET} $\{EXTDNS[i]:-$EXTDNS} $\{FIPAPI[i]:-$FIPAPI} $\{FIPAPP[i]:-$FIPAPP} $\{NBVOLUMES[i]:-$NBVOLUMES} $\{FLAVORWORKER[i]:-$FLAVORWORKER} || undeployOCP $\{OCP[i]:-$OCP} $\{DOMAIN[i]:-$DOMAIN} $\{FIPAPI[i]:-$FIPAPI} $\{FIPAPP[i]:-$FIPAPP} 
+  ((i+=1))
+done
+`;
+}
+
+
+//=================================
+//OCP4 baremetal deployer
+//=================================
+//Return a shell script deploying OpenShift 4 on bare metal
+function buildOCP4BaremetalDeployer(){
+  // Build or get the errors: 
+  var warnings=BaremetalNodes.build();
+  // If no openshift instances are defined, display warnings and return
+  if(!BaremetalNodes.clusters){
+    userOutput(warnings);
+    return '';
+  }
+  var shell= `
+# Reference documentation for OpenShift deployment on bare metal: https://openshift-kni.github.io/baremetal-deploy/4.6/Deployment.html
+# Deployment
+# Input parameters: cluster name and command to power off all nodes part of this cluster
+deployOCPBM() {
+  local _name=$1
+  local _powerOff=$2
+  
+  # Check openshift deployments CLIs
+  which oc > /dev/null && _log_ "oc CLI available version $(oc version 2> /dev/null | grep 'Client Version'  | awk '{print $3}')" || _fail_ "Missing oc CLI "
+  which openshift-baremetal-install > /dev/null && _log_ "openshift-baremetal-install CLI available version $(openshift-baremetal-install version | grep openshift-baremetal-install | awk '{print $2}')" || _fail_ "Missing openshift-baremetal-install CLI"
+  which ipmitool > /dev/null && _log_ "$(ipmitool -V) CLI available" || _fail_ "Missing ipmitool CLI"
+  
+  # Save a copy of the install-config.yaml consumed by the OpenShift installer
+  cp -f $_name/install-config.yaml $_name/install-config.saved.yaml &>> $logfile || _fail_ "Cannot save $_name/install-config.yaml to $_name/install-config.saved.yaml"
+  
+  # Power off all nodes
+  _log_ "Shuting down all servers part of $_name "
+  eval $_powerOff &>> $logfile || _fail_ "Cannot shutdown $_name nodes with: $_powerOff"
+  
+  # Deploy the cluster
+  _log_ "Deploying the OpenShift cluster $_name"
+  if [ "$logfile" != "/dev/stdout" ] ; then _log_ "This takes a while, follow-up available in $logfile" ; fi
+  $_preview openshift-baremetal-install create cluster --dir $_name --log-level debug &>> $logfile || _fail_ "Cannot create OpenShift cluster $_name"
+
+  _log_ "Checking deployment completion" 
+  $_preview openshift-baremetal-install wait-for install-complete --dir $_name --log-level debug &>> $logfile || _fail_ "OpenShift cluster $_name creation did not complete"
+  
+  _log_ "Checking OCP login as kubeadmin on $_name with KUBECONFIG=$_name/auth/kubeconfig and kubeadmin-password $(cat $_name/auth/kubeadmin-password)"
+  export KUBECONFIG=$_name/auth/kubeconfig
+  oc login -u kubeadmin -p $(cat $_name/auth/kubeadmin-password) &>> $logfile || _fail_ "Cannot login to OCP cluster $_name as kubeadmin"
+`+
+// Cluster is ready for openshift resources deployment
+buildNetworkFunctions()
++`
+}
+
+# Undeployment
+undeployOCPBM() {
+  local _name=$1
+  
+  # Delete cluster
+  _log_ "Destroying OpenShift cluster $_name"
+  $_preview openshift-baremetal-install destroy cluster --dir $_name --log-level debug &>> $logfile || rm -Rf $_name  &>> $logfile || _fail_ "Cannot destroy cluster $_name"
+}
+
+_log_ "OpenShift installer internal cleanup"
+for i in $(sudo virsh pool-list --all | tail -n +3 | grep cluster | awk {'print $1'}); do   
+  virsh pool-destroy $i &>> $logfile   
+  rm -Rf /var/lib/libvirt/openshift-images/$i &>> $logfile   
+  virsh pool-delete $i &>> $logfile   
+  virsh pool-undefine $i &>> $logfile 
+done
+for i in $(sudo virsh list | tail -n +3 | grep bootstrap | awk {'print $2'}); do   
+  sudo virsh destroy $i &>> $logfile   
+  sudo virsh undefine $i &>> $logfile   
+  sudo virsh vol-delete $i --pool default &>> $logfile   
+  sudo virsh vol-delete $i.ign --pool default &>> $logfile 
+done
+
+# If deployment, create one directory per OCP cluster, and drop install-config files
+if $_deploy ; then
+`;
+Object.keys(BaremetalNodes.clusters).forEach(function(ocp){
+shell+=`_name=`+ocp+`
+mkdir -p $_name || _fail_ "Cannot create installation directory $_name"
+# Build install-config.yaml
+cat > $_name/install-config.yaml << EOF || _fail_ "Cannot build $_name/install-config.yaml"
+`+BaremetalNodes.clusters[ocp].installConfig+`
+EOF
+`  
+});
+
+shell+=`
+fi  # If deployment, create one directory per OCP cluster, and drop install-config files
+
+# For all instance names, deploy or undeploy
+i=0 && while (( i <  $\{#OCPBM[@]} )) ; do 
+  $_deploy && deployOCPBM $\{OCPBM[i]:-$OCPBM} "$\{OCPBMOFF[i]}" || undeployOCPBM $\{OCPBM[i]:-$OCPBM}  
   ((i+=1))
 done
 `;
@@ -4751,7 +5040,19 @@ _displayedAction=$($_deploy && echo Deploying || echo Undeploying)
 state=$($_deploy && echo present || echo absent)
 _headless=`+Misc.getValue('headless')+`
 _preview=
-`;
+
+_defaultName=$default_stack
+unset OCP FIPAPI FIPAPP
+ETCHOSTS=true
+EXTNET=`+Misc.getValue('extnet')+`
+DOMAIN=localdomain
+WORKERS=3
+MASTERS=3
+FLAVOR=v4.m16.d25
+FLAVORWORKER=$FLAVOR
+EXTDNS=8.8.8.8
+NBVOLUMES=10
+`; 
 
 if(OpenShiftNodes.instances && OpenShiftNodes.instances.name.length)shell+=`
 _defaultName=(`+OpenShiftNodes.instances.name.join(' ')+`)
@@ -4768,19 +5069,11 @@ FLAVOR=(`+OpenShiftNodes.instances.flavor.join(' ')+`)
 FLAVORWORKER=(`+OpenShiftNodes.instances.flavorWorker.join(' ')+`)
 EXTDNS=(`+OpenShiftNodes.instances.extdns.join(' ')+`)
 NBVOLUMES=(`+OpenShiftNodes.instances.nbVolumes.join(' ')+`)`;
-else shell+=`
-_defaultName=$default_stack
-unset OCP FIPAPI FIPAPP
-ETCHOSTS=true
-EXTNET=`+Misc.getValue('extnet')+`
-DOMAIN=localdomain
-WORKERS=3
-MASTERS=3
-FLAVOR=v4.m16.d25
-FLAVORWORKER=$FLAVOR
-EXTDNS=8.8.8.8
-NBVOLUMES=10
-`; 
+
+if(BaremetalNodes.clusters && Object.keys(BaremetalNodes.clusters).length)shell+=`
+_defaultName=(`+Object.keys(BaremetalNodes.clusters).join(' ')+`)
+OCPBM=(`+Object.keys(BaremetalNodes.clusters).join(' ')+`)
+OCPBMOFF=("`+Object.keys(BaremetalNodes.clusters).map(function(ocp){  return BaremetalNodes.clusters[ocp].powerOff  }).join('" "')+`")`;
 
 shell+=`
 RHELSECRET='`+Misc.getValue('rhel_pullsecret')+`'
@@ -4852,12 +5145,17 @@ function outputInstallerShell(){
 	var shellOpenStack='';
 	var shellOpenShift='';
   var shellTerraform='';
+  var shellBaremetal='';
 	Nodes.cloudNodes=undefined;
 
   // OCP4 clusters if any
   if(!OpenShiftNodes.isEmpty()){
     shellTerraform=buildOCP4Deployer();
     if(!shellTerraform)return false;
+  }
+  if(!BaremetalNodes.isEmpty()){
+    shellBaremetal=buildOCP4BaremetalDeployer();
+    if(!shellBaremetal)return false;
   }
   // OpenStack resources if any
   if(!Nodes.isEmpty()){
@@ -4866,11 +5164,11 @@ function outputInstallerShell(){
   }
 
 	// Add OpenShift resources except if an OpenShift cluster was deployed before: the OCP deployment includes the resources deployment
-  if(OpenShiftNodes.isEmpty() && (!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}))){
+  if(OpenShiftNodes.isEmpty() && BaremetalNodes.isEmpty() && (!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}))){
 		shellOpenShift=buildNetworkFunctions();
 		if(hpe5gResources.projects.length && !shellOpenShift)return false;
 	}
-	var shell=shellHeader()+shellTerraform+shellOpenStack+shellOpenShift+"\nexit 0";
+	var shell=shellHeader()+shellTerraform+shellBaremetal+shellOpenStack+shellOpenShift+"\nexit 0";
 	
 	// Show to the user and save to hpe5g.sh
     userOutput(shell);
@@ -4888,7 +5186,7 @@ function outputInstallerShell(){
 	return true;
 }
 
-// Build a kubernetes native application to be deployed with the hpe5gApp operator availble from the catalog endpoint: https://quay.io/cnr registryNamespace: dometdemont
+// Build a kubernetes native application template 
 function outputAppHpe5g(){
   hpe5gResources.init();
 
@@ -4901,13 +5199,7 @@ function outputAppHpe5g(){
   check += hpe5gResources.compile();
   if(check){userOutput(check); return '';}
 
-  var result=`apiVersion: cms.hpe.com/v1
-kind: HPE5gApp
-metadata:
-  name: hpe5gapp
-spec:
-  templateContent:`;
-  result+=hpe5gNetworkFunctions().replace(/\n/g, "\n"+'    '); // fix the template indentation as expected by the hpe5g operator
+  var result=hpe5gNetworkFunctions();
   
   // Show to the user and save to hpe5gApp.yaml
     userOutput(result);
@@ -5093,7 +5385,8 @@ var defaultCatalog=`
       "fluentd"
     ],
     "OperatorSources": [  
-      "operator-source"
+      "operator-source",
+      "catalog-source"
     ],
     "Operators": [  
       "jaeger-product",
@@ -5104,7 +5397,8 @@ var defaultCatalog=`
       "kiali-ossm",
       "grafana-operator",
       "etcd-operator",
-      "ignite-operator",
+      "local-storage-operator",
+      "container-storage-operator",
       "prometheus-operator"
     ],
     "HelmCharts": [
@@ -5161,9 +5455,11 @@ var defaultCatalog=`
 	    "kube-state-metrics": true,
 	    "grafana-operator": true,
       "etcd-operator": true,
-      "ignite-operator": true,
+      "local-storage-operator": true,
+      "container-storage-operator": true,
 	    "prometheus-operator": true,
-      "operator-source": true
+      "operator-source": true,
+      "catalog-source": true
   },
   "values": {
     "jenkins": {
@@ -5304,14 +5600,23 @@ var defaultCatalog=`
     },
     "jaeger-product": {},
     "cert-manager": {},
-    "operator-source": {"URL": "https://quay.io/cnr", "Project": "openshift-marketplace"},
+    "operator-source": {"Name": "dometdemont", "URL": "https://quay.io/cnr", "Project": "openshift-marketplace"},
+    "catalog-source": {"Name": "hpe5gcs-operator", "URL": "quay.io/dometdemont/hpe5gcs-operator-index:v0.1.0", "Project": "openshift-marketplace"},
     "servicemeshoperator": {},
     "amq-streams": {},
     "elasticsearch-operator": {},
     "kiali-ossm": {},
     "grafana-operator": {},
     "etcd-operator": {},
-    "ignite-operator": {},
+    "local-storage-operator": {
+      "Name": "local-storage-operator",
+      "Project": "openshift-local-storage"
+    },
+    "container-storage-operator": {
+      "Name": "ocs-storagecluster",
+      "Project": "openshift-storage",
+      "Replicas": "3"
+    },
     "prometheus-operator": {},
     "nudm-chart": {
       "chart": "hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz"
@@ -12769,223 +13074,98 @@ hpe5gResources.defaults['etcd-operator']['template']=
     version: 3.2.13
 `;
 //================================================
-hpe5gResources.defaults['ignite-operator']['template']=
+hpe5gResources.defaults['local-storage-operator']['template']=
 //================================================
 `
-- apiVersion: apiextensions.k8s.io/v1beta1
-  kind: CustomResourceDefinition
+- kind: OperatorGroup
+  apiVersion: operators.coreos.com/v1alpha2
   metadata:
-    name: ignites.charts.helm.k8s.io
-  spec:
-    group: charts.helm.k8s.io
-    names:
-      kind: Ignite
-      listKind: IgniteList
-      plural: ignites
-      singular: ignite
-    scope: Namespaced
-    subresources:
-      status: {}
-    validation:
-      openAPIV3Schema:
-        type: object
-        x-kubernetes-preserve-unknown-fields: true
-    versions:
-    - name: v1alpha1
-      served: true
-      storage: true
-- apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: ignite-operator
-- apiVersion: rbac.authorization.k8s.io/v1
-  kind: ClusterRole
-  metadata:
-    creationTimestamp: null
-    name: ignite-operator
-  rules:
-  - apiGroups:
-    - ""
-    resources:
-    - namespaces
-    verbs:
-    - get
-  - apiGroups:
-    - ""
-    resources:
-    - configmaps
-    - secrets
-    verbs:
-    - '*'
-  - apiGroups:
-    - ""
-    resources:
-    - events
-    verbs:
-    - create
-  - apiGroups:
-    - rbac.authorization.k8s.io
-    resources:
-    - clusterrolebindings
-    - clusterroles
-    verbs:
-    - '*'
-  - apiGroups:
-    - apps
-    resources:
-    - statefulsets
-    verbs:
-    - '*'
-  - apiGroups:
-    - ""
-    resources:
-    - configmaps
-    - serviceaccounts
-    - services
-    verbs:
-    - '*'
-  - apiGroups:
-    - monitoring.coreos.com
-    resources:
-    - servicemonitors
-    verbs:
-    - get
-    - create
-  - apiGroups:
-    - apps
-    resourceNames:
-    - ignite-operator
-    resources:
-    - deployments/finalizers
-    verbs:
-    - update
-  - apiGroups:
-    - ""
-    resources:
-    - pods
-    verbs:
-    - get
-  - apiGroups:
-    - apps
-    resources:
-    - replicasets
-    - deployments
-    verbs:
-    - get
-  - apiGroups:
-    - charts.helm.k8s.io
-    resources:
-    - '*'
-    verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- kind: ClusterRoleBinding
-  apiVersion: rbac.authorization.k8s.io/v1
-  metadata:
-    name: ignite-operator
-  subjects:
-  - kind: ServiceAccount
-    name: ignite-operator
-    # Replace this with the namespace the operator is deployed in.
+    name: local-operator-group
     namespace: ~PROJECT~
-  roleRef:
-    kind: ClusterRole
-    name: ignite-operator
-    apiGroup: rbac.authorization.k8s.io
-- apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: ignite-operator
   spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        name: ignite-operator
-    template:
-      metadata:
-        labels:
-          name: ignite-operator
-      spec:
-        serviceAccountName: ignite-operator
-        containers:
-          - name: ignite-operator
-            # Replace this with the built image name
-            image: quay.io/dometdemont/ignite:1.0.3
-            imagePullPolicy: Always
-            env:
-              - name: WATCH_NAMESPACE
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.namespace
-              - name: POD_NAME
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
-              - name: OPERATOR_NAME
-                value: "ignite-operator"
-- apiVersion: charts.helm.k8s.io/v1alpha1
-  kind: Ignite
+    targetNamespaces:
+      - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
   spec:
-    # Default values copied from <project_dir>/helm-charts/ignite/values.yaml
-
-    affinity: {}
-    dataStorage:
-      config: ""
-    env:
-      IGNITE_QUIET: "false"
-      JVM_OPTS: -Djava.net.preferIPv4Stack=true
-      OPTION_LIBS: ignite-kubernetes,ignite-rest-http
-    extraContainers: []
-    extraInitContainers: []
-    extraVolumes: null
-    fullnameOverride: ""
-    image:
-      pullPolicy: IfNotPresent
-      repository: apacheignite/ignite
-      tag: 2.7.6
-    nameOverride: ""
-    nodeSelector: {}
-    peerClassLoadingEnabled: false
-    persistence:
-      enabled: false
-      persistenceVolume:
-        provisioner: kubernetes.io/aws-ebs
-        provisionerParameters:
-          fsType: ext4
-          type: gp2
-        size: 8Gi
-      walVolume:
-        provisioner: kubernetes.io/aws-ebs
-        provisionerParameters:
-          fsType: ext4
-          type: gp2
-        size: 8Gi
-    priorityClassName: ""
-    rbac:
-      create: true
-    replicaCount: ~REPLICAS~
-    resources: {}
-    serviceAccount:
-      create: true
-      name: null
-    tolerations: []
-- kind: Route
-  apiVersion: v1
+    installPlanApproval: Automatic
+    name: ~NAME~
+    source: redhat-operators
+    sourceNamespace: openshift-marketplace
+- kind: LocalVolumeDiscovery
+  apiVersion: local.storage.openshift.io/v1alpha1
+  metadata:
+    name: auto-discover-devices
+    namespace: ~PROJECT~
+  spec:
+    nodeSelector:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - ""
+- kind: LocalVolumeSet
+  apiVersion: local.storage.openshift.io/v1alpha1
+  metadata:
+    name: localblock
+    namespace: ~PROJECT~
+  spec:
+    storageClassName: localblock
+    volumeMode: Block
+    nodeSelector:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - ""
+`;
+//================================================
+hpe5gResources.defaults['container-storage-operator']['template']=
+//================================================
+`
+- apiVersion: operators.coreos.com/v1alpha2
+  kind: OperatorGroup
+  metadata:
+    name: openshift-storage
+    namespace: openshift-storage
+  spec:
+    targetNamespaces:
+      - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
+  metadata:
+    name: ocs-operator
+    namespace: ~PROJECT~
+  spec:
+    installPlanApproval: Automatic
+    name: ocs-operator
+    source: redhat-operators
+    sourceNamespace: openshift-marketplace
+- kind: StorageCluster
+  apiVersion: ocs.openshift.io/v1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
   spec:
-    to:
-      kind: Service
-      name: ~NAME~
+    storageDeviceSets:
+    - config: {}
+      count: 1
+      dataPVCTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: "1"
+          storageClassName: localblock
+          volumeMode: Block
+      name: ocs-deviceset-localblock
+      replica: ~REPLICAS~
 `;
 //================================================
 hpe5gResources.defaults['operator-source']['template']=
@@ -13000,6 +13180,19 @@ spec:
   type: appregistry
   endpoint: ~URL~
   registryNamespace: ~NAME~
+`;
+//================================================
+hpe5gResources.defaults['catalog-source']['template']=
+//================================================
+`
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ~NAME~
+  namespace: ~PROJECT~
+spec:
+  sourceType: grpc
+  image: ~URL~
 `;
 </script>
 

@@ -72,6 +72,9 @@ FLAVORWORKER=$FLAVOR
 EXTDNS=8.8.8.8
 NBVOLUMES=10
 
+_defaultName=(steel)
+OCPBM=(steel)
+OCPBMOFF=("ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.16 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.17 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.19 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.15 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.18 power off")
 RHELSECRET='{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"registry.connect.redhat.com":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"},"registry.redhat.io":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"}}}'
 
 while [[ "$#" -gt 0 ]]; do case $1 in
@@ -134,6 +137,37 @@ _fail_() {
 # Clean log file
 > $logfile
 
+# Reference documentation for OpenShift deployment on bare metal: https://openshift-kni.github.io/baremetal-deploy/4.6/Deployment.html
+# Deployment
+# Input parameters: cluster name and command to power off all nodes part of this cluster
+deployOCPBM() {
+  local _name=$1
+  local _powerOff=$2
+  
+  # Check openshift deployments CLIs
+  which oc > /dev/null && _log_ "oc CLI available version $(oc version 2> /dev/null | grep 'Client Version'  | awk '{print $3}')" || _fail_ "Missing oc CLI "
+  which openshift-baremetal-install > /dev/null && _log_ "openshift-baremetal-install CLI available version $(openshift-baremetal-install version | grep openshift-baremetal-install | awk '{print $2}')" || _fail_ "Missing openshift-baremetal-install CLI"
+  which ipmitool > /dev/null && _log_ "$(ipmitool -V) CLI available" || _fail_ "Missing ipmitool CLI"
+  
+  # Save a copy of the install-config.yaml consumed by the OpenShift installer
+  cp -f $_name/install-config.yaml $_name/install-config.saved.yaml &>> $logfile || _fail_ "Cannot save $_name/install-config.yaml to $_name/install-config.saved.yaml"
+  
+  # Power off all nodes
+  _log_ "Shuting down all servers part of $_name "
+  eval $_powerOff &>> $logfile || _fail_ "Cannot shutdown $_name nodes with: $_powerOff"
+  
+  # Deploy the cluster
+  _log_ "Deploying the OpenShift cluster $_name"
+  if [ "$logfile" != "/dev/stdout" ] ; then _log_ "This takes a while, follow-up available in $logfile" ; fi
+  $_preview openshift-baremetal-install create cluster --dir $_name --log-level debug &>> $logfile || _fail_ "Cannot create OpenShift cluster $_name"
+
+  _log_ "Checking deployment completion" 
+  $_preview openshift-baremetal-install wait-for install-complete --dir $_name --log-level debug &>> $logfile || _fail_ "OpenShift cluster $_name creation did not complete"
+  
+  _log_ "Checking OCP login as kubeadmin on $_name with KUBECONFIG=$_name/auth/kubeconfig and kubeadmin-password $(cat $_name/auth/kubeadmin-password)"
+  export KUBECONFIG=$_name/auth/kubeconfig
+  oc login -u kubeadmin -p $(cat $_name/auth/kubeadmin-password) &>> $logfile || _fail_ "Cannot login to OCP cluster $_name as kubeadmin"
+
 # Prerequisites:
 # - OpenShift command line interface installed (oc)
 if ! which oc  > /dev/null ; then  echo Please install oc utility to submit OpenShift requests ; exit 1 ; fi
@@ -180,44 +214,19 @@ _cmd_with_retry() {
    return 0
 }
 
-cat > openshift_project_automated-deployer.yaml << 'EOFILE'
+cat > openshift_project_sanity.yaml << 'EOFILE'
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: automated-deployer
+  name: sanity
   annotations:
-    description: network functions and backing services for project automated-deployer
+    description: network functions and backing services for project sanity
 objects:
-  - kind: Secret
-    apiVersion: v1
-    metadata:
-      name: assistant-autotest
-      namespace: automated-deployer
-    type: Opaque
-    data:
-      ssh-privatekey: LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUJGd0FBQUFkemMyZ3RjbgpOaEFBQUFBd0VBQVFBQUFRRUF6eG5CdlJRdUZoRnFzMjZqbHdMUlJUK0IveEJmMm1MOXlYMXdmSU43cTRFaVB1d3dKSk5CCnlkWnFQeC9hdGxmeGRkeXU0SHlqRXJySjBKV2NOczRFL1dTY2dkQSsxVnVTWlE2ZDY4ZHhYRkJrTGJkUlhjOWtuVUdPWkMKNVhycGt3QytZQnZHZ0poaWlZeW54SlN5YStGeW9XbDdqQWxwRmtTOFMrYWtlb1Y2TnIvc2NXM0EvY21rdlRVKzBYZkdzRApJcGIrSENYSmZUMU1seTI3cDJjdjJyN1FpeWhncEx6MEtYdHZrTTJEeWswZ1BaYzNxLzM2Y1c2REZqenlVT1FNRjBGaS8wCmdMWkI1aEc5QVBRbHZzcVZ2b292R0RGZHlkejQ0V0hseDVOOXFGeFJCZjZRenZsSzVQSGRtSmFDVlpLdytYMmtRNzZOQlgKdU9iSjBvREVYUUFBQTlnbXJaM2VKcTJkM2dBQUFBZHpjMmd0Y25OaEFBQUJBUURQR2NHOUZDNFdFV3F6YnFPWEF0RkZQNApIL0VGL2FZdjNKZlhCOGczdXJnU0krN0RBa2swSEoxbW8vSDlxMlYvRjEzSzdnZktNU3VzblFsWncyemdUOVpKeUIwRDdWClc1SmxEcDNyeDNGY1VHUXR0MUZkejJTZFFZNWtMbGV1bVRBTDVnRzhhQW1HS0pqS2ZFbExKcjRYS2hhWHVNQ1drV1JMeEwKNXFSNmhYbzJ2K3h4YmNEOXlhUzlOVDdSZDhhd01pbHY0Y0pjbDlQVXlYTGJ1blp5L2F2dENMS0dDa3ZQUXBlMitRellQSwpUU0E5bHplci9mcHhib01XUFBKUTVBd1hRV0wvU0F0a0htRWIwQTlDVyt5cFcraWk4WU1WM0ozUGpoWWVYSGszMm9YRkVGCi9wRE8rVXJrOGQyWWxvSlZrckQ1ZmFSRHZvMEZlNDVzblNnTVJkQUFBQUF3RUFBUUFBQVFFQW5rY2FHVTZkOWtHellaVHkKTTh4MGNjOGFvL3c0dGFnb08rREJvbmUrZ1pHOHdZZ3pOeERRRzlqaDlJSjgzaFVTTmpqRjhrMXZPRFpIWFVHcVZQeFpOZQp1NTdVQmhkU0I2SHYvdjA2M214bDJ1WW40VEVuWVplRklNNkNXKzMzSzJGTEhocThON1crd1U4ZFBSRkQxMDFERlhlUGM3ClFSZTNKbTBqOWdmejhaMVZTYTNDSmE2SGtYamhzdjc1VEcvSzFRc0xNVTlYSDd5TmVrRWhDVWYyeWNkUmtCbkRUcFlTQWwKNVp1d25GZW1TNzRDSGdCTWxwNmNLL3lhbUs0RFZwbi9kSzNzUkd2OHRsU2NGVFdHdEdsYko1czh3RjlndjBkdXdyM2RqUwpDU2EwZGpVVUpndmcxcXRWVzhnMDI2S2lsUDVNMnZvSTdwekNmYWQ1N0g5NmhRQUFBSUVBcEVMcXV5czNydWtnRUFQYnJ5CjV3Y20wMVp2L1JtcU5tYVR0SFRIN1JIRTRRV1N6Lzg1aFNraHFwN3NJVUlEVGoxL0EyQWJ6UmFRbmduMUd0S2dVbVlpODQKazUwZjBraWRDRmNXVVBSL0hKUmlOZ3J1SVQzWjBFako4dGRKek14WTRDSFQ2NzBOdjM4RkU0YXlEeVBQWUw1OStxb0kyagpEMU9VdmM4OEQvZTk4QUFBQ0JBT2c5TC8rdk95c2NhQzl3dG9VMTFiNU9lMzFzU3VpU2RWL0VHRDBINEtxY1Q0MkNJTGJkCmJNKzFxVThOVmZEY1VvMk1BMEFXdzFqS0ZUUVhyRjdCYXJySW10NTF3ekdXTXlFWS9yaTMwazZNaCthWFc2QmxSSmxxNlkKVk8yMXJtQ2poZCtFY0JHczF3QlJaMnNHSm5iaU1qNlRvZTR1aitibFNKWHJCTDM4UEhBQUFBZ1FEa1NpUzF3QVJidFBsMApHVzJvU3RIWmRJdXpVM0xWclduZWtoYUpLazZ1YVBsTHQ0Yk14Y1Ivc1pPVHA1SEN0N1UrbmR4UnRYUE0vQnBiZlN1WDhTCktzeTBwVERSZnFSdkJobEhuY1p3Q0J6clJma1IveFhsbjNPUEhhRHNnT1c1VVRxd2lHN0FZOFpybnZPZW0rN1JkenV5bmsKd1hraHc0dU9FKy9iZWlrdXV3QUFBQ0ZrYjIxcGJtbHhkV1ZBWjJodmMzUXlNQzVuY21VdWFIQmxZMjl5Y0M1dVpYUT0KLS0tLS1FTkQgT1BFTlNTSCBQUklWQVRFIEtFWS0tLS0tCg==
-  - kind: BuildConfig
-    apiVersion: build.openshift.io/v1
-    metadata:
-      name: "assistant-autotest"
-    spec:
-      source:
-        contextDir: pipelines/autotest
-        sourceSecret:
-          name: assistant-autotest
-        git:
-          uri: git@github.hpe.com:CMS-5GCS/automated-deployer.git
-      strategy:
-        jenkinsPipelineStrategy:
-          type: JenkinsPipeline
-          env:
-            - name: "_NAME"
-              value: assistant
   - kind: ImageStream
     apiVersion: v1
     metadata:
-      name: pipelines
-      namespace: automated-deployer
+      name: mypipes
+      namespace: sanity
     spec:
       lookupPolicy:
         local: false
@@ -237,30 +246,30 @@ objects:
       annotations:
         haproxy.router.openshift.io/timeout: 4m
         template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
-      name: pipelines
+      name: mypipes
     spec:
       tls:
         insecureEdgeTerminationPolicy: Redirect
         termination: edge
       to:
         kind: Service
-        name: pipelines
+        name: mypipes
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
       annotations:
         template.alpha.openshift.io/wait-for-ready: "true"
-      name: pipelines
+      name: mypipes
     spec:
       replicas: 1
       selector:
-        name: pipelines
+        name: mypipes
       strategy:
         type: Recreate
       template:
         metadata:
           labels:
-            name: pipelines
+            name: mypipes
         spec:
           containers:
           - capabilities: {}
@@ -274,9 +283,9 @@ objects:
             - name: KUBERNETES_TRUST_CERTIFICATES
               value: "true"
             - name: JENKINS_SERVICE_NAME
-              value: pipelines
+              value: mypipes
             - name: JNLP_SERVICE_NAME
-              value: pipelines-jnlp
+              value: mypipes-jnlp
             image: quay.io/openshift/origin-jenkins:latest
             imagePullPolicy: IfNotPresent
             livenessProbe:
@@ -303,34 +312,34 @@ objects:
             terminationMessagePath: /dev/termination-log
             volumeMounts:
             - mountPath: /var/lib/jenkins
-              name: pipelines-data
+              name: mypipes-data
           dnsPolicy: ClusterFirst
           restartPolicy: Always
-          serviceAccountName: pipelines
+          serviceAccountName: mypipes
           volumes:
           - emptyDir:
               medium: ""
-            name: pipelines-data
+            name: mypipes-data
   - kind: ServiceAccount
     apiVersion: v1
     metadata:
       annotations:
-        serviceaccounts.openshift.io/oauth-redirectreference.jenkins: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"pipelines"}}'
-      name: pipelines
+        serviceaccounts.openshift.io/oauth-redirectreference.jenkins: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"mypipes"}}'
+      name: mypipes
   - apiVersion: v1
     groupNames: null
     kind: RoleBinding
     metadata:
-      name: pipelines_edit
+      name: mypipes_edit
     roleRef:
       name: edit
     subjects:
     - kind: ServiceAccount
-      name: pipelines
+      name: mypipes
   - kind: Service
     apiVersion: v1
     metadata:
-      name: pipelines-jnlp
+      name: mypipes-jnlp
     spec:
       ports:
       - name: agent
@@ -339,16 +348,16 @@ objects:
         protocol: TCP
         targetPort: 50000
       selector:
-        name: pipelines
+        name: mypipes
       sessionAffinity: None
       type: ClusterIP
   - kind: Service
     apiVersion: v1
     metadata:
       annotations:
-        service.alpha.openshift.io/dependencies: '[{"name": "pipelines-jnlp", "namespace": "", "kind": "Service"}]'
+        service.alpha.openshift.io/dependencies: '[{"name": "mypipes-jnlp", "namespace": "", "kind": "Service"}]'
         service.openshift.io/infrastructure: "true"
-      name: pipelines
+      name: mypipes
     spec:
       ports:
       - name: web
@@ -357,63 +366,12 @@ objects:
         protocol: TCP
         targetPort: 8080
       selector:
-        name: pipelines
+        name: mypipes
       sessionAffinity: None
       type: ClusterIP
   
 EOFILE
 # CustomApps deployment scripts
-cat > openshift_project_automated-deployer.sh << 'EOFautomated-deployer'
-#!/bin/bash
-( [[ "$1" == "delete" ]] && oc delete all --selector app=assistant ) || ( [[ "$1" == "apply" ]] && oc create secret generic assistant-mad --type=kubernetes.io/ssh-auth --from-literal=ssh-privatekey='-----BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
-NhAAAAAwEAAQAAAQEAzxnBvRQuFhFqs26jlwLRRT+B/xBf2mL9yX1wfIN7q4EiPuwwJJNB
-ydZqPx/atlfxddyu4HyjErrJ0JWcNs4E/WScgdA+1VuSZQ6d68dxXFBkLbdRXc9knUGOZC
-5XrpkwC+YBvGgJhiiYynxJSya+FyoWl7jAlpFkS8S+akeoV6Nr/scW3A/cmkvTU+0XfGsD
-Ipb+HCXJfT1Mly27p2cv2r7QiyhgpLz0KXtvkM2Dyk0gPZc3q/36cW6DFjzyUOQMF0Fi/0
-gLZB5hG9APQlvsqVvoovGDFdydz44WHlx5N9qFxRBf6QzvlK5PHdmJaCVZKw+X2kQ76NBX
-uObJ0oDEXQAAA9gmrZ3eJq2d3gAAAAdzc2gtcnNhAAABAQDPGcG9FC4WEWqzbqOXAtFFP4
-H/EF/aYv3JfXB8g3urgSI+7DAkk0HJ1mo/H9q2V/F13K7gfKMSusnQlZw2zgT9ZJyB0D7V
-W5JlDp3rx3FcUGQtt1Fdz2SdQY5kLleumTAL5gG8aAmGKJjKfElLJr4XKhaXuMCWkWRLxL
-5qR6hXo2v+xxbcD9yaS9NT7Rd8awMilv4cJcl9PUyXLbunZy/avtCLKGCkvPQpe2+QzYPK
-TSA9lzer/fpxboMWPPJQ5AwXQWL/SAtkHmEb0A9CW+ypW+ii8YMV3J3PjhYeXHk32oXFEF
-/pDO+Urk8d2YloJVkrD5faRDvo0Fe45snSgMRdAAAAAwEAAQAAAQEAnkcaGU6d9kGzYZTy
-M8x0cc8ao/w4tagoO+DBone+gZG8wYgzNxDQG9jh9IJ83hUSNjjF8k1vODZHXUGqVPxZNe
-u57UBhdSB6Hv/v063mxl2uYn4TEnYZeFIM6CW+33K2FLHhq8N7W+wU8dPRFD101DFXePc7
-QRe3Jm0j9gfz8Z1VSa3CJa6HkXjhsv75TG/K1QsLMU9XH7yNekEhCUf2ycdRkBnDTpYSAl
-5ZuwnFemS74CHgBMlp6cK/yamK4DVpn/dK3sRGv8tlScFTWGtGlbJ5s8wF9gv0duwr3djS
-CSa0djUUJgvg1qtVW8g026KilP5M2voI7pzCfad57H96hQAAAIEApELquys3rukgEAPbry
-5wcm01Zv/RmqNmaTtHTH7RHE4QWSz/85hSkhqp7sIUIDTj1/A2AbzRaQngn1GtKgUmYi84
-k50f0kidCFcWUPR/HJRiNgruIT3Z0EjJ8tdJzMxY4CHT670Nv38FE4ayDyPPYL59+qoI2j
-D1OUvc88D/e98AAACBAOg9L/+vOyscaC9wtoU11b5Oe31sSuiSdV/EGD0H4KqcT42CILbd
-bM+1qU8NVfDcUo2MA0AWw1jKFTQXrF7BarrImt51wzGWMyEY/ri30k6Mh+aXW6BlRJlq6Y
-VO21rmCjhd+EcBGs1wBRZ2sGJnbiMj6Toe4uj+blSJXrBL38PHAAAAgQDkSiS1wARbtPl0
-GW2oStHZdIuzU3LVrWnekhaJKk6uaPlLt4bMxcR/sZOTp5HCt7U+ndxRtXPM/BpbfSuX8S
-Ksy0pTDRfqRvBhlHncZwCBzrRfkR/xXln3OPHaDsgOW5UTqwiG7AY8ZrnvOem+7Rdzuynk
-wXkhw4uOE+/beikuuwAAACFkb21pbmlxdWVAZ2hvc3QyMC5ncmUuaHBlY29ycC5uZXQ=
------END OPENSSH PRIVATE KEY-----
-' && oc new-app --name assistant --source-secret=assistant-mad git@github.hpe.com:CMS-5GCS/automated-deployer.git && oc expose svc/assistant ) || exit 1
-exit 0
-EOFautomated-deployer
-chmod a+x openshift_project_automated-deployer.sh
-
-cat > openshift_project_openshift-marketplace.sh << 'EOFopenshift-marketplace'
-#!/bin/bash
-oc $1 -f - << EOFhpe5gcs-operator
-apiVersion: operators.coreos.com/v1alpha1
-kind: CatalogSource
-metadata:
-  name: hpe5gcs-operator
-  namespace: openshift-marketplace
-spec:
-  sourceType: grpc
-  image: quay.io/dometdemont/hpe5gcs-operator-index:v0.1.0
-EOFhpe5gcs-operator
-[ $? = 0 ] || exit 1
-exit 0
-EOFopenshift-marketplace
-chmod a+x openshift_project_openshift-marketplace.sh
-
 if $_deploy ; then 
 	_ocAction="apply"
 	_helmAction() { helm upgrade --install $_HPE5G_name $_HPE5G_template --values _tmp_$_helmValues $_HPE5G_options; }
@@ -427,21 +385,19 @@ oc_user=$(oc whoami)
 test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user is ${oc_user:-unknown}: please log as user: oc login -u user"
 _log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
-oc_projects="automated-deployer openshift-marketplace"
-for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-04-14 Version 0.92 on: Thu Apr 15 2021 10:24:48 GMT+0200 (Central European Summer Time) Deploy an automated deployer as a custom app with a jenkins pipeline running autotests' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+oc_projects="sanity"
+for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-04-14 Version 0.92 on: Thu Apr 15 2021 10:50:12 GMT+0200 (Central European Summer Time) An OpenShift cluster on 5 baremetal servers, 3 masters and 2 workers, one jenkins pipeline deployed.' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
 if echo guess | oc login -u system:admin &>> $logfile ; then
 _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &>> $logfile
 oc login -u $oc_user &>> $logfile
-else
- _warn_ "Resource(s) requiring special privileges might jeopardize the deployment:"
- _warn_ "- hpe5gcs-operator:	section: OperatorSources	project: openshift-marketplace	type: catalog-source"
+
 fi
 _log_ "Listing pods as $oc_user"
 oc get pods -o wide  -n default  &>> $logfile
-oc_image_projects=( )
-oc_image_urls=( )
-oc_images=( )
+oc_image_projects=()
+oc_image_urls=()
+oc_images=()
 [[ ${#oc_images[@]} != 0 ]] && _log_ "Populating the docker registry with services images: pull, tag and push"
   for _iImage in ${!oc_images[@]} ; do
     sudo docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry.default.svc:5000 &>> $logfile || _fail_ "Cannot connect to the internal docker registry as user $oc_user"
@@ -475,5 +431,124 @@ for _project in $oc_projects; do
 done
 oc login -u $oc_user &>> $logfile || _fail_ "Cannot log as $oc_user"
 _log_ "$_displayedAction completed: check $logfile"
+
+}
+
+# Undeployment
+undeployOCPBM() {
+  local _name=$1
+  
+  # Delete cluster
+  _log_ "Destroying OpenShift cluster $_name"
+  $_preview openshift-baremetal-install destroy cluster --dir $_name --log-level debug &>> $logfile || rm -Rf $_name  &>> $logfile || _fail_ "Cannot destroy cluster $_name"
+}
+
+_log_ "OpenShift installer internal cleanup"
+for i in $(sudo virsh pool-list --all | tail -n +3 | grep cluster | awk {'print $1'}); do   
+  virsh pool-destroy $i &>> $logfile   
+  rm -Rf /var/lib/libvirt/openshift-images/$i &>> $logfile   
+  virsh pool-delete $i &>> $logfile   
+  virsh pool-undefine $i &>> $logfile 
+done
+for i in $(sudo virsh list | tail -n +3 | grep bootstrap | awk {'print $2'}); do   
+  sudo virsh destroy $i &>> $logfile   
+  sudo virsh undefine $i &>> $logfile   
+  sudo virsh vol-delete $i --pool default &>> $logfile   
+  sudo virsh vol-delete $i.ign --pool default &>> $logfile 
+done
+
+# If deployment, create one directory per OCP cluster, and drop install-config files
+if $_deploy ; then
+_name=steel
+mkdir -p $_name || _fail_ "Cannot create installation directory $_name"
+# Build install-config.yaml
+cat > $_name/install-config.yaml << EOF || _fail_ "Cannot build $_name/install-config.yaml"
+apiVersion: v1
+baseDomain: hpe5g.bm.fc
+metadata:
+  name: steel
+networking:
+  machineCIDR: 10.33.200.0/24
+  networkType: OVNKubernetes
+compute:
+- name: worker
+  replicas: 2
+controlPlane:
+  name: master
+  replicas: 3
+  platform:
+    baremetal: {}
+platform:
+  baremetal:
+    apiVIP: 10.33.200.90
+    ingressVIP: 10.33.200.91
+    disableCertificateVerification: True
+    provisioningBridge: provisioning
+    provisioningNetworkCIDR: 10.33.202.0/24
+    provisioningNetworkInterface: ens1f0
+
+    hosts:
+      - name: zwei
+        role: master
+        bmc:
+          address: ipmi://10.33.0.16/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:6b:e7:3c
+        rootDeviceHints:
+         deviceName: "/dev/sdb"
+      - name: drei
+        role: master
+        bmc:
+          address: ipmi://10.33.0.17/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:68:f4:c8
+        rootDeviceHints:
+         deviceName: "/dev/sdb"
+      - name: funf
+        role: master
+        bmc:
+          address: ipmi://10.33.0.19/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:c9:ab:a8
+        rootDeviceHints:
+         deviceName: "/dev/sdb"
+      - name: eins
+        role: worker
+        bmc:
+          address: ipmi://10.33.0.15/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:6b:e7:38
+        rootDeviceHints:
+         deviceName: "/dev/sdh"
+      - name: vier
+        role: worker
+        bmc:
+          address: ipmi://10.33.0.18/
+          username: admin
+          password: HP1nvent
+          disableCertificateVerification: True
+        bootMACAddress: 48:df:37:6b:e7:40
+        rootDeviceHints:
+         deviceName: "/dev/sdh"
+pullSecret: '{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"registry.connect.redhat.com":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"},"registry.redhat.io":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"}}}'
+sshKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDD7NHyHQT3pfG6yfpmQFSBjYe0x7t3qosl0sd880GHDbOkEZy9q5qMxYkQS41QCNzbx6RLrfz5eQawyWx0ADfY/YHaCKrjtFjd1hsP/svOBycJcOscGRjgmHt5ONDxqQGNgIpPOk/HOZn5oJEeJ8Bmk8hFdrsfl5m5f3IHg29jXmfL6bjaGGuWhD1xTKQEAk12DzObqvngalTO5+JPNoxSn2M7bYKZykP+vWQICyHTc8IRnwExyEmI4wEONOrMh13S2AdDpP9aoVCoTk+1Q8sJCmjO49g/uJlusfVTiVTBHTGycxWCcGG2uQ1BfwYJ/vp/8y9A/LVXmjYzYUIjBiBT Generated-by-Nova' 
+
+EOF
+
+fi  # If deployment, create one directory per OCP cluster, and drop install-config files
+
+# For all instance names, deploy or undeploy
+i=0 && while (( i <  ${#OCPBM[@]} )) ; do 
+  $_deploy && deployOCPBM ${OCPBM[i]:-$OCPBM} "${OCPBMOFF[i]}" || undeployOCPBM ${OCPBM[i]:-$OCPBM}  
+  ((i+=1))
+done
 
 exit 0

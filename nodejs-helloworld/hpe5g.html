@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2021-03-04 Version 0.91</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2021-04-22 Version 0.93</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
@@ -33,7 +33,7 @@
 <table>
 <tr><td valign="top">Get help on the environment setup and topology definition</td><td valign="top"><input class="helpButton" type="button" value="Help" onclick="deploymentHelp()"></td>
 <tr><td valign="top">Build the installer</td><td valign="top"><input class="buildButton" type="button" value="Installer" onclick="outputInstallerShell()"></td></tr>
-<tr><td valign="top">Build the application for HPE5gApp operator</td><td valign="top"><input class="buildButton" type="button" value="hpe5gApp" onclick="outputAppHpe5g()"></td></tr>
+<tr><td valign="top">Build the kubernetes application template</td><td valign="top"><input class="buildButton" type="button" value="hpe5gApp" onclick="outputAppHpe5g()"></td></tr>
 <td valign="top">Build the OpenStack Heat template</td><td valign="top"><input class="buildButton" type="button" value="Stack" onclick="outputHeatTemplate()"></td></tr>
 <tr><td valign="top">OpenShift target version<td valign="top"><select id="oc_version" onchange="Nodes.hideUnused()">
 <option name="4" selected>4.x</option>
@@ -115,6 +115,8 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2021-04-22 0.93 (experimental) local-storage-operator delivering persistent storage on baremetal 
+2021-04-14 0.92 OpenShift 4 on bare metal ; Catalog Source for operators
 2021-03-04 0.91 UPF router support; automatic link between UPF and the OCP hosting the NRF if any; more UPF attributes in Misc section; network interfaces naming more flexible to address ubuntu targets 
 2021-02-12 0.90 OpenShift 4.x deployment: support preallocated floating IPs for API and APP endpoints
 2021-02-03 0.89 OpenShift 4.x deployment: export APP and API floating IPs for UPF automatic link; UPF: make mcc and mnc variables in Misc section
@@ -1011,6 +1013,7 @@ Networks.build = function(target, engine){
 //===========================
 var MiscItems = [
   {name: 'rhel_pullsecret', comment: "User secret provided by RedHat for deploying an OpenShift 4.x cluster; visit https://cloud.redhat.com/openshift/install/pull-secret", value:'{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"registry.connect.redhat.com":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"},"registry.redhat.io":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"}}}'},
+  {name: 'public_sshKey', comment: "Public SSH key injected in baremetal nodes part of an OpenShift cluster, for debugging purpose", value:'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDD7NHyHQT3pfG6yfpmQFSBjYe0x7t3qosl0sd880GHDbOkEZy9q5qMxYkQS41QCNzbx6RLrfz5eQawyWx0ADfY/YHaCKrjtFjd1hsP/svOBycJcOscGRjgmHt5ONDxqQGNgIpPOk/HOZn5oJEeJ8Bmk8hFdrsfl5m5f3IHg29jXmfL6bjaGGuWhD1xTKQEAk12DzObqvngalTO5+JPNoxSn2M7bYKZykP+vWQICyHTc8IRnwExyEmI4wEONOrMh13S2AdDpP9aoVCoTk+1Q8sJCmjO49g/uJlusfVTiVTBHTGycxWCcGG2uQ1BfwYJ/vp/8y9A/LVXmjYzYUIjBiBT Generated-by-Nova'},
   {name: 'anyuid', value: 'false', comment: "true|false: relax security on the OpenShift cluster before deploying resources by granting all containers the root privilege and approving pending certificates (not recommended)"},
   {name: 'extnet', value: 'ext-net', comment: "Name of the OpenStack external network used to connect the public addresses of the instances defined in the Nodes section"},
   {name: 'UPFpassword', value: 'R7VgbZPass.y4yDukYdA8/', comment: "Encrypted password set in the Casa UPF startup configuration file; used to allow/deny the user entering the configuration mode"},
@@ -1190,7 +1193,7 @@ var Nodes= new vnfResource("Nodes", [
 	);
 	
 Nodes.help = function(){
-	return `Nodes and roles definition and assignment
+	return `OpenStack Nodes and roles definition and assignment
 - MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
 - MGMT IP addr: use a question mark on OpenStack (dynamic allocation)
 - PUBLIC IP addr: external IP address for this nodes; use a question mark on OpenStack (dynamic allocation)
@@ -1581,6 +1584,7 @@ interface gige 0/`+i+`
 `;
 }
 
+    
 // ===========================
 // OpenShiftNodes resource
 // ===========================
@@ -1745,6 +1749,195 @@ OpenShiftNodes.build = function(target){
   OpenShiftNodes.instances=null;
   return OpenShiftNodes.check;
 };
+
+// ===========================
+// BaremetalNodes resource
+// ===========================
+var BaremetalNodes= new vnfResource("BaremetalNodes", [
+  {name:'FQDN', type:'text', width: '200px'}, 
+  {name:'Role', width:'120px', type:'choice', choices:['master','worker']},
+  {name:'IPMI address', type:'text', width: '120px'},
+  {name:'IPMI user', type:'text', width: '120px'},
+  {name:'IPMI password', type:'text', width: '120px'},
+  {name:'API VIP', type:'text', width: '120px'},
+  {name:'Ingress VIP', type:'text', width: '120px'},
+  {name:'Baremetal CIDR', type:'text', width: '120px'},
+  {name:'Provisioning CIDR', type:'text', width: '120px'},
+  {name:'Boot MAC address', type:'text', width: '120px'},
+  {name:'Boot interface', type:'text', width: '120px'},
+  {name:'Boot device', type:'text', width: '120px'}
+  ]
+  );
+  
+BaremetalNodes.help = function(){
+  return `Hardware servers part of an OpenShift cluster on bare metal
+Each server must be connected to 2 networks on the same interfaces:
+- baremetal network: a rootable network
+- provisioning network: non-routable network used for provisioning the underlying operating system;  no other DHCP servers should run on the same broadcast domain.  
+FQDN: the fully qualified domain name of this server on the baremetal network: this name must be resolved by a domain name server. It consists in three parts:
+- the node short name
+- the OpenShift cluster name
+- the domain
+Role: 3 masters minimum per OpenShift cluster; workers are optional: if missing, master nodes play both master and worker roles
+IPMI address, user and password: ILO remote control for this server
+API/Ingress VIP: virtual IP addresses for the API endpoint and wildcard ingress endpoint respectively
+Baremetal/Provisioning CIDR: The public CIDR (Classless Inter-Domain Routing) of the networks. For example, 10.0.0.0/24
+Boot MAC address and interface: IP address and network interface of this node on the provisioning network
+Boot device: Linux path to the block device used for installing the OS, eg /dev/sdb
+`;
+}
+  
+BaremetalNodes.build = function(target){
+  var nameIndexes = BaremetalNodes.nameIndexes;
+  var result = "";
+  BaremetalNodes.check="";
+  var table = document.getElementById("BaremetalNodes");
+  var rowCount = table.rows.length;
+  // For each OpenShift cluster
+  BaremetalNodes.clusters=new Array();
+  var nodes=new Array();
+  var powerOff=new Array();
+  var masters=new Array();
+  var workers=new Array();
+  var domains=new Array();
+  var apiVIPs=new Array();
+  var ingressVIPs=new Array();
+  var baremetalCIDRs=new Array();
+  var provisioningCIDRs=new Array();
+  var bootInterfaces=new Array();
+  
+  for(var i=1; i < rowCount; i++){
+    if(result==""){
+      result += "\n"
+      result += "\n# ------------------------------- #";
+      result += "\n# BaremetalNodes definition       #";
+      result += "\n# ------------------------------- #";
+      }
+    var row = table.rows[i];
+    // nodes attributes
+    var fqdn=BaremetalNodes.getAndSetValue(row, nameIndexes, 'FQDN', 'node-'+i+'.steel.bm.fc');
+    var role=BaremetalNodes.getAndSetSelection(row, nameIndexes, 'Role',0);
+    var ipmi=BaremetalNodes.getAndSetValue(row, nameIndexes, 'IPMI address', '10.33.0.'+(14+i));
+    var user=BaremetalNodes.getAndSetValue(row, nameIndexes, 'IPMI user', 'admin');
+    var password=BaremetalNodes.getAndSetValue(row, nameIndexes, 'IPMI password', 'HP1nvent');
+    var mac=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Boot MAC address', '48:df:37:xx:yy:zz');
+    var device=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Boot device', '/dev/sdb');
+    
+    var name=fqdn.split('.'); var shortname=name[0]; var ocp=name[1]; var domain=fqdn.substring((shortname+'.'+ocp+'.').length);
+    if(name.length < 3)BaremetalNodes.check+="\nBaremetalNodes: Invalid FQDN "+fqdn+": expecting <node name>.<cluster name>.<domain>";
+    if(!masters[ocp])masters[ocp]=new Array();
+    if(!workers[ocp])workers[ocp]=new Array();
+    if(masters[ocp].indexOf(shortname)<0 && workers[ocp].indexOf(shortname)<0)switch(role){
+      case 'master': masters[ocp].push(shortname); break;
+      case 'worker': workers[ocp].push(shortname); break;
+      default: BaremetalNodes.check+="\nBaremetalNodes: unsupported role "+role+" for "+fqdn+": expecting master or worker";
+    }else{
+      BaremetalNodes.check+="\nBaremetalNodes: "+shortname+" is duplicated in cluster "+ocp;
+    }
+    
+    if(!powerOff[ocp])powerOff[ocp]=new Array();
+    powerOff[ocp].push("ipmitool -I lanplus -U "+user+" -P "+password+" -H "+ipmi+" power off");
+    
+    if(!domains[ocp]){
+      domains[ocp]=domain;
+    }else {
+      if(domains[ocp] != domain)BaremetalNodes.check+="\nBaremetalNodes: inconsistent domain "+domain+" for node "+shortname+" on cluster "+ocp+" expecting consistent value across nodes: "+domains[ocp];
+    }
+    var macT=mac.split(':');
+    isTwoHex = function(mac_addr){return mac_addr.length == 2 && mac_addr.match("^[0-9a-fA-F]+$")};
+    if(macT.length < 6 || !macT.every(isTwoHex))BaremetalNodes.check+="\nBaremetalNodes: Invalid Boot MAC address "+mac+": expecting 6 column separated hex values 00-ff";
+    
+    // Cluster wide attributes, common to all nodes in one given cluster
+    var apiVIP=BaremetalNodes.getAndSetValue(row, nameIndexes, 'API VIP', apiVIPs[ocp]?apiVIPs[ocp]:'10.33.200.'+(90+2*i));
+    if(!apiVIPs[ocp])apiVIPs[ocp]=apiVIP;
+    if(apiVIPs[ocp] != apiVIP)BaremetalNodes.check+="\nBaremetalNodes: inconsistent apiVIP on node "+fqdn+" for cluster "+ocp+": "+apiVIP+": expecting consistent value across nodes: "+apiVIPs[ocp];
+    var ingressVIP=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Ingress VIP', ingressVIPs[ocp]?ingressVIPs[ocp]:'10.33.200.'+(91+2*i));
+    if(!ingressVIPs[ocp])ingressVIPs[ocp]=ingressVIP;
+    if(ingressVIPs[ocp] != ingressVIP)BaremetalNodes.check+="\nBaremetalNodes: inconsistent ingressVIP on node "+fqdn+" for cluster "+ocp+": "+ingressVIP+": expecting consistent value across nodes: "+ingressVIPs[ocp];
+    var baremetalCIDR=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Baremetal CIDR', baremetalCIDRs[ocp]?baremetalCIDRs[ocp]:'10.33.200.0/24');
+    if(!baremetalCIDRs[ocp])baremetalCIDRs[ocp]=baremetalCIDR;
+    if(baremetalCIDRs[ocp] != baremetalCIDR)BaremetalNodes.check+="\nBaremetalNodes: inconsistent baremetalCIDR on node "+fqdn+" for cluster "+ocp+": "+baremetalCIDR+": expecting consistent value across nodes: "+baremetalCIDRs[ocp];
+    var provisioningCIDR=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Provisioning CIDR', provisioningCIDRs[ocp]?provisioningCIDRs[ocp]:'10.33.202.0/24');
+    if(!provisioningCIDRs[ocp])provisioningCIDRs[ocp]=provisioningCIDR;
+    if(provisioningCIDRs[ocp] != provisioningCIDR)BaremetalNodes.check+="\nBaremetalNodes: inconsistent provisioningCIDR on node "+fqdn+" for cluster "+ocp+": "+provisioningCIDR+": expecting consistent value across nodes: "+provisioningCIDRs[ocp];
+    var bootInterface=BaremetalNodes.getAndSetValue(row, nameIndexes, 'Boot interface', bootInterfaces[ocp]?bootInterfaces[ocp]:'ens1f0');
+    if(!bootInterfaces[ocp])bootInterfaces[ocp]=bootInterface;
+    if(bootInterfaces[ocp] != bootInterface)BaremetalNodes.check+="\nBaremetalNodes: inconsistent bootInterface on node "+fqdn+" for cluster "+ocp+": "+bootInterface+": expecting consistent value across nodes: "+bootInterfaces[ocp];
+    
+    result+='\n# '+(role+' '+fqdn).padEnd(40)+'IPMI: '+ipmi+'/'+ user+'/'+password+ ' MAC: '+mac+' boot disk: '+device;
+    
+    if(!BaremetalNodes.clusters[ocp]){
+      BaremetalNodes.clusters[ocp] = new Object;
+      BaremetalNodes.clusters[ocp].installConfig="apiVersion: v1";
+    }
+    if(!nodes[ocp])nodes[ocp]="\nhosts:";
+    nodes[ocp]+=`
+  - name: `+shortname+`
+    role: `+role+`
+    bmc:
+      address: ipmi://`+ipmi+`/
+      username: `+user+`
+      password: `+password+`
+      disableCertificateVerification: True
+    bootMACAddress: `+mac+`
+    rootDeviceHints:
+     deviceName: "`+device+`"`;
+  }
+  
+  // OCP on bare metal requires the RedHat pull secret and a public ssh key
+  if(Object.keys(BaremetalNodes.clusters).length){
+    if(!Misc.search('Property','rhel_pullsecret'))BaremetalNodes.check+="\nBaremetalNodes section: missing the RedHat secret definition in Misc section rhel_pullsecret";
+    if(!Misc.search('Property','public_sshKey'))BaremetalNodes.check+="\nBaremetalNodes section: missing the public ssh key definition in Misc section public_sshKey";
+  }
+  
+  result+='\n# OpenShift clusters summary:';
+  // Build the OpenShift installConfig yaml files
+  Object.keys(BaremetalNodes.clusters).forEach(function(ocp){
+    if(masters[ocp].length<3)BaremetalNodes.check+="\nBaremetalNodes: on cluster "+ocp+", found "+masters[ocp].length+" master(s), expecting three or more.";
+    // Prepare the command powering off all nodes
+    BaremetalNodes.clusters[ocp].powerOff=powerOff[ocp].join(" && ");
+    // Prepare the list of nodes hosting local storage as a json array of short names: workers if any, otherwise masters. Eg: ["drei", "funf", "zwei"]
+    BaremetalNodes.clusters[ocp].localStorageNode='["'+(workers[ocp].length?workers[ocp]:masters[ocp]).join('", "')+'"]';
+    BaremetalNodes.clusters[ocp].installConfig+=
+`
+baseDomain: `+domains[ocp]+`
+metadata:
+  name: `+ocp+`
+networking:
+  machineCIDR: `+baremetalCIDRs[ocp]+`
+  networkType: OVNKubernetes
+compute:
+- name: worker
+  replicas: `+workers[ocp].length+`
+controlPlane:
+  name: master
+  replicas: `+masters[ocp].length+`
+  platform:
+    baremetal: {}
+platform:
+  baremetal:
+    apiVIP: `+apiVIPs[ocp]+`
+    ingressVIP: `+ingressVIPs[ocp]+`
+    disableCertificateVerification: True
+    provisioningBridge: provisioning
+    provisioningNetworkCIDR: `+provisioningCIDRs[ocp]+`
+    provisioningNetworkInterface: `+bootInterfaces[ocp]+`
+`+nodes[ocp].replace(/\n/g, "\n    ")+
+`
+pullSecret: '`+Misc.getValue('rhel_pullsecret')+`'
+sshKey: '`+Misc.getValue('public_sshKey')+`' 
+`;
+
+    result+='\n# '+ocp.padEnd(15)+':'+masters[ocp].length+' masters and '+workers[ocp].length+' worker(s) on domain '+domains[ocp]+' API VIP '+apiVIPs[ocp]+' ingress VIP '+ingressVIPs[ocp]+' CIDRs '+provisioningCIDRs[ocp]+'/'+baremetalCIDRs[ocp]+' boot on '+bootInterfaces[ocp];
+  });
+  
+  if(!BaremetalNodes.check)return result;
+  
+  // Errors: cleanup and report
+  BaremetalNodes.clusters=null;
+  return BaremetalNodes.check;
+};
+
 // ===========================
 // CinderVolumes settings
 // ===========================
@@ -2199,7 +2392,7 @@ hpe5gResource.prototype.build = function(target){
 		var row = table.rows[i];
 		var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
 		if(!hpe5gResources.types[this.title] || hpe5gResources.types[this.title].indexOf(type) < 0){this.check += "\n"+this.title+": "+type+" is unknown in the catalog"; continue;}
-		var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
+    var name=this.getAndSetValue(row, nameIndexes, 'Name', hpe5gResources.defaults[type]['Name']?hpe5gResources.defaults[type]['Name']:type+"-"+i);
 		var project=this.getAndSetValue(row, nameIndexes, 'Project',hpe5gResources.defaults[type]['Project']?hpe5gResources.defaults[type]['Project']:Misc.getValue('default_project'));
 		var URL=this.getAndSetValue(row, nameIndexes, 'URL',hpe5gResources.defaults[type]['URL']);
 		var insecure=Nodes.getAndSetChecked(row, nameIndexes, 'insecure');
@@ -2218,7 +2411,7 @@ hpe5gResource.prototype.build = function(target){
 		if(chartOptions)displayChart+=" "+chartOptions;
 		this.check += checkDependency(this.title=='HelmCharts', [values!=undefined && values.content!=undefined && chart.length>0], this.title+" "+name,", Helm chart and values are required");
 		var displayVolume="";
-		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas');
+		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas', hpe5gResources.defaults[type]['Replicas']?hpe5gResources.defaults[type]['Replicas']:"");
 		if(!replicas)replicas="1";
 		var dependenciesList=this.getAndSetValue(row, nameIndexes, 'Dependencies');
 		var dependencies=undefined;
@@ -2446,17 +2639,19 @@ IndirectServices.help = function(){return hpe5gResource.prototype.help()+
 //OperatorSources
 //===========================
 var OperatorSources = new vnfResource("OperatorSources", [
-  {name:'Type', type:'choice', width: '140px', choices: ['operator-source']}, 
+  {name:'Type', type:'choice', width: '140px', choices: ['catalog-source','operator-source',]}, 
   {name:'Name', type:'text', width:'100px'},
   {name:'Project', type:'text', width:'200px'},
-  {name:'URL', type:'text', width:'200px'}
+  {name:'URL', type:'text', width:'400px'}
   ]
 );
 OperatorSources.help = function(){return `Operator sources instantiation:
-- Type: the type of the operator source to instantiate
-- Name: the name of the operator source, typically the account name in quay.io
+- Type: the type of the operator source to instantiate:
+  operator-source is supported until OpenShift 4.5 included (kind OperatorSource)
+  catalog-source is mandatory starting with OpenShift 4.6 (kind CatalogSource)
+- Name: the name of the operator source, typically the account name in quay.io for OperatorSource, the name of the operator for CatalogSource
 - Project: the OpenShift project where to deploy this source, typically openshift-marketplace
-- URL: location of the account, typically https://quay.io/cnr  
+- URL: location of the account, typically https://quay.io/cnr for OperatorSource, quay.io/<user account>/<operator index>:<version> for CatalogSource
 `;
 }
 OperatorSources.build = function(target){
@@ -2467,6 +2662,7 @@ OperatorSources.build = function(target){
   var rowCount = table.rows.length;
   OperatorSources.deployments = new Object;
   Builds.templates['operator-source']=new Object;
+  Builds.templates['catalog-source']=new Object;
 
   for(var i=1; i < rowCount; i++){
     if(result==""){
@@ -2476,11 +2672,11 @@ OperatorSources.build = function(target){
       result += "\n# -------------------------------- ";
       }
     var row = table.rows[i];
-    var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type');
+    var type=this.getAndSetSelection(table.rows[i], nameIndexes, 'Type', 0);
     if(!hpe5gResources.defaults[type] || !hpe5gResources.defaults[type]['template']){this.check += "\n"+this.title+": "+type+" template is unknown in the catalog"; continue;}
-    var name=this.getAndSetValue(row, nameIndexes, 'Name', type+"-"+i);
-    var project=this.getAndSetValue(row, nameIndexes, 'Project','openshift-marketplace');
-    var URL=this.getAndSetValue(row, nameIndexes, 'URL',hpe5gResources.defaults[type]['URL']);
+    var name=this.getAndSetValue(row, nameIndexes, 'Name', hpe5gResources.defaults[type]['Name']);
+    var project=this.getAndSetValue(row, nameIndexes, 'Project',hpe5gResources.defaults[type]['Project']);
+    var URL=this.getAndSetValue(row, nameIndexes, 'URL', hpe5gResources.defaults[type]['URL']);
     Builds.makeTemplate(name, type, URL);
     var template=Builds.templates[type][name];
     
@@ -2502,9 +2698,9 @@ OperatorSources.build = function(target){
 //Operators
 //===========================
 var Operators = new hpe5gResource("Operators", [
-	{name:'Type', type:'choice', width: '140px', choices: function(){return hpe5gResources.types['Operators']}}, 
-	{name:'Name', type:'text', width:'100px'},
-	{name:'Project', type:'text', width:'60px'},
+	{name:'Type', type:'choice', width: '200px', choices: function(){return hpe5gResources.types['Operators']}}, 
+	{name:'Name', type:'text', width:'140px'},
+	{name:'Project', type:'text', width:'140px'},
 	{name:'Replicas', type:'text', width:'40px'},
 	{name:'Pipeline', type:'text', width:'100px'}
 	]
@@ -2553,7 +2749,7 @@ return help;
 function deploymentHelp(){userOutput(welcomeMsg+OpenStackHelp);}
 var OpenStackHelp=
 `
-Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab infrastructure using ansible: 
+Quick user guide for deploying an OpenShift cluster in an OpenStack HPE lab infrastructure using ansible: 
 
 - OpenStack tenant
     - Get a tenant on RHOS13 from infra team at https://cmsgvm42.gre.hpecorp.net/hos    
@@ -2576,12 +2772,12 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
     - connect to this VM as user centos with the saved ssh key eg:   
     ssh -i mykey.pem centos@30.118.0.26
     - install git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository:     
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y epel-release     
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
+     sudo  yum install -y epel-release     
+     sudo  yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
     - install openstack client, ansible, shade, passlib, decorator and cryptography:    
-     sudo  http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
+     sudo  pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
     - clone the CMS5G Core Stack automated deployer from git:     
-     http_proxy=http://16.46.16.11:8080 https_proxy=http://16.46.16.11:8080 git clone git@10.74.128.22:CMS-5GCS/automated-deployer.git
+     git clone git@github.hpe.com:CMS-5GCS/automated-deployer.git
     - move to this directory    
      cd automated-deployer
     - retrieve in this directory the private ssh key file and set ssh compliant access rights eg :    
@@ -2636,7 +2832,7 @@ function deploymentDoc(){
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 `;
-	['Misc', 'Networks','OpenShiftNodes','Nodes','Flavors','Clusters','Builds', 'CustomApps', 'NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
+	['Misc', 'Networks','OpenShiftNodes','BaremetalNodes','Nodes','Flavors','Clusters','Builds', 'CustomApps', 'NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
 		result+="\n### "+section+"\n"+window[section].help();
 		if(hpe5gResources.types[section])result+="\n"+section+" supported types: "+hpe5gResources.types[section]+"\n";
 	});
@@ -2736,7 +2932,7 @@ test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user i
 _log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="~PROJECTS~"
-for _project in $oc_projects ; do oc project $_project &>> $logfile || oc new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='~PROJECT_DESCRIPTION~' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
 if echo guess | oc login -u system:admin &>> $logfile ; then
 _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &>> $logfile
@@ -2830,12 +3026,12 @@ function hpe5gHelmValues(header, footer, tab){
 function hpe5gNetworkFunctions(header, footer, tab, singleProject){
 	var templateHeader=
 `
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: ~PROJECT~
   annotations:
-    description: network functions and backing services for project ~PROJECT~
+    description: '`+document.getElementById("quickDescription").value+`'
 objects:`;
 	var result="";
 	hpe5gResources.projects.forEach(function(project){
@@ -3327,7 +3523,7 @@ function buildHeatTemplate(){
 	    heat+=n0+"            cat > /home/centos/openshift_volumes.yaml << 'EOFILE'";
 	    // OpenShift system level functions: volumes
 	    heat+=n0+'            kind: Template';
-	    heat+=n0+'            apiVersion: v1';
+	    heat+=n0+'            apiVersion: template.openshift.io/v1';
 	    heat+=n0+'            metadata:';
 	    heat+=n0+'              name: system';
 	    heat+=n0+'              annotations:';
@@ -3586,15 +3782,16 @@ disableSecurityPortsForInstance() {
     subnet=$(openstack network list -f json | jq -r -c '.[] | select( .Name | startswith("'$\{_name}-'")) | .Subnets')
     [[ "$subnet" =~ "[" ]] && subnet=$(echo $subnet | jq -r .[0])
     [[ $subnet =~ "-" ]] || continue
-    subnetname=$(openstack subnet show $subnet -f json | jq -r .name)
-    # Get the ports IDs on this subnet
-    ports=$(openstack port list --fixed-ip subnet=$subnet -f json | jq -r -c '.[].ID' )
-    # Reset security on each port
-    for p in $ports ; do 
-      # if port security enabled => disable
-      $(openstack port show $p -f json | jq .port_security_enabled) &&
-      echo BACKGROUND Disabling security on port $p subnet $subnetname &>> $logfile && 
-      openstack port set $p --no-allowed-address --no-security-group --disable-port-security &>> $logfile 
+    for _subnet in $subnet ; do subnetname=$(openstack subnet show $_subnet -f json | jq -r .name) 
+      # Get the ports IDs on this subnet
+      ports=$(openstack port list --fixed-ip subnet=$subnet -f json | jq -r -c '.[].ID' )
+      # Reset security on each port
+      for p in $ports ; do 
+        # if port security enabled => disable
+        $(openstack port show $p -f json | jq .port_security_enabled) &&
+        echo BACKGROUND Disabling security on port $p subnet $subnetname &>> $logfile && 
+        openstack port set $p --no-allowed-address --no-security-group --disable-port-security &>> $logfile 
+      done
     done
   done
 }
@@ -3663,6 +3860,7 @@ deployOCP() {
   local _fipapp=$9
   local _nbVolumes=$10
   local _flavorWorker=$\{11:-$_flavor}
+  local _etchosts=$\{12:-false}
   
   # Check openshift deployments CLIs
   which oc > /dev/null && _log_ "oc CLI available version $(oc version 2> /dev/null | grep 'Client Version'  | awk '{print $3}')" || _failOCP4_ "Missing oc CLI "
@@ -3690,7 +3888,7 @@ deployOCP() {
   _templatedVariablesResolution+=" -e 's/~$\{_name}_APP~/$_fipapp/g'"
 
   # Populate /etc/hosts
-  if $\{ETCHOSTS:-false} ; then 
+  if $_etchosts ; then 
   _log_ "Updating /etc/hosts"
   cat << EOF | sudo tee -a /etc/hosts &>> $logfile || _failOCP4_ "Cannot update /etc/hosts"
 #### BofS OpenShift cluster $_name.$_domain ####
@@ -3756,7 +3954,7 @@ networking:
     hostPrefix: 23
   machineNetwork:
   - cidr: 10.0.0.0/16
-  networkType: OpenShiftSDN
+  networkType: OVNKubernetes
   serviceNetwork:
   - 172.30.0.0/16
 platform:
@@ -3835,6 +4033,7 @@ undeployOCP() {
   local _domain=$2
   local _fipapi=$3
   local _fipapp=$4
+  local _etchosts=$\{5:-false}
 
   openstack network list > /dev/null && _log_ "Connection to openstack API successful" || _failOCP4_ "Cannot connect to openstack CLI"
   
@@ -3855,7 +4054,7 @@ undeployOCP() {
   for f in $fips ; do _log_ Deleting floating IP $f && openstack floating ip delete $f &>> $logfile ; done
 
   # Cleanup /etc/hosts
-  if $\{ETCHOSTS:-false} ; then 
+  if $_etchosts ; then 
     _log_ "Cleaning up /etc/hosts of cluster $_name"
     sudo sed -i '/#### BofS OpenShift cluster '$_name.$_domain' ####/,/#### EofS OpenShift cluster '$_name.$_domain' ####/d' /etc/hosts &>> $logfile || _failOCP4_ "Cannot cleanup /etc/hosts"
   fi
@@ -3876,7 +4075,105 @@ i=0 && while (( i <  $\{#OCP[@]} )) ; do
     source $os_env || _failOCP4_ "Environment file $os_env not found"
   fi
   
-  $_deploy && deployOCP $\{OCP[i]:-$OCP} $\{DOMAIN[i]:-$DOMAIN} $\{FLAVOR[i]:-$FLAVOR} $\{MASTERS[i]:-$MASTERS} $\{WORKERS[i]:-$WORKERS} $\{EXTNET[i]:-$EXTNET} $\{EXTDNS[i]:-$EXTDNS} $\{FIPAPI[i]:-$FIPAPI} $\{FIPAPP[i]:-$FIPAPP} $\{NBVOLUMES[i]:-$NBVOLUMES} $\{FLAVORWORKER[i]:-$FLAVORWORKER} || undeployOCP $\{OCP[i]:-$OCP} $\{DOMAIN[i]:-$DOMAIN} $\{FIPAPI[i]:-$FIPAPI} $\{FIPAPP[i]:-$FIPAPP} 
+  $_deploy && deployOCP $\{OCP[i]:-$OCP} $\{DOMAIN[i]:-$DOMAIN} $\{FLAVOR[i]:-$FLAVOR} $\{MASTERS[i]:-$MASTERS} $\{WORKERS[i]:-$WORKERS} $\{EXTNET[i]:-$EXTNET} $\{EXTDNS[i]:-$EXTDNS} $\{FIPAPI[i]:-$FIPAPI} $\{FIPAPP[i]:-$FIPAPP} $\{NBVOLUMES[i]:-$NBVOLUMES} $\{FLAVORWORKER[i]:-$FLAVORWORKER} $\{ETCHOSTS[i]:-$ETCHOSTS} || undeployOCP $\{OCP[i]:-$OCP} $\{DOMAIN[i]:-$DOMAIN} $\{FIPAPI[i]:-$FIPAPI} $\{FIPAPP[i]:-$FIPAPP} $\{ETCHOSTS[i]:-$ETCHOSTS}  
+  ((i+=1))
+done
+`;
+}
+
+
+//=================================
+//OCP4 baremetal deployer
+//=================================
+//Return a shell script deploying OpenShift 4 on bare metal
+function buildOCP4BaremetalDeployer(){
+  // Build or get the errors: 
+  var warnings=BaremetalNodes.build();
+  // If no openshift instances are defined, display warnings and return
+  if(!BaremetalNodes.clusters){
+    userOutput(warnings);
+    return '';
+  }
+  var shell= `
+# Reference documentation for OpenShift deployment on bare metal: https://openshift-kni.github.io/baremetal-deploy/4.6/Deployment.html
+# Deployment
+# Input parameters: cluster name, command to power off all nodes part of this cluster, list of nodes providing local storage as a json array
+deployOCPBM() {
+  local _name=$1
+  local _powerOff=$2
+  local _localStorageNodes=$3
+  
+  # Check openshift deployments CLIs
+  which oc > /dev/null && _log_ "oc CLI available version $(oc version 2> /dev/null | grep 'Client Version'  | awk '{print $3}')" || _fail_ "Missing oc CLI "
+  which openshift-baremetal-install > /dev/null && _log_ "openshift-baremetal-install CLI available version $(openshift-baremetal-install version | grep openshift-baremetal-install | awk '{print $2}')" || _fail_ "Missing openshift-baremetal-install CLI"
+  which ipmitool > /dev/null && _log_ "$(ipmitool -V) CLI available" || _fail_ "Missing ipmitool CLI"
+  
+  # Save a copy of the install-config.yaml consumed by the OpenShift installer
+  cp -f $_name/install-config.yaml $_name/install-config.saved.yaml &>> $logfile || _fail_ "Cannot save $_name/install-config.yaml to $_name/install-config.saved.yaml"
+  
+  # Power off all nodes
+  _log_ "Shuting down all servers part of $_name "
+  eval $_powerOff &>> $logfile || _fail_ "Cannot shutdown $_name nodes with: $_powerOff"
+  
+  # Deploy the cluster
+  _log_ "Deploying the OpenShift cluster $_name"
+  if [ "$logfile" != "/dev/stdout" ] ; then _log_ "This takes a while, follow-up available in $logfile" ; fi
+  $_preview openshift-baremetal-install create cluster --dir $_name --log-level debug &>> $logfile || _fail_ "Cannot create OpenShift cluster $_name"
+
+  _log_ "Checking deployment completion" 
+  $_preview openshift-baremetal-install wait-for install-complete --dir $_name --log-level debug &>> $logfile || _fail_ "OpenShift cluster $_name creation did not complete"
+  
+  _log_ "Checking OCP login as kubeadmin on $_name with KUBECONFIG=$_name/auth/kubeconfig and kubeadmin-password $(cat $_name/auth/kubeadmin-password)"
+  export KUBECONFIG=$_name/auth/kubeconfig
+  oc login -u kubeadmin -p $(cat $_name/auth/kubeadmin-password) &>> $logfile || _fail_ "Cannot login to OCP cluster $_name as kubeadmin"
+`+
+// Cluster is ready for openshift resources deployment
+buildNetworkFunctions()
++`
+}
+
+# Undeployment
+undeployOCPBM() {
+  local _name=$1
+  
+  # Delete cluster
+  _log_ "Destroying OpenShift cluster $_name"
+  $_preview openshift-baremetal-install destroy cluster --dir $_name --log-level debug &>> $logfile || rm -Rf $_name  &>> $logfile || _fail_ "Cannot destroy cluster $_name"
+}
+
+_log_ "OpenShift installer internal cleanup"
+for i in $(sudo virsh pool-list --all | tail -n +3 | grep cluster | awk {'print $1'}); do   
+  virsh pool-destroy $i &>> $logfile   
+  rm -Rf /var/lib/libvirt/openshift-images/$i &>> $logfile   
+  virsh pool-delete $i &>> $logfile   
+  virsh pool-undefine $i &>> $logfile 
+done
+for i in $(sudo virsh list | tail -n +3 | grep bootstrap | awk {'print $2'}); do   
+  sudo virsh destroy $i &>> $logfile   
+  sudo virsh undefine $i &>> $logfile   
+  sudo virsh vol-delete $i --pool default &>> $logfile   
+  sudo virsh vol-delete $i.ign --pool default &>> $logfile 
+done
+
+# If deployment, create one directory per OCP cluster, and drop install-config files
+if $_deploy ; then
+`;
+Object.keys(BaremetalNodes.clusters).forEach(function(ocp){
+shell+=`_name=`+ocp+`
+mkdir -p $_name || _fail_ "Cannot create installation directory $_name"
+# Build install-config.yaml
+cat > $_name/install-config.yaml << EOF || _fail_ "Cannot build $_name/install-config.yaml"
+`+BaremetalNodes.clusters[ocp].installConfig+`
+EOF
+`  
+});
+
+shell+=`
+fi  # If deployment, create one directory per OCP cluster, and drop install-config files
+
+# For all instance names, deploy or undeploy
+i=0 && while (( i <  $\{#OCPBM[@]} )) ; do 
+  $_deploy && deployOCPBM $\{OCPBM[i]:-$OCPBM} "$\{OCPBMOFF[i]}" "$\{OCPBMNODES[i]}"  || undeployOCPBM $\{OCPBM[i]:-$OCPBM}  
   ((i+=1))
 done
 `;
@@ -4105,13 +4402,23 @@ function buildNetworkFunctions(){
 	}
 
 	if(Clusters.targeted == undefined || Clusters.targeted.length == 0){
-    	// File naming convention for Network functions: openshift_project_<project>.yaml
-    	// File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
-    	function catHeader(project){return "\ncat > openshift_project_"+project+".yaml << 'EOFILE'"};
+      function catHeader(project){return `
+# File naming convention for Network functions: openshift_project_<project>.yaml
+_templateYaml=openshift_project_`+project+`.yaml
+cat > $_templateYaml << 'EOFILE'`
+  };
     	function catHelmValuesHeader(project, name, template, options){
-    		return "\ncat > openshift_helm_"+project+"_"+name+".yaml << 'EOFILE'\n_HPE5G_name="+name+" _HPE5G_template="+template+" _HPE5G_options='"+options+"'";
+        return `
+# File naming convention for Helm instances: openshift_helm_<project>_<name>.yaml and a first line setting the context as bash variables: _HPE5G_name= _HPE5G_template= _HPE5G_options=
+_templateYaml=openshift_helm_`+project+`_`+name+`.yaml
+cat > $_templateYaml << 'EOFILE'
+_HPE5G_name=`+name+` _HPE5G_template=`+template+` _HPE5G_options='`+options+`'`
     	}
-    	function catFooter(project){return "\nEOFILE"};
+      function catFooter(project){return `
+EOFILE
+# Cluster specific variables resolution:
+sed -i "s/~LOCAL_STORAGE_NODES~/$_localStorageNodes/" $_templateYaml`
+      };
     	
     	shell+=shellBody('oc');
     	shell+=hpe5gNetworkFunctions(catHeader, catFooter);
@@ -4273,7 +4580,19 @@ _displayedAction=$($_deploy && echo Deploying || echo Undeploying)
 state=$($_deploy && echo present || echo absent)
 _headless=`+Misc.getValue('headless')+`
 _preview=
-`;
+
+_defaultName=$default_stack
+unset OCP FIPAPI FIPAPP
+ETCHOSTS=true
+EXTNET=`+Misc.getValue('extnet')+`
+DOMAIN=localdomain
+WORKERS=3
+MASTERS=3
+FLAVOR=v4.m16.d25
+FLAVORWORKER=$FLAVOR
+EXTDNS=8.8.8.8
+NBVOLUMES=10
+`; 
 
 if(OpenShiftNodes.instances && OpenShiftNodes.instances.name.length)shell+=`
 _defaultName=(`+OpenShiftNodes.instances.name.join(' ')+`)
@@ -4290,19 +4609,12 @@ FLAVOR=(`+OpenShiftNodes.instances.flavor.join(' ')+`)
 FLAVORWORKER=(`+OpenShiftNodes.instances.flavorWorker.join(' ')+`)
 EXTDNS=(`+OpenShiftNodes.instances.extdns.join(' ')+`)
 NBVOLUMES=(`+OpenShiftNodes.instances.nbVolumes.join(' ')+`)`;
-else shell+=`
-_defaultName=$default_stack
-unset OCP FIPAPI FIPAPP
-ETCHOSTS=true
-EXTNET=`+Misc.getValue('extnet')+`
-DOMAIN=localdomain
-WORKERS=3
-MASTERS=3
-FLAVOR=v4.m16.d25
-FLAVORWORKER=$FLAVOR
-EXTDNS=8.8.8.8
-NBVOLUMES=10
-`; 
+
+if(BaremetalNodes.clusters && Object.keys(BaremetalNodes.clusters).length)shell+=`
+_defaultName=(`+Object.keys(BaremetalNodes.clusters).join(' ')+`)
+OCPBM=(`+Object.keys(BaremetalNodes.clusters).join(' ')+`)
+OCPBMNODES=('`+Object.keys(BaremetalNodes.clusters).map(function(ocp){  return BaremetalNodes.clusters[ocp].localStorageNode  }).join("' '")+`')
+OCPBMOFF=("`+Object.keys(BaremetalNodes.clusters).map(function(ocp){  return BaremetalNodes.clusters[ocp].powerOff  }).join('" "')+`")`;
 
 shell+=`
 RHELSECRET='`+Misc.getValue('rhel_pullsecret')+`'
@@ -4374,12 +4686,17 @@ function outputInstallerShell(){
 	var shellOpenStack='';
 	var shellOpenShift='';
   var shellTerraform='';
+  var shellBaremetal='';
 	Nodes.cloudNodes=undefined;
 
   // OCP4 clusters if any
   if(!OpenShiftNodes.isEmpty()){
     shellTerraform=buildOCP4Deployer();
     if(!shellTerraform)return false;
+  }
+  if(!BaremetalNodes.isEmpty()){
+    shellBaremetal=buildOCP4BaremetalDeployer();
+    if(!shellBaremetal)return false;
   }
   // OpenStack resources if any
   if(!Nodes.isEmpty()){
@@ -4388,11 +4705,11 @@ function outputInstallerShell(){
   }
 
 	// Add OpenShift resources except if an OpenShift cluster was deployed before: the OCP deployment includes the resources deployment
-  if(OpenShiftNodes.isEmpty() && (!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}))){
+  if(OpenShiftNodes.isEmpty() && BaremetalNodes.isEmpty() && (!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}))){
 		shellOpenShift=buildNetworkFunctions();
 		if(hpe5gResources.projects.length && !shellOpenShift)return false;
 	}
-	var shell=shellHeader()+shellTerraform+shellOpenStack+shellOpenShift+"\nexit 0";
+	var shell=shellHeader()+shellTerraform+shellBaremetal+shellOpenStack+shellOpenShift+"\nexit 0";
 	
 	// Show to the user and save to hpe5g.sh
     userOutput(shell);
@@ -4410,7 +4727,7 @@ function outputInstallerShell(){
 	return true;
 }
 
-// Build a kubernetes native application to be deployed with the hpe5gApp operator availble from the catalog endpoint: https://quay.io/cnr registryNamespace: dometdemont
+// Build a kubernetes native application template 
 function outputAppHpe5g(){
   hpe5gResources.init();
 
@@ -4423,13 +4740,7 @@ function outputAppHpe5g(){
   check += hpe5gResources.compile();
   if(check){userOutput(check); return '';}
 
-  var result=`apiVersion: cms.hpe.com/v1
-kind: HPE5gApp
-metadata:
-  name: hpe5gapp
-spec:
-  templateContent:`;
-  result+=hpe5gNetworkFunctions().replace(/\n/g, "\n"+'    '); // fix the template indentation as expected by the hpe5g operator
+  var result=hpe5gNetworkFunctions();
   
   // Show to the user and save to hpe5gApp.yaml
     userOutput(result);
@@ -4615,7 +4926,8 @@ var defaultCatalog=`
       "fluentd"
     ],
     "OperatorSources": [  
-      "operator-source"
+      "operator-source",
+      "catalog-source"
     ],
     "Operators": [  
       "jaeger-product",
@@ -4626,7 +4938,8 @@ var defaultCatalog=`
       "kiali-ossm",
       "grafana-operator",
       "etcd-operator",
-      "ignite-operator",
+      "local-storage-operator",
+      "container-storage-operator",
       "prometheus-operator"
     ],
     "HelmCharts": [
@@ -4683,9 +4996,11 @@ var defaultCatalog=`
 	    "kube-state-metrics": true,
 	    "grafana-operator": true,
       "etcd-operator": true,
-      "ignite-operator": true,
+      "local-storage-operator": true,
+      "container-storage-operator": true,
 	    "prometheus-operator": true,
-      "operator-source": true
+      "operator-source": true,
+      "catalog-source": true
   },
   "values": {
     "jenkins": {
@@ -4826,14 +5141,23 @@ var defaultCatalog=`
     },
     "jaeger-product": {},
     "cert-manager": {},
-    "operator-source": {"URL": "https://quay.io/cnr", "Project": "openshift-marketplace"},
+    "operator-source": {"Name": "dometdemont", "URL": "https://quay.io/cnr", "Project": "openshift-marketplace"},
+    "catalog-source": {"Name": "hpe5gcs-operator", "URL": "quay.io/dometdemont/hpe5gcs-operator-index:v0.1.10", "Project": "openshift-marketplace"},
     "servicemeshoperator": {},
     "amq-streams": {},
     "elasticsearch-operator": {},
     "kiali-ossm": {},
     "grafana-operator": {},
     "etcd-operator": {},
-    "ignite-operator": {},
+    "local-storage-operator": {
+      "Name": "local-storage-operator",
+      "Project": "openshift-local-storage"
+    },
+    "container-storage-operator": {
+      "Name": "ocs-storagecluster",
+      "Project": "openshift-storage",
+      "Replicas": "3"
+    },
     "prometheus-operator": {},
     "nudm-chart": {
       "chart": "hpe-nf-udm-0.9.0-005194.c3fa0f7.tgz"
@@ -12291,223 +12615,120 @@ hpe5gResources.defaults['etcd-operator']['template']=
     version: 3.2.13
 `;
 //================================================
-hpe5gResources.defaults['ignite-operator']['template']=
+hpe5gResources.defaults['local-storage-operator']['template']=
 //================================================
 `
-- apiVersion: apiextensions.k8s.io/v1beta1
-  kind: CustomResourceDefinition
+- kind: OperatorGroup
+  apiVersion: operators.coreos.com/v1alpha2
   metadata:
-    name: ignites.charts.helm.k8s.io
-  spec:
-    group: charts.helm.k8s.io
-    names:
-      kind: Ignite
-      listKind: IgniteList
-      plural: ignites
-      singular: ignite
-    scope: Namespaced
-    subresources:
-      status: {}
-    validation:
-      openAPIV3Schema:
-        type: object
-        x-kubernetes-preserve-unknown-fields: true
-    versions:
-    - name: v1alpha1
-      served: true
-      storage: true
-- apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: ignite-operator
-- apiVersion: rbac.authorization.k8s.io/v1
-  kind: ClusterRole
-  metadata:
-    creationTimestamp: null
-    name: ignite-operator
-  rules:
-  - apiGroups:
-    - ""
-    resources:
-    - namespaces
-    verbs:
-    - get
-  - apiGroups:
-    - ""
-    resources:
-    - configmaps
-    - secrets
-    verbs:
-    - '*'
-  - apiGroups:
-    - ""
-    resources:
-    - events
-    verbs:
-    - create
-  - apiGroups:
-    - rbac.authorization.k8s.io
-    resources:
-    - clusterrolebindings
-    - clusterroles
-    verbs:
-    - '*'
-  - apiGroups:
-    - apps
-    resources:
-    - statefulsets
-    verbs:
-    - '*'
-  - apiGroups:
-    - ""
-    resources:
-    - configmaps
-    - serviceaccounts
-    - services
-    verbs:
-    - '*'
-  - apiGroups:
-    - monitoring.coreos.com
-    resources:
-    - servicemonitors
-    verbs:
-    - get
-    - create
-  - apiGroups:
-    - apps
-    resourceNames:
-    - ignite-operator
-    resources:
-    - deployments/finalizers
-    verbs:
-    - update
-  - apiGroups:
-    - ""
-    resources:
-    - pods
-    verbs:
-    - get
-  - apiGroups:
-    - apps
-    resources:
-    - replicasets
-    - deployments
-    verbs:
-    - get
-  - apiGroups:
-    - charts.helm.k8s.io
-    resources:
-    - '*'
-    verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- kind: ClusterRoleBinding
-  apiVersion: rbac.authorization.k8s.io/v1
-  metadata:
-    name: ignite-operator
-  subjects:
-  - kind: ServiceAccount
-    name: ignite-operator
-    # Replace this with the namespace the operator is deployed in.
+    name: local-operator-group
     namespace: ~PROJECT~
-  roleRef:
-    kind: ClusterRole
-    name: ignite-operator
-    apiGroup: rbac.authorization.k8s.io
-- apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: ignite-operator
   spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        name: ignite-operator
-    template:
-      metadata:
-        labels:
-          name: ignite-operator
-      spec:
-        serviceAccountName: ignite-operator
-        containers:
-          - name: ignite-operator
-            # Replace this with the built image name
-            image: quay.io/dometdemont/ignite:1.0.3
-            imagePullPolicy: Always
-            env:
-              - name: WATCH_NAMESPACE
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.namespace
-              - name: POD_NAME
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
-              - name: OPERATOR_NAME
-                value: "ignite-operator"
-- apiVersion: charts.helm.k8s.io/v1alpha1
-  kind: Ignite
+    targetNamespaces:
+      - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
   spec:
-    # Default values copied from <project_dir>/helm-charts/ignite/values.yaml
-
-    affinity: {}
-    dataStorage:
-      config: ""
-    env:
-      IGNITE_QUIET: "false"
-      JVM_OPTS: -Djava.net.preferIPv4Stack=true
-      OPTION_LIBS: ignite-kubernetes,ignite-rest-http
-    extraContainers: []
-    extraInitContainers: []
-    extraVolumes: null
-    fullnameOverride: ""
-    image:
-      pullPolicy: IfNotPresent
-      repository: apacheignite/ignite
-      tag: 2.7.6
-    nameOverride: ""
-    nodeSelector: {}
-    peerClassLoadingEnabled: false
-    persistence:
-      enabled: false
-      persistenceVolume:
-        provisioner: kubernetes.io/aws-ebs
-        provisionerParameters:
-          fsType: ext4
-          type: gp2
-        size: 8Gi
-      walVolume:
-        provisioner: kubernetes.io/aws-ebs
-        provisionerParameters:
-          fsType: ext4
-          type: gp2
-        size: 8Gi
-    priorityClassName: ""
-    rbac:
-      create: true
-    replicaCount: ~REPLICAS~
-    resources: {}
-    serviceAccount:
-      create: true
-      name: null
-    tolerations: []
-- kind: Route
-  apiVersion: v1
+    installPlanApproval: Automatic
+    name: ~NAME~
+    source: redhat-operators
+    sourceNamespace: openshift-marketplace
+- kind: LocalVolumeDiscovery
+  apiVersion: local.storage.openshift.io/v1alpha1
+  metadata:
+    name: auto-discover-devices
+    namespace: ~PROJECT~
+  spec:
+    nodeSelector:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values: ~LOCAL_STORAGE_NODES~
+- kind: LocalVolumeSet
+  apiVersion: local.storage.openshift.io/v1alpha1
+  metadata:
+    name: localblock
+    namespace: ~PROJECT~
+  spec:
+    deviceInclusionSpec:
+      deviceTypes:
+      - disk
+      - part
+      minSize: 1Gi
+    storageClassName: localblock
+    volumeMode: Block
+    nodeSelector:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values: ~LOCAL_STORAGE_NODES~
+`;
+//================================================
+hpe5gResources.defaults['container-storage-operator']['template']=
+//================================================
+`
+- apiVersion: operators.coreos.com/v1alpha2
+  kind: OperatorGroup
+  metadata:
+    name: openshift-storage
+    namespace: openshift-storage
+  spec:
+    targetNamespaces:
+      - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
+  metadata:
+    name: ocs-operator
+    namespace: ~PROJECT~
+  spec:
+    installPlanApproval: Automatic
+    name: ocs-operator
+    source: redhat-operators
+    sourceNamespace: openshift-marketplace
+- kind: StorageCluster
+  apiVersion: ocs.openshift.io/v1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
   spec:
-    to:
-      kind: Service
-      name: ~NAME~
+    encryption: {}
+    externalStorage: {}
+    manageNodes: false
+    managedResources:
+      cephBlockPools:
+        reconcileStrategy: manage
+      cephFilesystems:
+        reconcileStrategy: manage
+      cephObjectStoreUsers:
+        reconcileStrategy: manage
+      cephObjectStores:
+        reconcileStrategy: manage
+      snapshotClasses:
+        reconcileStrategy: manage
+      storageClasses:
+        reconcileStrategy: manage
+    multiCloudGateway:
+      reconcileStrategy: manage
+    monDataDirHostPath: /var/lib/rook
+    storageDeviceSets:
+    - config: {}
+      count: 1
+      dataPVCTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: "1"
+          storageClassName: localblock
+          volumeMode: Block
+      name: ocs-deviceset-localblock
+      replica: ~REPLICAS~
 `;
 //================================================
 hpe5gResources.defaults['operator-source']['template']=
@@ -12522,6 +12743,19 @@ spec:
   type: appregistry
   endpoint: ~URL~
   registryNamespace: ~NAME~
+`;
+//================================================
+hpe5gResources.defaults['catalog-source']['template']=
+//================================================
+`
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ~NAME~
+  namespace: ~PROJECT~
+spec:
+  sourceType: grpc
+  image: ~URL~
 `;
 </script>
 </body>
