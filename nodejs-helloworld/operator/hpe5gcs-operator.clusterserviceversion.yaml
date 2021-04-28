@@ -1,0 +1,353 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "cms.hpe.com/v1alpha1",
+          "kind": "HPE5gcsApp",
+          "metadata": {
+            "name": "my5g"
+          },
+          "spec": {
+            "templateName": "hpe5g",
+            "templateURL": "http://orgues.free.fr/tmp/my5g.yaml"
+          }
+        }
+      ]
+    capabilities: Basic Install
+    operators.operatorframework.io/builder: operator-sdk-v1.4.0+git
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+  name: hpe5gcs-operator.v_OPERATOR_VERSION
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - kind: HPE5gcsApp
+      name: hpe5gcsapps.cms.hpe.com
+      description: An HPE 5g Core Stack application
+      version: v1alpha1
+  description: |-
+    The HPE5gcsApp operator deploys an instance of the template passed as parameter in the provided namespace. 
+    The template to instantiate can be defined by name (TemplateName) or by URL (TemplateURL), the name being the first choice.
+    The status of this instantiation is watched by the operator's reconciliation logic and reported in the HPE5gcsApp status as:
+    - bool: Ready and 
+    - string: Feedback.
+  displayName: Hpe5gcs Operator
+  icon:
+    - base64data: iVBORw0KGgoAAAANSUhEUgAAAGUAAAAlCAIAAADURrD0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAC9SURBVGhD7dehDcJgFEXhjsBIjMBISFy3wKEweBJMJ8CwSjFXEN4LzUmqyjm57lfvc/8wG0kvll4svVh6sfRiNV7D9eRiUdKrXyxKevWLRUmvfrEo6dUvFqVlr8N0GV/T5re7jZ9Xx6K07HV83vOw6fRi6cXSi6UXSy+WXiy9WHqx9GLpxdKLpRdrNa/94/z1ld/kVvP6z8WipFe/WJT06heLkl79YlHSq18sSo2X/Ugvll4svVh6sfQizfMbu74fE85yMQgAAAAASUVORK5CYII=
+      mediatype: image/png
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - secrets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - cms.hpe.com
+          resources:
+          - hpe5gcsapps
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - cms.hpe.com
+          resources:
+          - hpe5gcsapps/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - cms.hpe.com
+          resources:
+          - hpe5gcsapps/status
+          verbs:
+          - get
+          - patch
+          - update
+        - apiGroups:
+          - coordination.k8s.io
+          resources:
+          - leases
+          verbs:
+          - create
+          - get
+          - list
+          - update
+        - apiGroups:
+          - template.openshift.io
+          resources:
+          - templateconfigs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - template.openshift.io
+          resources:
+          - templateinstances
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - template.openshift.io
+          resources:
+          - templates
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch                    
+        - apiGroups:
+          - authentication.k8s.io
+          resources:
+          - tokenreviews
+          verbs:
+          - create
+        - apiGroups:
+          - authorization.k8s.io
+          resources:
+          - subjectaccessreviews
+          verbs:
+          - create
+        serviceAccountName: default
+      deployments:
+      - name: hpe5gcs-operator-controller-manager
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              control-plane: controller-manager
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                control-plane: controller-manager
+            spec:
+              containers:
+              - args:
+                - --secure-listen-address=0.0.0.0:8443
+                - --upstream=http://127.0.0.1:8080/
+                - --logtostderr=true
+                - --v=10
+                image: gcr.io/kubebuilder/kube-rbac-proxy:v0.5.0
+                name: kube-rbac-proxy
+                ports:
+                - containerPort: 8443
+                  name: https
+                resources: {}
+              - args:
+                - --health-probe-bind-address=:8081
+                - --metrics-bind-address=127.0.0.1:8080
+                - --leader-elect
+                command:
+                - /manager
+                image: quay.io/dometdemont/hpe5gcs-operator:v_OPERATOR_VERSION
+                livenessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 8081
+                  initialDelaySeconds: 15
+                  periodSeconds: 20
+                name: manager
+                readinessProbe:
+                  httpGet:
+                    path: /readyz
+                    port: 8081
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                resources:
+                  limits:
+                    cpu: 100m
+                    memory: 30Mi
+                  requests:
+                    cpu: 100m
+                    memory: 20Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+              securityContext:
+                runAsNonRoot: true
+              terminationGracePeriodSeconds: 10
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - serviceaccounts
+          - services/finalizers
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          - templates
+          - templateinstances
+          - templateconfigs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - template.openshift.io
+          resources:
+          - templates
+          - templateinstances
+          - templateconfigs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - hpe5gcs-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - templates
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          - deployments
+          verbs:
+          - get
+        - apiGroups:
+          - authorization.openshift.io
+          resources:
+          - rolebindings
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - image.openshift.io
+          resources:
+          - imagestreams
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - apps.openshift.io
+          resources:
+          - deploymentconfigs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - route.openshift.io
+          resources:
+          - routes
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - cms.hpe.com
+          resources:
+          - '*'
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: default
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: true
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - HPE
+  - 5G
+  links:
+  - name: Hpe5gcs Operator
+    url: https://hpe5gcs-operator.domain
+  maturity: alpha
+  provider:
+    name: Dominique Domet de Mont
+    url: http://orgues.free.fr/d3m
+  version: _OPERATOR_VERSION

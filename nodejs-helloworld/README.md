@@ -559,7 +559,6 @@ EOF
 ```
 The installer is not able to detect this incompatibility. The client has to check the application status from the standard OpenShift API/CLI.   
 
-
 <a name="SectionsDetails"></a>
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
@@ -587,8 +586,8 @@ Miscellaneous settings:
 - default_openstack_network_root: The default OpenStack network root as 3 unique digits like 192.168.199
 - openstack_security_group: Name of the OpenStack security group controlling network permissions to the instances
 - openstack_volume_size: Size in Gb of the specific volume allocated to each OpenStack instance:
-    In that case, the OpenStack image must refer to a volume ID used for cloning.
-    Default: local storage sized according to the flavor and initialiazed with the image.
+		In that case, the OpenStack image must refer to a volume ID used for cloning.
+		Default: local storage sized according to the flavor and initialiazed with the image.
 - tester_nodejs_version: Nodejs version used to run the CMS5G Core Stack tester tool
 - tester_git_url: Git project URL delivering the CMS5G Core Stack tester tool
 - tester_deploy_key: Optional git deploy key to clone the project delivering the CMS5G Core Stack tester tool
@@ -761,7 +760,7 @@ PREREQUISITE: the Builds section defines the build source in GIT repository for 
 - Name: one word resource name for this application instance
 - Project: the OpenShift project hosting this application instance
 - Pipeline: create a Jenkins pipeline for this application from the Builds section definition
-  
+	
 
 ### NetworkFunctions
 Attributes:
@@ -778,7 +777,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-  
+	
 
 NetworkFunctions supported types: nudsf-dr,nudr-dr,nudr-prov,nudr-reg-agent,nudm-ee,nudm-li-poi,nudm-li-tf,nudm-ueau,nudm-uecm,nudm-sdm,nudm-notify,sf-cmod,nrf-reg-agent
 
@@ -797,7 +796,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-  
+	
 NOTES:
 - redis default admin password is the name of the instance.
   redis-nopwd deploys a redis instance without password 
@@ -828,7 +827,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-  
+	
 NOTES: 
 - jenkins recommended values for RedHat OpenShift 3 are : 
   . URL: docker.io/openshift
@@ -846,9 +845,9 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Project: the OpenShift project hosting this operator instance
 - Replicas: number of replicas passsed to this operator instance.
 - Pipeline: create a Jenkins pipeline for this operator instance from the Builds section definition
-  
+	
 
-Operators supported types: jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,etcd-operator,local-storage-operator,container-storage-operator,prometheus-operator
+Operators supported types: hpe5gcs-operator,jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,etcd-operator,local-storage-operator,container-storage-operator,prometheus-operator
 
 ### HelmCharts
 HelmCharts
@@ -861,7 +860,7 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Version: specify the exact chart version to install. If this is not specified, the latest version is installed
 - Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
 - Pipeline: create a Jenkins pipeline for this chart instance from the Builds section definition
-  
+	
 
 HelmCharts supported types: nudm-chart,nudr-chart,telegraf-chart,generic
 
@@ -883,7 +882,7 @@ It consists in four sections:
   The placeholder used in templates is the first element in this list.    
   Example: telegraf can play an influxdb type, and can be deployed as an indirect service or a helm chart.    
     The udsf resource requiring both ignite and influxdb resources can specify this dependencies list:   
-  "nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
+	"nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
     The udsf template has to use the placeholders \~ignite_NAME\~ and \~influxdb_NAME\~ to enable the dependencies resolution at deployment time.    
 3. values:
   Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
@@ -907,7 +906,7 @@ The template attribute in the values section is a YAML description of the OpenSh
       This placeholder allows dynamic resolution of dependencies between resources. For instance, in the udsf template, the datasource service name \~ignite_NAME\~ will be dynamically resolved as the actual name of the ignite instance in this project for this deployment.
       - \~VOLUME\~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
       - \~PERSISTENCE_START\~conditional_sequence\~PERSISTENCE_END\~ useful to manage resources with optional persistent storage like ignite: 
-        the conditional sequence is removed when no persistent storage is defined by the user for this resource    
+    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
      
 Those placeholders are processed at build time with the actual values defined by the user.
 Templates can also be loaded as files from the GUI using the Import Yaml template button in the Catalog fieldset. See the online help for more details.  
@@ -915,13 +914,11 @@ Templates can also be loaded as files from the GUI using the Import Yaml templat
 <a name="OpenStackHelp"></a>
 ## OpenStack deployment help
 
-Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab infrastructure using ansible: 
+Quick user guide for deploying an OpenShift cluster in an OpenStack HPE lab infrastructure using ansible: 
 
 - OpenStack tenant
-    - Get a tenant on RHOS13 from infra team at https://cmsgvm42.gre.hpecorp.net/hos    
+    - Get a tenant on OpenStack    
      Typical quota: 25 vCPUs, 50Gb RAM, 100Gb disk
-    - Install and configure the infrastructure VPN as per    https://github.hpe.com/OTC-Foundation/sandboxes_user_doc/blob/master/docs/vpn.md
-    - Connect to your tenant at https://30.118.132.11/dashboard/auth/login
     - in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
     - create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
     - save the private key, eg mykey.pem
@@ -939,9 +936,9 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
     ssh -i mykey.pem centos@30.118.0.26
     - install git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository:     
      sudo  yum install -y epel-release     
-     sudo  yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
+     sudo  yum install -y git httpd-tools java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
     - install openstack client, ansible, shade, passlib, decorator and cryptography:    
-     sudo  pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
+     sudo  pip3 install python-openstackclient===5.4.0 shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
     - clone the CMS5G Core Stack automated deployer from git:     
      git clone git@github.hpe.com:CMS-5GCS/automated-deployer.git
     - move to this directory    
@@ -962,7 +959,7 @@ Quick user guide for deploying an OpenShift 3.x cluster in an OpenStack HPE lab 
       - export CLOUD_SSH_KEY_PAIR="mykey"
       - export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
     - set the name of the external network offering public access
-      - export CLOUD_EXTERNAL_NETWORK=ext-net
+  	  - export CLOUD_EXTERNAL_NETWORK=ext-net
     - set the default image to used:
       - export CLOUD_IMAGE="Cent OS 7"
     - retrieve the infrastructure certificate: e.g. grenoble-infra-root-ca_gs118.crt 
@@ -979,7 +976,7 @@ The first master public IP address is available as $openshift_ip: eg 30.118.0.24
     - accept the security warning and log on with any name and password
     - approve the self signed certificate for the metrics display engine Hawkular by clicking the warning link in another tab
     - connect to the master, connect with the user name used in the GUI
-     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip 
+     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip	
      - oc login -u <user>
     - invoke the deployment script: ./hpe5g.sh
 

@@ -8,7 +8,7 @@
 <table border=0 width="100%">
 <td valign="top" align="left">
 <H1>CMS5G Core Stack</H1>
-<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2021-04-22 Version 0.93</a></p>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">2021-04-28 Version 0.94</a></p>
 <p>
 <label for="quickDescription">Description :</label>
 <input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
@@ -115,6 +115,7 @@ document.getElementById("HPElogo").src="data:image/png;base64,"+HPElogo;
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
+2021-04-28 0.94 OpenShift 4 deployment: switch to OVN network type; bug fix on /etc/hosts update; (experimental) adding hpe5gcs-operator in the default catalog; how to update.
 2021-04-22 0.93 (experimental) local-storage-operator delivering persistent storage on baremetal 
 2021-04-14 0.92 OpenShift 4 on bare metal ; Catalog Source for operators
 2021-03-04 0.91 UPF router support; automatic link between UPF and the OCP hosting the NRF if any; more UPF attributes in Misc section; network interfaces naming more flexible to address ubuntu targets 
@@ -1713,7 +1714,7 @@ OpenShiftNodes.build = function(target){
     var workersNumber = Number(workers);
     if(isNaN(workersNumber)){
       OpenShiftNodes.check+="\nOpenShiftNodes section: illegal value for Workers on "+name+" : "+workers+"; expecting integer";
-    }else if(workersNumber<1)OpenShiftNodes.check+="\nOpenShiftNodes section: illegal value for Workers on "+name+" : "+workers+"; 1 minimum required";
+    }
     if(!flavor)OpenShiftNodes.check+="\nOpenShiftNodes section: "+name+" missing Flavor attribute";
     // Convert to the actual flavor name
     flavor=Flavors['openstack'][flavor].name
@@ -2752,10 +2753,8 @@ var OpenStackHelp=
 Quick user guide for deploying an OpenShift cluster in an OpenStack HPE lab infrastructure using ansible: 
 
 - OpenStack tenant
-    - Get a tenant on RHOS13 from infra team at https://cmsgvm42.gre.hpecorp.net/hos    
+    - Get a tenant on OpenStack    
      Typical quota: 25 vCPUs, 50Gb RAM, 100Gb disk
-    - Install and configure the infrastructure VPN as per    https://github.hpe.com/OTC-Foundation/sandboxes_user_doc/blob/master/docs/vpn.md
-    - Connect to your tenant at https://30.118.132.11/dashboard/auth/login
     - in the default security group, allow all ports for TCP and UDP ingress: Networks/Security Groups/default/Manage Rules/Add Rule
     - create an ssh key pair: Compute/Key Pairs/Create Key Pair, eg mykey
     - save the private key, eg mykey.pem
@@ -2773,9 +2772,9 @@ Quick user guide for deploying an OpenShift cluster in an OpenStack HPE lab infr
     ssh -i mykey.pem centos@30.118.0.26
     - install git httpd-tools java-1.8.0-openjdk-headless and pip from epel repository:     
      sudo  yum install -y epel-release     
-     sudo  yum install -y git httpd-tools     java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
+     sudo  yum install -y git httpd-tools java-1.8.0-openjdk-headless python3 python3-pip --enablerepo='epel'
     - install openstack client, ansible, shade, passlib, decorator and cryptography:    
-     sudo  pip3 install python-openstackclient shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
+     sudo  pip3 install python-openstackclient===5.4.0 shade passlib decorator===4.4.0 ansible===2.7.4 cryptography==2.5
     - clone the CMS5G Core Stack automated deployer from git:     
      git clone git@github.hpe.com:CMS-5GCS/automated-deployer.git
     - move to this directory    
@@ -4930,6 +4929,7 @@ var defaultCatalog=`
       "catalog-source"
     ],
     "Operators": [  
+      "hpe5gcs-operator",
       "jaeger-product",
       "cert-manager",
       "servicemeshoperator",
@@ -4996,6 +4996,7 @@ var defaultCatalog=`
 	    "kube-state-metrics": true,
 	    "grafana-operator": true,
       "etcd-operator": true,
+      "hpe5gcs-operator": true,
       "local-storage-operator": true,
       "container-storage-operator": true,
 	    "prometheus-operator": true,
@@ -5143,6 +5144,7 @@ var defaultCatalog=`
     "cert-manager": {},
     "operator-source": {"Name": "dometdemont", "URL": "https://quay.io/cnr", "Project": "openshift-marketplace"},
     "catalog-source": {"Name": "hpe5gcs-operator", "URL": "quay.io/dometdemont/hpe5gcs-operator-index:v0.1.10", "Project": "openshift-marketplace"},
+    "hpe5gcs-operator": {},
     "servicemeshoperator": {},
     "amq-streams": {},
     "elasticsearch-operator": {},
@@ -12756,6 +12758,29 @@ metadata:
 spec:
   sourceType: grpc
   image: ~URL~
+`;
+//================================================
+hpe5gResources.defaults['hpe5gcs-operator']['template']=
+//================================================
+`
+- kind: OperatorGroup
+  apiVersion: operators.coreos.com/v1
+  metadata:
+    name: hpe5gcs-operator-~PROJECT~
+    namespace: ~PROJECT~
+  spec:
+    targetNamespaces:
+    - ~PROJECT~
+- kind: Subscription
+  apiVersion: operators.coreos.com/v1alpha1
+  metadata:
+    name: hpe5gcs-operator
+    namespace: ~PROJECT~
+  spec:
+    channel: alpha
+    name: hpe5gcs-operator
+    source: hpe5gcs-operator
+    sourceNamespace: openshift-marketplace
 `;
 </script>
 </body>
