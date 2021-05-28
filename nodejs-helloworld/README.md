@@ -9,12 +9,12 @@
 7. [OpenStack deployment help](#OpenStackHelp)
 
 This tool builds and run an installer deploying user defined HPE5G resources on OpenShift clusters.  
-It can also deploy on OpenStack an OpenShift cluster including HPE5G resources and/or additional instances.  
+It can also deploy an OpenShift cluster including HPE5G resources and/or additional instances.  
 It operates in two modes: interactive or headless.
 
-For the interactive mode, open the [hpe5g.html](hpe5g.html) file in a browser. From this interface, once the application is defined as a set of resources, the user can build either:
+For the interactive mode, open the [index.html](index.html) file in a browser. From this interface, once the application is defined as a set of resources, the user can build either:
 - an installer invokable from a bash console, or 
-- an OpenShift hpe5gApp application, deployable using the hpe5g operator 
+- an OpenShift application template 
      
 Click the Help buttons in the user interface for more information. 
 
@@ -40,6 +40,20 @@ The catalog can be exported and imported in order to expand, restrict or change 
 ### Session
 A session is a snapshot of a specific deployment, ie a list of resources. It can be saved as an HTML or json file. An HTML session
 can be used as a starting point for a deployment; typically, a set of backing services can be saved as a session and used later to resolve dependencies required by network functions deployment.
+#### Standalone vs Composed HTML sessions
+The default starting empty session is implemented in the file index.html: this session is composed of a set of Javascript sources, thus not usable as a standalone session. 
+
+A standalone session is a single HTML file including all the HTML and Javascript sources: such a session can be shared and moved around as a single all-in-one file. A composed session can be made standalone by running a REST GET request in headless mode; typically to get a standalone hpe5g.html session from the empty composed index.html session:
+```
+curl.exe http://localhost:8080/index.html > hpe5g.html
+```
+All sessions provided as examples in this project are standalone sessions:
+- hpe5g.html: blank session
+- bs-set.html: set of backing services
+- autotest.html: this project deployed as a pod in Openshift along with its jenkins pipeline
+- bm.m3.w2.html: a barematal deployment
+- green.html: three OpenShift clusters deployed on top of OpenStack
+- etc.
 ## Deployment <a name="Deployment"></a>
 The headless automated deployer is a nodejs application deployed as per the [package.json](package.json) specification from [hpe5g.js](hpe5g.js) file.   
 It can be deployed on any nodejs server:  
@@ -128,15 +142,17 @@ The RESTful interface is exposing three verbs:
 - [PUT](#PUT) to deploy a set of resources by building and retrieving or running an installer, or to build a new session,
 - [DELETE](#DELETE) to delete or undeploy a set of resources and projects.
 #### GET<a name="GET"></a>
-##### View an existing session GUI
+##### Dump an existing session as HTML
 `curl  -X GET  http://<host:port>/<session>`   
 Where:
 - session is the HTML session file on the application server
-##### Dump the resources defined in an existing session
+
+NOTE: the session is dumped as a standalone HTML session.
+##### Dump the resources defined in an existing session as json
 `curl  -X GET  http://<host:port>/<session>/dump`   
 Where:
 - session is the HTML session file on the application server
-##### Dump the catalog content
+##### Dump the catalog content as json
 `curl  -X GET  http://<host:port>/<session>/catalog[?catalog=<catalog>]`   
 Where:
 - session is the HTML session file on the application server, typically hpe5g.html delivered as an empty session by the github project.
@@ -184,9 +200,9 @@ Where:
 	      - name: the node name in OpenStack
 	      - groups: the ansible list of groups this node belongs to
 	      - fqdn: the fully qualified domain name of this node
-    - hpe5gApp.yaml: to retrieve the application definition as an HPE5gApp kind, deployable using the hpe5g operator. This operator has to be installed beforehand from https://quay.io/cnr registryNamespace: dometdemont    
+    - hpe5gApp.yaml: to retrieve the application definition as an OpenShift application template with optional parameters    
     - dump: to retrieve the concatenation of resources passed as payload with the resources defined in the session; the returned json is a merge of both set of resources, ready for a single shot deployment
-    - save: similar to dump, but resulting in an HTML session ready to use as a starting point for other deployments  
+    - save: similar to dump, but resulting in an HTML session ready to use as a starting point for other deployments. The saved session is standalone.  
     - hpe5g.yaml: to retrieve an OpenStack Heat template deploying a full OpenShift cluster, HPE5G resources, and/or additional instances made available to run custom tools.       
     
 - Optional parameters:

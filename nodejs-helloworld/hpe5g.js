@@ -62,10 +62,30 @@ if(args.privateKey && args.certificate){
 	});
 }
 
+function inlineScripts(document){
+	// Replace all scripts referring to an external local file content by this actual content and return the updated document
+	for(var i=0; i<document.scripts.length; i++){
+		const refType="file:///"
+		var scriptSrc=document.scripts[i].src
+		if(!scriptSrc || !scriptSrc.startsWith(refType))continue;
+		try {
+		  var fileName=scriptSrc.substr(refType.length)
+		  var scriptContent = fs.readFileSync(fileName, 'utf8')
+		  console.log("In-lining script file "+fileName)
+		  document.scripts[i].removeAttribute("src")
+		  document.scripts[i].text=scriptContent
+		} catch (err) {
+		  console.error("In-lining script file "+scriptSrc+" failed with "+err+"; keeping original source attribute")
+		}
+	}
+	return document;
+}
+
 // Get the default catalog, or the one passed as parameter or the session dump or the session HTML document
 app.get(['/:session', '/:session/:target'], function (req, res, next) {
 	console.log(new Date().toISOString()+'\t'+req.method+' '+req.params.target+' session: '+req.params.session+' catalog:'+req.query.catalog+' project:'+req.query.project+' OSenv:'+req.query.OSenv+' OSnetwork:'+req.query.OSnetwork);
-	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
+	// Allow external scripts to run 
+	JSDOM.fromFile(req.params.session, { resources: 'usable', runScripts: "dangerously"}).then(dom => {
 	  var mywin=dom.window;
 	  mywin.headless=true;
 	  switch(req.params.target){
@@ -110,7 +130,7 @@ app.get(['/:session', '/:session/:target'], function (req, res, next) {
 			return res.status(returnCode).send(message).end()
 			break;
 		default:
-		  res.send(mywin.document.documentElement.outerHTML);
+		  res.send(inlineScripts(mywin.document).documentElement.outerHTML);
 		  break;
 	  }
 	}).catch((err) => {
@@ -122,7 +142,8 @@ app.get(['/:session', '/:session/:target'], function (req, res, next) {
 app.use('/:session/:target', function (req, res, next) {
 	var syncMsg=req.query.async != undefined?' asynchronously ':' synchronously ';
 	console.log(new Date().toISOString()+'\t'+req.method+syncMsg+req.params.target+' session: '+req.params.session+' catalog:'+req.query.catalog+' project:'+req.query.project+' OSenv:'+req.query.OSenv+' OSnetwork:'+req.query.OSnetwork);
-	JSDOM.fromFile(req.params.session, { runScripts: "dangerously" }).then(dom => {
+	// Allow external scripts to run 
+	JSDOM.fromFile(req.params.session, { resources: 'usable', runScripts: "dangerously"}).then(dom => {
 	  var mywin=dom.window;
 	  var mydom=mywin.document;
 	  mywin.headless=true;
@@ -198,7 +219,7 @@ app.use('/:session/:target', function (req, res, next) {
 			}
 		 }
 		 switch(success){
-			case true: res.send(DOMresult ? mywin.document.documentElement.outerHTML: mywin.rawUserOutput); break;
+			case true: res.send(DOMresult ? inlineScripts(mywin.document).documentElement.outerHTML: mywin.rawUserOutput); break;
 			case false: res.status(400).send(mywin.rawUserOutput); break;
 			default: /* let nodejs wait for the asynchronous final status */ break;
 		 }

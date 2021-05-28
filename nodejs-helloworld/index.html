@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CMS5G Core Stack</title>
+</head>
+<body >
+<input id="_uniqueInputId" value="1" type="hidden" placeholder="Hidden input recording the html id for dynamic delete buttons"/>
+<table border=0 width="100%">
+<td valign="top" align="left">
+<H1>CMS5G Core Stack</H1>
+<p><a id="vnfDescriptorWizardVersion" href="#endOfUserArea" title="Click to view version history" style="color: #01a982; text-decoration: underline;" onclick="versionHistory()">unknown</a></p>
+<p>
+<label for="quickDescription">Description :</label>
+<input id="quickDescription" size="150" name="quickDescription" placeholder="One line CMS5G Core Stack instance description"/>
+</p>
+</td>
+<td valign="top" align="right">
+<img id=HPElogo  alt="logo.png">
+</td>
+</table>
+
+<H3>Summary: <a id="summary" href="#endOfUserArea" >Outputs and Result</a></H3>
+
+<form>
+<div id="tableInsertionPoint"></div>
+</form>
+
+<hr>
+
+<table>
+<td valign="top"><fieldset>
+    <legend>Build</legend>
+<table>
+<tr><td valign="top">Get help on the environment setup and topology definition</td><td valign="top"><input class="helpButton" type="button" value="Help" onclick="deploymentHelp()"></td>
+<tr><td valign="top">Build the installer</td><td valign="top"><input class="buildButton" type="button" value="Installer" onclick="outputInstallerShell()"></td></tr>
+<tr><td valign="top">Build the kubernetes application template</td><td valign="top"><input class="buildButton" type="button" value="hpe5gApp" onclick="outputAppHpe5g()"></td></tr>
+<td valign="top">Build the OpenStack Heat template</td><td valign="top"><input class="buildButton" type="button" value="Stack" onclick="outputHeatTemplate()"></td></tr>
+<tr><td valign="top">OpenShift target version<td valign="top"><select id="oc_version" onchange="Nodes.hideUnused()">
+<option name="4" selected>4.x</option>
+<option name="3.11">3.11</option>
+<option name="3.9">3.9</option></select> 
+</td></tr>
+<tr><td valign="top">Build the markdown documentation</td><td valign="top"><input class="helpButton" type="button" value="Doc" onclick="deploymentDoc()"></td></tr></tr>
+</table>
+</fieldset></td>
+<td valign="top"><fieldset>
+    <legend>Session</legend>
+<table id="controlArea">
+<tr><td valign="top" >Status</td><td valign="top" id=sessionStatus colspan=3>unchanged</td></tr>
+<tr><td valign="top" colspan=2>Get help</td><td valign="top"><input class="helpButton" type="button" value="Help" onclick="sessionHelp()"></td></tr>
+<tr><td valign="top" colspan=2><label>Save as html</label></td><td><input class="helpButton" type="button" value="Save" onclick="saveSession()"/></td></tr>
+<tr><td valign="top" colspan=2>View and save as Json</td><td valign="top"><input class="buildButton" type="button" value="Dump" onclick="jsonSession()"></td></tr>
+</table>
+</fieldset></td>
+<td valign="top"><fieldset>
+    <legend>Catalog</legend>
+<table id="catalogArea">
+<tr><td valign="top" colspan=2>Get help</td><td valign="top"><input class="helpButton" type="button" value="Help" onclick="catalogHelp()"></td></tr>
+<tr>
+<td valign="top" colspan=2>Display depth
+<select id="catalog_display_depth">
+<option>1</option>
+<option>2</option>
+<option selected>all</option>
+</select>ellipsis<select id="catalog_display_ellipse">
+<option>50</option>
+<option>200</option>
+<option>1000</option>
+<option selected>none</option>
+</select></td><td valign="top"><input class="helpButton" type="button" value="Display" onclick="displayCatalog()"></td>
+<tr><td valign="top" colspan=2>Export Json catalog</td><td valign="top"><input class="buildButton" type="button" value="Export" onclick="exportCatalog()"></td></tr>
+</table>
+</fieldset></td>
+</table>
+
+<!-- Link to the end of the user area, useful to focus the user on the result on long pages -->
+<p>Quick links: <a id="endOfUserArea" href="#endOfUserArea" >Outputs and Result</a></p>
+<p>
+<textarea readonly rows="20" cols="200" id="userArea"></textarea>
+<textarea readonly rows="20" cols="200" id="startupArea" style="display:none;color:red"></textarea>
+
+<a name="endOfUserArea"></a>
+</p>
+<iframe width="1500" height="200" name="importedDocument" style="display:none"></iframe>
+<P class="copyright">&copy; 2020 Hewlett Packard Enterprise Development LP</P>
+<script>
+function catchFatalStartupError(file) {
+	var startupArea=document.getElementById("startupArea")
+	if(!startupArea.innerHTML){
+		startupArea.innerHTML="Fatal startup error(s)"
+		startupArea.style.display=''
+		document.getElementById("userArea").style.display='none'
+	}
+	startupArea.innerHTML+="\nError on loading file "+file
+};
+</script>
+<script src="hpestyle.js" onerror="catchFatalStartupError('hpestyle.js')"></script>
+<script src="YAML.min.js" onerror="catchFatalStartupError('YAML.min.js')"></script>
+<script src="version.js" onerror="catchFatalStartupError('version.js')"></script>
+<script src="userLoadedFile.js" onerror="catchFatalStartupError('userLoadedFile.js')"></script>
+<script src="utils.js" onerror="catchFatalStartupError('utils.js')"></script>
+<script src="vnfResource.js" onerror="catchFatalStartupError('vnfResource.js')"></script>
+<script src="Networks.js" onerror="catchFatalStartupError('Networks.js')"></script>
+<script src="Misc.js" onerror="catchFatalStartupError('Misc.js')"></script>
+<script src="Flavors.js" onerror="catchFatalStartupError('Flavors.js')"></script>
+<script src="Nodes.js" onerror="catchFatalStartupError('Nodes.js')"></script>
+<script src="OpenShiftNodes.js" onerror="catchFatalStartupError('OpenShiftNodes.js')"></script>
+<script src="BaremetalNodes.js" onerror="catchFatalStartupError('BaremetalNodes.js')"></script>
+<script src="Volumes.js" onerror="catchFatalStartupError('Volumes.js')"></script>
+<script src="Clusters.js" onerror="catchFatalStartupError('Clusters.js')"></script>
+<script src="Builds.js" onerror="catchFatalStartupError('Builds.js')"></script>
+<script src="hpe5gResources.js" onerror="catchFatalStartupError('hpe5gResources.js')"></script>
+<script src="documentation.js" onerror="catchFatalStartupError('documentation.js')"></script>
+<script src="installer.js" onerror="catchFatalStartupError('installer.js')"></script>
+<script src="Session.js" onerror="catchFatalStartupError('Session.js')"></script>
+<script src="Heat.js" onerror="catchFatalStartupError('Heat.js')"></script>
+<script src="OpenShift4.js" onerror="catchFatalStartupError('OpenShift4.js')"></script>
+<script src="BaremetalBuild.js" onerror="catchFatalStartupError('BaremetalBuild.js')"></script>
+<script src="catalog.js" onerror="catchFatalStartupError('catalog.js')"></script>
+<script src="catalogDefaults.js" onerror="catchFatalStartupError('catalogDefaults.js')"></script>
+<script src="main.js" onerror="catchFatalStartupError('main.js')"></script>
+<script src="catalogDefaultTemplates.js" onerror="catchFatalStartupError('catalogDefaultTemplates.js')"></script>
+</body>
+</html>
