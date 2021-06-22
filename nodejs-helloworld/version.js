@@ -1,9 +1,12 @@
 // Current version
-document.getElementById("vnfDescriptorWizardVersion").innerHTML="2021-05-24 Version 0.96"
+document.getElementById("vnfDescriptorWizardVersion").innerHTML="2021-06-21 Version 0.97"
 
 // Display version history in the user output area
 function versionHistory(){userOutput(`Version history:
-2021-05-24 0.96	Code split, standalone session delivery by inlining javascript files from the node js application; session status management by tracking modifications and backup.
+2021-06-21 0.97 Azure infrastructure: new section VanillaNodes to deploy vanilla kubernetes clusters; create the service principal required for OpenShift clusters, if missing. 
+  OpenShift 4 on OpenStack: check for conflicting network resources before launching the OpenShift installer; default templates: move rbac.authorization.k8s.io/v1beta1 version to v1
+2021-05-31 0.96	Code split, standalone session delivery by inlining javascript files from the node js application; session status management by tracking modifications and backup.
+2021-05-12 0.95 Support OpenShift 4 deployment on Azure public cloud; new section to define optional kubernetes application template parameters
 2021-04-28 0.94 OpenShift 4 deployment: switch to OVN network type; bug fix on /etc/hosts update; (experimental) adding hpe5gcs-operator in the default catalog; how to update.
 2021-04-22 0.93 (experimental) local-storage-operator delivering persistent storage on baremetal 
 2021-04-14 0.92 OpenShift 4 on bare metal ; Catalog Source for operators

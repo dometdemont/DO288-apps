@@ -133,8 +133,7 @@ Builds.build = function(target){
 		var gitURL=Builds.getAndSetValue(row, nameIndexes, 'GIT URL', 'https://github.com/dometdemont/DO288-apps');
 		var gitDirectory=Builds.getAndSetValue(row, nameIndexes, 'directory');
 		var gitBranch=Builds.getAndSetValue(row, nameIndexes, 'branch');
-		var delButton=row.getElementsByClassName("delButton")[0];
-		var sshKey=window[this.title + "_sshKey_" + delButton.id];
+		var sshKey=Builds.getFileObject(row, "sshKey");
 		var check='';
 		if(!type)check += "\nBuilds section: "+name+": type is required";
 		if(!name)check += "\nBuilds section: "+type+" name is required";
@@ -145,8 +144,7 @@ Builds.build = function(target){
 		Builds.check+=check;
 		if(check)continue;
 		
-		result+="\n#- "+type+" "+name+" build from GIT "+gitURL+"/"+gitDirectory+" branch: "+gitBranch+" sshKey: ";
-		if(sshKey.content)result+=sshKey.content.length+" bytes";
+		result+="\n#- "+type+" "+name+" build from GIT "+gitURL+"/"+gitDirectory+" branch: "+(gitBranch?gitBranch:"master")+(sshKey.hasContent()?" sshKey: "+sshKey.content.trunc(50):'')
 		Builds.makeTemplate(name, type, gitURL, gitDirectory, gitBranch, sshKey);
 	}
 

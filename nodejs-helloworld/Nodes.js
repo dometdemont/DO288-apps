@@ -38,7 +38,7 @@ Nodes.help = function(){
   - NRF is defined in the Misc section as an IP address, a port and an interface number; 
     the IP address specified in the Misc section can be a templated variable referring to an OpenShift API floating IP as ~ocp_API~ where ocp is the name of the OpenShift cluster defined in the OpenShiftNodes section 
   - mobile network and country codes are defined in the Misc section
-- Master/Etcd/Worker: the role(s) played by this node in the OpenShift 3.x cluster    
+- Master/Etcd/Worker: the role(s) played by this node in the OpenShift 3.x cluster; check boxes are enabled by OpenShift target version set to 3.x in the build pane        
   If no box is checked, the node is instantiated but not part of the OpenShift cluster, available for any specific usage.
 - Tester: node hosting the nodejs application used as HPE network functions tester    
   This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
@@ -67,7 +67,6 @@ Example with 3 nodes large, medium, small on 4 networks MGMT/DATA1-3
   "~large_data1~": "192.168.199.44", 
   "~medium_data1~": "192.168.199.49"
 } 
--  
 `;
 }
 

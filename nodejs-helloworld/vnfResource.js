@@ -495,3 +495,9 @@ vnfResource.prototype.getAndSetSelection = function(row, nameIndexes, column, de
 	setModifiedSession(this.title);
 	return x;
 }
+
+vnfResource.prototype.getFileObject = function(row, column){
+  var delButton=row.getElementsByClassName("delButton")[0];
+  var fileObj=window[this.title + "_"+column+"_" + delButton.id];
+  return fileObj;
+}

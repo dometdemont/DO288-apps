@@ -2,24 +2,27 @@
 // Session management
 //=================================
 function sessionHelp(){userOutput(
-`Save:
-	Saved sessions are self-contained entities, and can be edited at will to reflect topology or feature changes, then saved again as new or modified sessions.
-	By clicking the Save button, the whole HTML document is saved in the Download folder managed by the browser as a file named hpe5g.saved.html.
-	This saved session gathers all HTML resources defined by the user in a single standalone file.
-	NOTE: user loaded files are not part of the HTML document and must be reloaded from the saved session (catalog, Helm values, ...)
+`Status:
+  Tracks the modifications in the current session: either unchanged or modified or saved. In case of unsaved modifications, the user is prompted for confirmation upon session closing.
+  
+Save:
+  Saved sessions are self-contained entities, and can be edited at will to reflect topology or feature changes, then saved again as new or modified sessions.
+  By clicking the Save button, the whole HTML document is saved in the Download folder managed by the browser as a file named hpe5g.saved.html.
+  This saved session gathers all HTML resources defined by the user in a single standalone file.
+  NOTE: user loaded files are not part of the HTML document and must be reloaded from the saved session (catalog, Helm values, ...)
 
 Dump:
-	Produces a Json image of the current session, as a file named hpe5g.json in the Download folder of the browser.
-	This light image does not contain the HTML document; it can be injected by the PUT verb of the Restful interface in headless mode,
-	or imported to another session using the Import button.
+  Produces a Json image of the current session, as a file named hpe5g.json in the Download folder of the browser.
+  This light image does not contain the HTML document; it can be injected by the PUT verb of the Restful interface in headless mode,
+  or imported to another session using the Import button.
 	
 Import:
-	Besides, it may be useful to import an existing session in the current one, typically to merge sections from several sessions, 
-	or to upgrade an existing session to a new version of the CMS5G Core Stack Assistant, thus benefiting from new features.
-	To that aim, from the importing session, click the session file chooser button, and select the imported session file, either
-	as a Json or Html file.
-	A summary of imported sections is displayed in the text area; it is the user's responsibility to check the merged result 
-	and remove or fix inconsistencies before building.
+  Besides, it may be useful to import an existing session in the current one, typically to merge sections from several sessions, 
+  or to upgrade an existing session to a new version of the CMS5G Core Stack Assistant, thus benefiting from new features.
+  To that aim, from the importing session, click the session file chooser button, and select the imported session file, either
+  as a Json or Html file.
+  A summary of imported sections is displayed in the text area; it is the user's responsibility to check the merged result 
+  and remove or fix inconsistencies before building.
 
 `)};
 
@@ -33,9 +36,20 @@ function setModifiedSession(location){
 }
 
 function saveSession(){
+  // Set volatile values as attributes so that they get saved in the cloned document
 	var quickDescription = document.getElementById("quickDescription");
 	quickDescription.setAttribute("value", quickDescription.value);
-	
+  var oc_version=document.getElementById("oc_version");
+  var selectedOption=oc_version.options.selectedIndex;
+  if(selectedOption != -1){
+    // Remove all existing selected attributes
+    for (var i=oc_version.options.length;i--;) { // looping over the options
+      oc_version.options[i].removeAttribute("selected");
+    }
+    var s = oc_version.options[selectedOption];
+    if(s != undefined)s.setAttribute("selected", "selected");
+  }
+  	
 	var exportedDocument=document.cloneNode(true);
 	// Update the backup status in the current document with the current date
 	var savedStatus=document.getElementById("sessionStatus");

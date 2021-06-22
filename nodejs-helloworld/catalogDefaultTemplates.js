@@ -6269,7 +6269,7 @@ hpe5gResources.defaults['kube-state-metrics']['template']=
     name: ~NAME~
     namespace: ~PROJECT~
 - kind: ClusterRole
-  apiVersion: rbac.authorization.k8s.io/v1beta1
+  apiVersion: rbac.authorization.k8s.io/v1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
@@ -6367,7 +6367,7 @@ hpe5gResources.defaults['kube-state-metrics']['template']=
       - storageclasses
     verbs: ["list", "watch"]
 - kind: ClusterRoleBinding
-  apiVersion: rbac.authorization.k8s.io/v1beta1
+  apiVersion: rbac.authorization.k8s.io/v1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
@@ -6605,7 +6605,7 @@ hpe5gResources.defaults['fluentd']['template']=
     name: ~NAME~
     namespace: ~PROJECT~
 - kind: Role
-  apiVersion: rbac.authorization.k8s.io/v1beta1
+  apiVersion: rbac.authorization.k8s.io/v1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
@@ -6870,7 +6870,7 @@ hpe5gResources.defaults['grafana']['template']=
     admin-password: "~NAME~"
     ldap-toml: ""
 - kind: Role
-  apiVersion: rbac.authorization.k8s.io/v1beta1
+  apiVersion: rbac.authorization.k8s.io/v1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~
@@ -6880,7 +6880,7 @@ hpe5gResources.defaults['grafana']['template']=
     verbs:          ['use']
     resourceNames:  [~NAME~]
 - kind: RoleBinding
-  apiVersion: rbac.authorization.k8s.io/v1beta1
+  apiVersion: rbac.authorization.k8s.io/v1
   metadata:
     name: ~NAME~
     namespace: ~PROJECT~

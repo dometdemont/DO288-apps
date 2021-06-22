@@ -83,7 +83,7 @@ function deploymentDoc(){
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
 `;
-	['Misc', 'Networks','OpenShiftNodes','BaremetalNodes','Nodes','Flavors','Clusters','Builds', 'CustomApps', 'NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
+	['Misc', 'Networks','OpenShiftNodes','BaremetalNodes','VanillaNodes','Nodes','Flavors','Clusters','Builds', 'CustomApps', 'TemplateParameters', 'NetworkFunctions','DirectServices','IndirectServices','Operators','HelmCharts'].forEach(function(section){
 		result+="\n### "+section+"\n"+window[section].help();
 		if(hpe5gResources.types[section])result+="\n"+section+" supported types: "+hpe5gResources.types[section]+"\n";
 	});

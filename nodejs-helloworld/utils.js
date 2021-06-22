@@ -182,6 +182,13 @@ if (!String.prototype.endsWith) {
 	  return d >= 0 && this.lastIndexOf(pattern) === d;
 	};
 }
+
+// Gratitude to https://stackoverflow.com/questions/1199352/smart-way-to-truncate-long-strings
+String.prototype.trunc = String.prototype.trunc ||
+function(n){
+    return (n != 0 && this.length > n) ? this.substr(0, n-1) + '&hellip;' : this;
+};
+
 // In a list of arrays 'a', for all empty elements from index 0 to the last existing array, create an array and insert a 'defaultString'
 function fillArrays(a, defaultString){
 	if(a == undefined)return;

@@ -2,7 +2,7 @@
 //Flavors settings
 //===========================
 var Flavors = new vnfResource("Flavors", [
-	{name:'Infrastructure', width:'100px', type:'choice', choices:['openstack']},
+	{name:'Infrastructure', width:'100px', type:'choice', choices:['openstack', 'azure']},
 	{name:'Flavor', width:'120px', type:'choice', choices:['flavorTiny', 'flavorSmall', 'flavorStandard', 'flavorLarge', 'flavorPerformance']},
 	{name:'name', type:'text', width:'200px'}
 	]
@@ -14,6 +14,12 @@ Flavors['openstack']['flavorSmall'] = {name: 'v2.m2'};
 Flavors['openstack']['flavorStandard'] = {name: 'v2.m8'};
 Flavors['openstack']['flavorLarge'] = {name: 'v4.m8'};
 Flavors['openstack']['flavorPerformance'] = {name: 'v4.m16'};
+Flavors['azure'] = new Array();
+Flavors['azure']['flavorTiny'] = {name: 'Standard_B2ms'};
+Flavors['azure']['flavorSmall'] = {name: 'Standard_B4ms'};
+Flavors['azure']['flavorStandard'] = {name: 'Standard_D4s_v3'};
+Flavors['azure']['flavorLarge'] = {name: 'Standard_D8s_v3'};
+Flavors['azure']['flavorPerformance'] = {name: 'Standard_D32_v4'};
 
 Flavors.help = function(){
 var help=`Infrastructure flavors:
@@ -31,7 +37,7 @@ Examples:
 		help+=column.padStart(colLength);
 	});
 	help+="    ";
-	['openstack'].forEach(function(infrastructure){
+	['openstack', 'azure'].forEach(function(infrastructure){
 		['flavorTiny','flavorStandard', 'flavorSmall','flavorLarge','flavorPerformance'].forEach(function(flavor){
       var name=Flavors[infrastructure][flavor].name;
       if(!name)name="<undefined>";
@@ -62,7 +68,7 @@ Flavors.build = function(target){
 		var infra=Flavors.getAndSetSelection(row, nameIndexes, 'Infrastructure');
 		var flavor=Flavors.getAndSetSelection(row, nameIndexes, 'Flavor');
 		switch(infra){
-			case 'openstack': 
+			case 'openstack': case 'azure':
 				Flavors[infra][flavor].name=Flavors.getAndSetValue(row, nameIndexes, 'name', Flavors[infra][flavor].name, "Flavor name for "+flavor+" on "+infra);
 				result+="\n# "+infra+" "+flavor+": name="+Flavors[infra][flavor].name;
 				break;

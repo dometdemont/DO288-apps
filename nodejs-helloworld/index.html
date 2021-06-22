@@ -92,6 +92,7 @@ function catchFatalStartupError(file) {
 		document.getElementById("userArea").style.display='none'
 	}
 	startupArea.innerHTML+="\nError on loading file "+file
+	startupArea.focus();
 };
 </script>
 <script src="hpestyle.js" onerror="catchFatalStartupError('hpestyle.js')"></script>
@@ -106,6 +107,7 @@ function catchFatalStartupError(file) {
 <script src="Nodes.js" onerror="catchFatalStartupError('Nodes.js')"></script>
 <script src="OpenShiftNodes.js" onerror="catchFatalStartupError('OpenShiftNodes.js')"></script>
 <script src="BaremetalNodes.js" onerror="catchFatalStartupError('BaremetalNodes.js')"></script>
+<script src="VanillaNodes.js" onerror="catchFatalStartupError('VanillaNodes.js')"></script>
 <script src="Volumes.js" onerror="catchFatalStartupError('Volumes.js')"></script>
 <script src="Clusters.js" onerror="catchFatalStartupError('Clusters.js')"></script>
 <script src="Builds.js" onerror="catchFatalStartupError('Builds.js')"></script>
@@ -115,6 +117,7 @@ function catchFatalStartupError(file) {
 <script src="Session.js" onerror="catchFatalStartupError('Session.js')"></script>
 <script src="Heat.js" onerror="catchFatalStartupError('Heat.js')"></script>
 <script src="OpenShift4.js" onerror="catchFatalStartupError('OpenShift4.js')"></script>
+<script src="vanillaKubernetes.js" onerror="catchFatalStartupError('vanillaKubernetes.js')"></script>
 <script src="BaremetalBuild.js" onerror="catchFatalStartupError('BaremetalBuild.js')"></script>
 <script src="catalog.js" onerror="catchFatalStartupError('catalog.js')"></script>
 <script src="catalogDefaults.js" onerror="catchFatalStartupError('catalogDefaults.js')"></script>

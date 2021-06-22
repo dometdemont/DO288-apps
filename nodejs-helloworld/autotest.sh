@@ -1,7 +1,7 @@
 #! /bin/bash
 _usage() {
     echo "
-HPE 5G resources automated deployer: 2021-04-14 Version 0.92
+HPE 5G resources automated deployer: 2021-06-21 Version 0.97
 This client deploys and undeploys 
 - OpenShift clusters hosted on OpenStack 
 - Individual OpenStack resources as a stack
@@ -9,9 +9,12 @@ This client deploys and undeploys
  
 Usage: $0 
     -d|--deploy <name> : name of the OpenShift instance and OpenStack stack to deploy; default: hpe5g
+    -c|--cloud <cloud type>: type of the target cloud: openstack|azure
     -o|--domain <domain name> : domain name of the OpenShift instance to deploy; default: localdomain
     -n|--OSnetwork <network root>: default OpenStack network root as 3 unique digits like 192.168.199
-    -e|--OSenv <OpenStackEnvironmentFile> : name of the file providing the OpenStack environment. Retrieved from the OpenStack GUI: Project/API access
+    -e|--OSenv <EnvironmentFile> : name of the file providing the infrastructure environment. 
+      For Azure, this file can be typically used for setting the PATH to point to the target openshift and oc CLI
+      For OpenStack , this environment is typically retrieved from the GUI: Project/API access
       By default, this file prompts the user for his password; to make the deployment unattended, replace the prompt with the actual password in the variable OS_PASSWORD
       Mandatory additional variables:
       - OS_CACERT: path to a file providing a specific cacert in case the SSL cert is signed by an unknown CA
@@ -77,6 +80,7 @@ RHELSECRET='{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV
 while [[ "$#" -gt 0 ]]; do case $1 in
   -d|--deploy) _deploy=true; _displayedAction="Deploying"; state=present ; OCP=(${2:-${OCP[@]:-$_defaultName}}) ; shift;;
   -u|--undeploy|--destroy) _deploy=false ; _displayedAction="Undeploying"; state=absent ; OCP=(${2:-${OCP[@]:-$_defaultName}}); shift;;
+  -c|--cloud) CLOUD=($2); shift;;
   -e|--OSenv) OS_env=($2); shift;;
   -n|--OSnetwork) oc_network="$2"; shift;;
   -o|--domain) DOMAIN=($2); shift;;
@@ -180,13 +184,15 @@ _cmd_with_retry() {
    return 0
 }
 
-cat > openshift_project_automated-deployer.yaml << 'EOFILE'
+# File naming convention for Network functions: openshift_project_<project>.yaml
+_templateYaml=openshift_project_automated-deployer.yaml
+cat > $_templateYaml << 'EOFILE'
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: automated-deployer
   annotations:
-    description: network functions and backing services for project automated-deployer
+    description: 'Deploy an automated deployer as a custom app with a jenkins pipeline running autotests'
 objects:
   - kind: Secret
     apiVersion: v1
@@ -362,6 +368,8 @@ objects:
       type: ClusterIP
   
 EOFILE
+# Cluster specific variables resolution:
+sed -i "s/~LOCAL_STORAGE_NODES~/$_localStorageNodes/" $_templateYaml
 # CustomApps deployment scripts
 cat > openshift_project_automated-deployer.sh << 'EOFautomated-deployer'
 #!/bin/bash
@@ -428,7 +436,7 @@ test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user i
 _log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="automated-deployer openshift-marketplace"
-for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-04-14 Version 0.92 on: Thu Apr 15 2021 10:24:48 GMT+0200 (Central European Summer Time) Deploy an automated deployer as a custom app with a jenkins pipeline running autotests' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-06-21 Version 0.97 on: Mon Jun 21 2021 14:40:21 GMT+0200 (Central European Summer Time) Deploy an automated deployer as a custom app with a jenkins pipeline running autotests' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
 if echo guess | oc login -u system:admin &>> $logfile ; then
 _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &>> $logfile

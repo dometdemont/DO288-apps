@@ -67,12 +67,11 @@ hpe5gResource.prototype.build = function(target){
 		var chart=this.getAndSetValue(row, nameIndexes, 'Chart', hpe5gResources.defaults[type]['chart']);
 		var chartVersion=this.getAndSetValue(row, nameIndexes, 'Version', hpe5gResources.defaults[type]['version']);
 		var chartOptions=this.getAndSetValue(row, nameIndexes, 'Options');
-		var delButton=row.getElementsByClassName("delButton")[0];
-		var values=window[this.title + "_Values_" + delButton.id];
+		var values=this.getFileObject(row, "Values");
 		if(chart)displayChart=" with chart "+chart;
 		if(chartVersion)chartOptions+=" --version "+chartVersion;
 		if(chartOptions)displayChart+=" "+chartOptions;
-		this.check += checkDependency(this.title=='HelmCharts', [values!=undefined && values.content!=undefined && chart.length>0], this.title+" "+name,", Helm chart and values are required");
+		this.check += checkDependency(this.title=='HelmCharts', [values && values.hasContent() && chart.length>0], this.title+" "+name,", Helm chart and values are required");
 		var displayVolume="";
 		var replicas=this.getAndSetValue(row, nameIndexes, 'Replicas', hpe5gResources.defaults[type]['Replicas']?hpe5gResources.defaults[type]['Replicas']:"");
 		if(!replicas)replicas="1";
@@ -100,7 +99,7 @@ hpe5gResource.prototype.build = function(target){
 		this.check += checkDependency(pipeline, [pipelineTemplate], this.title+" "+name+": pipeline "+pipeline, " is undefined in the Builds section");
 		
 		var replicasNumber = Number(replicas);
-		if(isNaN(replicasNumber)){
+		if(isNaN(replicasNumber) && !replicas.startsWith('${')){
 			this.check += "\n"+this.title+": illegal replicas value for "+name+" : "+replicas+"; expecting integer";
 			continue;
 		} 
@@ -382,6 +381,49 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 }
 
 //===========================
+// TemplateParameters
+//===========================
+var TemplateParameters = new vnfResource("TemplateParameters", [
+  {name:'Required', width:'60px', type:'bool'},
+  {name:'Name', type:'text', width:'200px'},
+  {name:'Value', type:'text', width:'300px'},
+  {name:'Description', type:'text', width:'400px'}
+  ]
+  );
+TemplateParameters.help = function(){ return `Resources customization in the application template output:
+- Name: the name of the parameter to replace in the template for each occurence of the reference: $\{Name} or $\{{Name}} for non strings parameters
+- Description: human readable description of this parameter
+- Value: default value for this parameter
+- Required: boolean enforcing the parameter definition  
+`;
+}
+TemplateParameters.build = function(target){
+  var nameIndexes = TemplateParameters.nameIndexes;
+  var result = "\n";
+  TemplateParameters.check = "";
+  TemplateParameters.output = new Array();
+  var table = document.getElementById("TemplateParameters");
+  var rowCount = table.rows.length;
+  
+  result += "\n# ------------------------------- #";
+  result += "\n# TemplateParameters                 #";
+  result += "\n# ------------------------------- #";
+  
+  for(var i=1; i < rowCount; i++){
+    var row = table.rows[i];
+    var required=TemplateParameters.getAndSetChecked(row, nameIndexes, 'Required');
+    var name=TemplateParameters.getAndSetValue(row, nameIndexes, 'Name',"Param-"+i);
+    var value=TemplateParameters.getAndSetValue(row, nameIndexes, 'Value', "Param-"+i+"-value");
+    var description=TemplateParameters.getAndSetValue(row, nameIndexes, 'Description', "Parameter "+i+" description");
+    if(!name)TemplateParameters.check+="\nTemplatePararmeters: "+description+" missing name";
+    result += "\n# "+(required?"Required":"Optional")+" parameter "+name+" defaulting to "+value+": "+description;
+    TemplateParameters.output.push({name:name, value:value, required:required, description:description});
+  }
+  if(TemplateParameters.check != "")return TemplateParameters.check;
+  return result;
+};
+
+//===========================
 //HelmCharts
 //===========================
 var HelmCharts = new hpe5gResource("HelmCharts", [
@@ -418,7 +460,7 @@ function outputAppHpe5g(){
 
   // Check the hpe5gResources sections (or get the errors)
   var check = '';
-  ['Builds', 'CustomApps'].concat(hpe5gResources.sections).forEach(function(section){
+  ['Builds', 'CustomApps','TemplateParameters'].concat(hpe5gResources.sections).forEach(function(section){
     window[section].build();
     check += window[section].check;
   });

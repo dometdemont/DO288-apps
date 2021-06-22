@@ -3,13 +3,15 @@
 2. [Deployment](#Deployment)
 3. [Operations](#Operations)
 4. [Examples](#Examples)
-5. [Sections detailed specifications](#SectionsDetails)
-6. [Catalog specification](#CatalogSpecification)
+5. [Modules description](#ModulesDescription)
+6. [Sections detailed specifications](#SectionsDetails)
+7. [Catalog specification](#CatalogSpecification)
     [Dynamic dependencies resolution](#dependenciesResolution)
-7. [OpenStack deployment help](#OpenStackHelp)
+8. [OpenStack deployment help](#OpenStackHelp)
 
 This tool builds and run an installer deploying user defined HPE5G resources on OpenShift clusters.  
-It can also deploy an OpenShift cluster including HPE5G resources and/or additional instances.  
+As a Full Stack Multi PaaS automated deployer, it can also deploy fresh OpenShift clusters from scratch, including HPE5G resources and/or additional backing services on various infrastructures: 
+OpenStack, bare metal, Azure. Deployment of bare vanilla kubernetes clusters is offered as well.  
 It operates in two modes: interactive or headless.
 
 For the interactive mode, open the [index.html](index.html) file in a browser. From this interface, once the application is defined as a set of resources, the user can build either:
@@ -28,11 +30,13 @@ Examples of types: ignite, influxdb, redis, nudsf-dr
 Examples of attributes: name, project, image, storage  
 ### Section
 A section is a logical group of types sharing the same list of attributes and the same deployment method.  
-Examples: DirectServices, IndirectServices, Operators
+Examples: OpenShiftNodes, VanillaNodes, DirectServices, IndirectServices, Operators
 ### Resource
 A resource is an instance of a type, defined by a name and a specific set of attributes values, optional or mandatory.  
 A deployment consists in a list of sections, each section being a list of resources to be deployed.  
-Example: memorydb is a resource of type ignite in the DirectServices section, using the image docker.io/gridgain/community:8.7.14 with 250Mi persistent storage
+Examples: 
+- memorydb is a resource of type ignite in the DirectServices section, using the image docker.io/gridgain/community:8.7.14 with 250Mi persistent storage
+- lazuli is an OpenShift cluster defined in the OpenShiftNodes section, deployed in Azure infrastructure, running 5 nodes of standard flavor, etc.  
 ### Catalog
 The catalog is an internal object listing all known types, their cross dependencies, and default values for all attributes.  
 Some kind of types deployable through OpenShift templates must have a 'template' attribute in the catalog.  
@@ -44,16 +48,29 @@ can be used as a starting point for a deployment; typically, a set of backing se
 The default starting empty session is implemented in the file index.html: this session is composed of a set of Javascript sources, thus not usable as a standalone session. 
 
 A standalone session is a single HTML file including all the HTML and Javascript sources: such a session can be shared and moved around as a single all-in-one file. A composed session can be made standalone by running a REST GET request in headless mode; typically to get a standalone hpe5g.html session from the empty composed index.html session:
-```
-curl.exe http://localhost:8080/index.html > hpe5g.html
-```
+1. launch the automated deployer in headless mode: `node hpe5g.js`
+2. in another session, save the composed session index.html as the standalone hpe5g.html: `curl.exe http://localhost:8080/index.html > hpe5g.html`
+
 All sessions provided as examples in this project are standalone sessions:
 - hpe5g.html: blank session
 - bs-set.html: set of backing services
 - autotest.html: this project deployed as a pod in Openshift along with its jenkins pipeline
-- bm.m3.w2.html: a barematal deployment
-- green.html: three OpenShift clusters deployed on top of OpenStack
+- bm.m3.w2.html: a baremetal deployment
+- green.html: three OpenShift 4.x clusters deployed on top of OpenStack
 - etc.
+### Full Stack Multi PaaS
+The Full Stack capability supports the deployment of the OpenShift clusters themselves, followed by the deployment of the resources on each cluster. 
+Dedicated sections are available to define the OpenShift clusters, depending on the targeted PaaS:
+- OpenShift 3.9/3.11 clusters on OpenStack: section Nodes, check boxes Master Etcd  Worker, enabled by OpenShift target version 3.x in the build pane. Examples:
+  - [five.html](five.html)
+  - [single.html](single.html)
+- OpenShift 4.x clusters on bare metal: section BaremetalNodes. Examples:
+  - [bm.m3w2.html](bm.m3w2.html)
+- OpenShift 4.x clusters on Azure and OpenStack: section OpenShiftNodes. Examples:
+  - 2 OCP 4 clusters on Azure: [azure.html](azure.html)
+  - 3 OCP 4 clusters on OpenStack: [green.html](green.html)
+- Vanilla kubernetes clusters on Azure: section VanillaNodes. Example:
+  - 2 AKS clusters: [aks.html](aks.html)
 ## Deployment <a name="Deployment"></a>
 The headless automated deployer is a nodejs application deployed as per the [package.json](package.json) specification from [hpe5g.js](hpe5g.js) file.   
 It can be deployed on any nodejs server:  
@@ -86,10 +103,16 @@ node hpe5g.js --port 8473 --privateKey headless.pem --certificate headless.cert.
 The installer can connect to the target cluster(s) either using the OpenShift command line (oc) or the OpenShift REST interface (curl).
 If the Clusters section defines one or more enabled target(s), then the installer relies on the OpenShift REST interface invoking curl.   
 If no target cluster is enabled, the installer relies on the OpenShift oc CLI to perform the deployment. 
-In that case, the installer has to be invoked in the context of an OpenShift user connected to the target cluster (ie oc whoami succeeds).   
-NOTE: helm based resources are deployed by invoking the helm command line: as a consequence:
+In that case, the installer has to be invoked in the context of an OpenShift user connected to the target cluster (ie oc whoami succeeds).    
+   
+---
+**NOTE**: helm based resources are deployed by invoking the helm command line: as a consequence:
 - this helm CLI has to be available
 - as helm is not supported by the OpenShift REST interface, no target clusters should be enabled when deploying helm based resources: the deployment is performed on the default cluster set in the context of the caller.  
+
+**NOTE**: vanilla kubernetes clustes do not offer the oc command line, this preventing resources automated deployment on such clusters. 
+
+---
 
 ### Installer invocation
 The deployer REST interface offers two options to invoke the installer: direct  or local.
@@ -575,6 +598,51 @@ EOF
 ```
 The installer is not able to detect this incompatibility. The client has to check the application status from the standard OpenShift API/CLI.   
 
+<a name="ModulesDescription"></a>
+## Modules description
+This section is an overview of the software modules and their interactions.
+### HTML sessions
+Sessions are provided as HTML files, either composed or standalone.
+- [index.html](index.html): the empty composed session, also the starting point of the interactive mode. It defines the layout of the GUI and loads the Javascript engine executing the deployer logic.
+- [hpe5g.html](hpe5g.html): the empty standalone session, to be used as the starting point for building other standalone sessions, either by edition or import of existing sessions.       
+It is automatically built from index.html by sending a GET request to a nodejs instance running locally:     
+```curl.exe http://localhost:8080/index.html > hpe5g.html```
+- [autotest.html](autotest.html): standalone session deploying in an OpenShift cluster an automated deployer as a custom app with a jenkins pipeline running autotests. The resulting installer is [autotest.sh](autotest.sh)
+- [azure.html](azure.html): standalone session deploying a basic set of backing services and one custom operator on two Azure OpenShift instances. The resulting installer is [azure.sh](azure.sh)
+- [aks.html](aks.html): standalone session deploying 2 vanilla kubernetes clusters on Azure infrastructure. The resulting installer is [aks.sh](aks.sh)
+- [bm.m3w2.html](bm.m3w2.html): standalone session deploying an OpenShift cluster on 5 baremetal servers, 3 masters and 2 workers, plus one jenkins pipeline. The resulting installer is [bm.m3w2.sh](bm.m3w2.sh)
+- [bs-set.basic.html](bs-set.basic.html): standalone session deploying a very limited set of backing services, project to be defined at deployment time.
+- [bs-set.html](bs-set.html): standalone session deploying more backing services, project to be defined at deployment time.
+- [green.html](green.html): standalone session deploying three OpenShift clusters running a basic set of backing services : jade, green and sinople, the first attached to its own UPF 5.0.0-522 and UPF router ubuntu 16.04. The resulting installer is [green.sh](green.sh)
+- [services.html](services.html): standalone session deploying a set of network functions and services with jenkins pipelines on three projects and four existing clusters
+- [single.html](single.html): standalone session deploying a single node OpenShift 3.11 cluster hosting udsf and jenkins with pipelines. The resulting installer is [single.sh](single.sh)
+- [five.html](five.html): standalone session deploying a five nodes OpenShift 3.9 cluster running ignite and udr and the nodejs tester for traffic generation. The resulting installer is [five.sh](five.sh)
+### JavaScript engine
+The JavaScript engine is implemented as a set of js files:
+- [main.js](main.js): the main JavaScript entry point: import the default catalog and display the welcome message.
+- [hpestyle.js](hpestyle.js): the HPE standard style, icon and logo
+- [YAML.min.js](YAML.min.js): a minified YAML encoder/decoder for JavaScript from [https://github.com/jeremyfa/yaml.js/blob/develop/dist/yaml.min.js](https://github.com/jeremyfa/yaml.js/blob/develop/dist/yaml.min.js)
+- [version.js](version.js): current version definition and version history
+- [userLoadedFile.js](userLoadedFile.js) : class implementing a file which content is loaded from the user file system
+- [utils.js](utils.js): various JavaScript utilities, including Heat/OpenStack objects like volumes, ports, etc.
+- [vnfResource.js](vnfResource.js): abstract class defining a generic section in the deployment definition. 
+- [Networks.js](Networks.js), [Misc.js](Misc.js), [Flavors.js](Flavors.js), [Nodes.js](Nodes.js), [OpenShiftNodes.js](OpenShiftNodes.js), [BaremetalNodes.js](BaremetalNodes.js), [VanillaNodes](VanillaNodes), [Volumes.js](Volumes.js), [Clusters.js](Clusters.js), [Builds.js](Builds.js): concrete classes inherited from vnfResource implementing their respective section in the deployment specification
+- [hpe5gResources.js](hpe5gResources.js): abstract class inherited from vnfResource representing a resource deployable on OpenShift    
+Concrete classes inheriting from hpe5gResources: NetworkFunctions, DirectServices, IndirectServices, OperatorSources, Operators, TemplateParameters, HelmCharts  
+- [documentation.js](documentation.js): the online documentation, except the help specific to each section, part of their respective file.  
+- [installer.js](installer.js): builds the installer as a shell script deploying the volumes, projects, and all OpenShift resources
+- [Session.js](Session.js): session management: save, import as HTML or Json
+- [Heat.js](Heat.js): build the OpenStack Heat template and the installer deploying this template
+- [OpenShift4.js](OpenShift4.js): builds the installer deploying OpenShift 4 clusters on OpenStack and Azure
+- [vanillaKubernetes.js](vanillaKubernetes.js): builds the installer deploying Vanilla kubernetes clusters on Azure
+- [BaremetalBuild.js](BaremetalBuild.js): builds the installer deploying OpenShift 4 clusters on bare metal
+- [catalog.js](catalog.js): management of the catalog defining the deployable resources: import, export, dump, document, list...
+- [catalogDefaults.js](catalogDefaults.js), [catalogDefaultTemplates.js](catalogDefaultTemplates.js): the default catalog definition
+### Node JS application
+The headless automated deployer is a nodejs application deployed as per the [package.json](package.json) specification implemented in [hpe5g.js](hpe5g.js).
+### Ansible playbook
+Heat stacks are deployed on OpenStack by the [hpe5g.ansible.yml](hpe5g.ansible.yml) ansible playbook.
+
 <a name="SectionsDetails"></a>
 ## Sections detailed specifications
 This chapter is a compilation of the detailed sections specifications.
@@ -602,8 +670,8 @@ Miscellaneous settings:
 - default_openstack_network_root: The default OpenStack network root as 3 unique digits like 192.168.199
 - openstack_security_group: Name of the OpenStack security group controlling network permissions to the instances
 - openstack_volume_size: Size in Gb of the specific volume allocated to each OpenStack instance:
-		In that case, the OpenStack image must refer to a volume ID used for cloning.
-		Default: local storage sized according to the flavor and initialiazed with the image.
+    In that case, the OpenStack image must refer to a volume ID used for cloning.
+    Default: local storage sized according to the flavor and initialiazed with the image.
 - tester_nodejs_version: Nodejs version used to run the CMS5G Core Stack tester tool
 - tester_git_url: Git project URL delivering the CMS5G Core Stack tester tool
 - tester_deploy_key: Optional git deploy key to clone the project delivering the CMS5G Core Stack tester tool
@@ -626,13 +694,25 @@ Network interfaces names and associated masks and resources
 OpenShift 4.x clusters definitions
 Prerequisites:
 - rhel_pullsecret: all OpenShift clusters are deployed using the RedHat secret provided in the Misc section
-- openshift-install and oc available at deployment time in the path with the target OpenShift version 
+- openshift-install and oc available at deployment time in the path with the target OpenShift version
+- jq command line 
+Azure specific prerequisites:
+- a DNS zone to be used as the domain for the OpenShift instances; from this DNS zone is inferred the related resource group and region
+- az command line
+- DNS lookup utility dig
+- az login successful
+- optional: azure service principal stored in \~/.azure/osServicePrincipal.json ; otherwise, it is created and removed upon undeployment
 
 Attributes:
 - Name : name of the OpenShift instance to deploy
-- Domain: domain name of the OpenShift instance to deploy; default: localdomain
-- OSenv: name of the file providing the OpenStack environment. Retrieved from the OpenStack GUI: Project/API access
-      By default, this file prompts the user for his password; to make the deployment unattended, replace the prompt with the actual password in the variable OS_PASSWORD
+- Cloud: the cloud type for this OpenShift instance
+- Domain: domain name of the OpenShift instance to deploy
+  On Azure, this domain must exist as a DNS zone
+  default: localdomain
+- OSenv: name of the file providing the infrastructure environment. 
+  For Azure, this file can be typically used for setting the PATH to point to the target openshift and oc CLI
+  For OpenStack , this environment is typically retrieved from the GUI: Project/API access      
+  By default, this file prompts the user for a password; to make the deployment unattended, replace the prompt with the actual password in the variable OS_PASSWORD
       Mandatory additional variables:
       - OS_CACERT: path to a file providing a specific cacert in case the SSL cert is signed by an unknown CA
       Extensions supported as additional variables: 
@@ -642,14 +722,14 @@ Attributes:
       OPENSHIFT_NO_PROXY
       - name of the ssh key pair defined in the OpenStack project, pushed to the OpenShift nodes for remote access (useful to connect to openshift nodes)
       OS_SSH_KEY_PAIR
-- ext-net: name of the external network in the OpenStack infrastructure to connect this instance to; default: ext-net
-- ext-dns: external domain name server; default 8.8.8.8
-- FIPAPI/APP: floating IPs preallocated to the OpenShift cluster for the API and APP endpoints respectively. By default, those IPs are dynamically allocated if undefined or defined as a question mark(?). 
+- ext-net: (OpenStack only) name of the external network in the OpenStack infrastructure to connect this instance to; default: ext-net
+- ext-dns: (OpenStack only) external domain name server; default 8.8.8.8
+- FIPAPI/APP: (OpenStack only) floating IPs preallocated to the OpenShift cluster for the API and APP endpoints respectively. By default, those IPs are dynamically allocated if undefined or defined as a question mark(?). 
 - Masters: number of masters: default 3
 - Workers: number of workers : default 3
 - etc-hosts: boolean enabling /etc/hosts update (requires sudo privilege) 
 - Flavor/Worker flavor: shortcut defining the resources allocated for this OpenShift instance nodes; mapping to the actual flavor for the target infrastructure is based on the Flavors section
-- #Volumes: quota of volumes on this OpenStack project; admin privileges required at run time if greater than the current quota; default 10
+- #Volumes: (OpenStack only) quota of volumes on this OpenStack project; admin privileges required at run time if greater than the current quota; default 10
 - UPF/UPF router: names of the nodes defined in the Nodes section, playing the UPF and UPF router roles for this OpenShift cluster respectively
 
 Outputs:
@@ -683,6 +763,27 @@ Baremetal/Provisioning CIDR: The public CIDR (Classless Inter-Domain Routing) of
 Boot MAC address and interface: IP address and network interface of this node on the provisioning network
 Boot device: Linux path to the block device used for installing the OS, eg /dev/sdb
 
+### VanillaNodes
+Vanilla Kubernetes clusters definitions
+Prerequisites:
+- jq command line     
+Azure specific prerequisites:
+- az command line
+- az login successful
+
+Attributes:
+- Name : name of the kubernetes vanilla cluster to deploy
+- Cloud: the cloud type for this instance
+- Nodes: the number of nodes to deploy for this kubernetes instance
+- Flavor: shortcut defining the resources allocated for those nodes; mapping to the actual flavor for the target infrastructure is based on the Flavors section    
+  List of Azure flavors: https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general    
+  or: az vm list-sizes --location _location_ | jq .[].name    
+  details: az vm list-sizes --location _location_  | jq '.[] | select(.name == "_flavor_")'    
+- Location: where the resources will be deployed in the infrastructure; for instance, on Azure: southindia, eastus, northeurope, westeurope, eastasia, etc.    
+  Full list retrieved by: az account list-locations | jq .[].name
+- sshKey: (optional) public ssh key dropped on the kubernetes nodes for advanced investigation through ssh access    
+  Default: Azure to generate SSH public and private key files if missing. The keys will be stored in the \~/.ssh directory. 
+
 ### Nodes
 OpenStack Nodes and roles definition and assignment
 - MGMT fqdn: The domain name used in fqdn should be consistent with the infrastructure settings: on OpenStack, the domain is typically: localdomain
@@ -695,7 +796,7 @@ OpenStack Nodes and roles definition and assignment
   - NRF is defined in the Misc section as an IP address, a port and an interface number; 
     the IP address specified in the Misc section can be a templated variable referring to an OpenShift API floating IP as \~ocp_API\~ where ocp is the name of the OpenShift cluster defined in the OpenShiftNodes section 
   - mobile network and country codes are defined in the Misc section
-- Master/Etcd/Worker: the role(s) played by this node in the OpenShift 3.x cluster    
+- Master/Etcd/Worker: the role(s) played by this node in the OpenShift 3.x cluster; check boxes are enabled by OpenShift target version set to 3.x in the build pane        
   If no box is checked, the node is instantiated but not part of the OpenShift cluster, available for any specific usage.
 - Tester: node hosting the nodejs application used as HPE network functions tester    
   This application is cloned from github using the Misc section entries tester_git_url and optionally tester_deploy_key
@@ -724,7 +825,6 @@ Example with 3 nodes large, medium, small on 4 networks MGMT/DATA1-3
   "\~large_data1\~": "192.168.199.44", 
   "\~medium_data1\~": "192.168.199.49"
 } 
--  
 
 ### Flavors
 Infrastructure flavors:
@@ -741,6 +841,11 @@ Examples:
            openstack         flavorSmall               v2.m2    
            openstack         flavorLarge               v4.m8    
            openstack   flavorPerformance              v4.m16    
+               azure          flavorTiny       Standard_B2ms    
+               azure      flavorStandard     Standard_D4s_v3    
+               azure         flavorSmall       Standard_B4ms    
+               azure         flavorLarge     Standard_D8s_v3    
+               azure   flavorPerformance     Standard_D32_v4    
 
 ### Clusters
 OpenShift clusters candidate for deployment through OpenShift RESTful API:
@@ -776,7 +881,14 @@ PREREQUISITE: the Builds section defines the build source in GIT repository for 
 - Name: one word resource name for this application instance
 - Project: the OpenShift project hosting this application instance
 - Pipeline: create a Jenkins pipeline for this application from the Builds section definition
-	
+  
+
+### TemplateParameters
+Resources customization in the application template output:
+- Name: the name of the parameter to replace in the template for each occurence of the reference: ${Name} or ${{Name}} for non strings parameters
+- Description: human readable description of this parameter
+- Value: default value for this parameter
+- Required: boolean enforcing the parameter definition  
 
 ### NetworkFunctions
 Attributes:
@@ -793,7 +905,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-	
+  
 
 NetworkFunctions supported types: nudsf-dr,nudr-dr,nudr-prov,nudr-reg-agent,nudm-ee,nudm-li-poi,nudm-li-tf,nudm-ueau,nudm-uecm,nudm-sdm,nudm-notify,sf-cmod,nrf-reg-agent
 
@@ -812,7 +924,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-	
+  
 NOTES:
 - redis default admin password is the name of the instance.
   redis-nopwd deploys a redis instance without password 
@@ -843,7 +955,7 @@ Attributes:
 - Dependencies: comma separated list of resources names resolving this function dependencies within this project.    
   If undefined, the first resource in the project providing the required type is used.
 - Pipeline: create a Jenkins pipeline for this function from the Builds section definition
-	
+  
 NOTES: 
 - jenkins recommended values for RedHat OpenShift 3 are : 
   . URL: docker.io/openshift
@@ -861,7 +973,7 @@ PREREQUISITE: the operators are installed on the target OpenShift infrastructure
 - Project: the OpenShift project hosting this operator instance
 - Replicas: number of replicas passsed to this operator instance.
 - Pipeline: create a Jenkins pipeline for this operator instance from the Builds section definition
-	
+  
 
 Operators supported types: hpe5gcs-operator,jaeger-product,cert-manager,servicemeshoperator,amq-streams,elasticsearch-operator,kiali-ossm,grafana-operator,etcd-operator,local-storage-operator,container-storage-operator,prometheus-operator
 
@@ -876,7 +988,7 @@ PREREQUISITE: Helm is installed on the target OpenShift infrastructure and confi
 - Version: specify the exact chart version to install. If this is not specified, the latest version is installed
 - Options: additional options passed to helm at deployment time as a text string (quotes and double quotes must be backslash escaped)
 - Pipeline: create a Jenkins pipeline for this chart instance from the Builds section definition
-	
+  
 
 HelmCharts supported types: nudm-chart,nudr-chart,telegraf-chart,generic
 
@@ -898,7 +1010,7 @@ It consists in four sections:
   The placeholder used in templates is the first element in this list.    
   Example: telegraf can play an influxdb type, and can be deployed as an indirect service or a helm chart.    
     The udsf resource requiring both ignite and influxdb resources can specify this dependencies list:   
-	"nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
+  "nudsf-dr": ["ignite",["influxdb","telegraf","telegraf-chart"]]   
     The udsf template has to use the placeholders \~ignite_NAME\~ and \~influxdb_NAME\~ to enable the dependencies resolution at deployment time.    
 3. values:
   Define for each type the values used as default for the resources attributes. The list of attributes offering default values depends on the resource category:
@@ -922,7 +1034,7 @@ The template attribute in the values section is a YAML description of the OpenSh
       This placeholder allows dynamic resolution of dependencies between resources. For instance, in the udsf template, the datasource service name \~ignite_NAME\~ will be dynamically resolved as the actual name of the ignite instance in this project for this deployment.
       - \~VOLUME\~ if the persistent storage can be hosted on a specific volume; this placeholder is replaced with "volumeName: the_volume_name" at build time
       - \~PERSISTENCE_START\~conditional_sequence\~PERSISTENCE_END\~ useful to manage resources with optional persistent storage like ignite: 
-    		the conditional sequence is removed when no persistent storage is defined by the user for this resource    
+        the conditional sequence is removed when no persistent storage is defined by the user for this resource    
      
 Those placeholders are processed at build time with the actual values defined by the user.
 Templates can also be loaded as files from the GUI using the Import Yaml template button in the Catalog fieldset. See the online help for more details.  
@@ -975,7 +1087,7 @@ Quick user guide for deploying an OpenShift cluster in an OpenStack HPE lab infr
       - export CLOUD_SSH_KEY_PAIR="mykey"
       - export CLOUD_SSH_KEY="/home/centos/openshift-ansible/mykey.pem"
     - set the name of the external network offering public access
-  	  - export CLOUD_EXTERNAL_NETWORK=ext-net
+      - export CLOUD_EXTERNAL_NETWORK=ext-net
     - set the default image to used:
       - export CLOUD_IMAGE="Cent OS 7"
     - retrieve the infrastructure certificate: e.g. grenoble-infra-root-ca_gs118.crt 
@@ -992,7 +1104,7 @@ The first master public IP address is available as $openshift_ip: eg 30.118.0.24
     - accept the security warning and log on with any name and password
     - approve the self signed certificate for the metrics display engine Hawkular by clicking the warning link in another tab
     - connect to the master, connect with the user name used in the GUI
-     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip	
+     - ssh -i $CLOUD_SSH_KEY centos@$openshift_ip 
      - oc login -u <user>
     - invoke the deployment script: ./hpe5g.sh
 

@@ -99,9 +99,11 @@ _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &>> $logfile
 oc login -u $oc_user &>> $logfile
 `;
-if(warningMessage){
+if(warningMessage.length){
+  // warningMessage is a table of messages: join them with new lines then split the result in single lines prefixed by the _warn_ invocation
+  var catWarningMessage=warningMessage.join('\n')
 	_shellTemplate+="else";
-	warningMessage.split("\n").forEach(function(line){_shellTemplate+='\n _warn_ "'+line+'"';});
+  catWarningMessage.split("\n").forEach(function(line){_shellTemplate+='\n _warn_ "'+line+'"';});
 }
 _shellTemplate+=
 `
@@ -236,6 +238,16 @@ objects:`;
 			});
 		result+=deployment;
 		});
+    if(TemplateParameters.output && TemplateParameters.output.length>0 && _header.length==0){
+      // Push user defined template parameters
+      result+='\nparameters:';
+      TemplateParameters.output.forEach(function(p){
+        result+='\n- name: '+p.name;
+        result+='\n  required: '+p.required;
+        if(p.description)result+='\n  description: '+p.description;
+        if(p.value)result+='\n  value: "'+p.value+'"';
+      });
+    }
 		if(footer != undefined && _header.length==0)result+=footer(project);
 	});
 	return result;
@@ -325,7 +337,7 @@ function buildNetworkFunctions(){
 
 	// Check the hpe5gResources sections + Builds and Clusters (or get the errors)
 	var check = '';
-	['Builds', 'CustomApps', 'Clusters'].concat(hpe5gResources.sections).forEach(function(section){
+	['Builds', 'CustomApps', 'Clusters','TemplateParameters'].concat(hpe5gResources.sections).forEach(function(section){
 		window[section].build();
 		check += window[section].check;
 	});
@@ -335,11 +347,9 @@ function buildNetworkFunctions(){
   if(!hpe5gResources.projects.length)return '';
   
 	var shell='';
-	var warningMessage='';
 	
 	if(hpe5gResources.adminList.length > 0){
-		warningMessage='Resource(s) requiring special privileges might jeopardize the deployment:'+hpe5gResources.adminList;
-		if(!Misc.getValue('headless') && !confirm(warningMessage)){userOutput(warningMessage); return '';}
+		userWarning.add('Resource(s) requiring special privileges might jeopardize the deployment:'+hpe5gResources.adminList);
 	}
 
 	if(Clusters.targeted == undefined || Clusters.targeted.length == 0){
@@ -365,7 +375,7 @@ sed -i "s/~LOCAL_STORAGE_NODES~/$_localStorageNodes/" $_templateYaml`
     	shell+=hpe5gNetworkFunctions(catHeader, catFooter);
     	shell+=hpe5gHelmValues(catHelmValuesHeader, catFooter);
 		  shell+=hpe5gUntemplatedDeploymentsScript();
-    	shell+=hpe5gDeploymentScript(warningMessage);
+    	shell+=hpe5gDeploymentScript(userWarning.messages);
 	}else{
 		shell+=shellBody('curl');
 		
@@ -471,9 +481,12 @@ This client deploys and undeploys
  
 Usage: $0 
     -d|--deploy <name> : name of the OpenShift instance and OpenStack stack to deploy; default: hpe5g
+    -c|--cloud <cloud type>: type of the target cloud: openstack|azure
     -o|--domain <domain name> : domain name of the OpenShift instance to deploy; default: localdomain
     -n|--OSnetwork <network root>: default OpenStack network root as 3 unique digits like 192.168.199
-    -e|--OSenv <OpenStackEnvironmentFile> : name of the file providing the OpenStack environment. Retrieved from the OpenStack GUI: Project/API access
+    -e|--OSenv <EnvironmentFile> : name of the file providing the infrastructure environment. 
+      For Azure, this file can be typically used for setting the PATH to point to the target openshift and oc CLI
+      For OpenStack , this environment is typically retrieved from the GUI: Project/API access
       By default, this file prompts the user for his password; to make the deployment unattended, replace the prompt with the actual password in the variable OS_PASSWORD
       Mandatory additional variables:
       - OS_CACERT: path to a file providing a specific cacert in case the SSL cert is signed by an unknown CA
@@ -538,6 +551,7 @@ NBVOLUMES=10
 if(OpenShiftNodes.instances && OpenShiftNodes.instances.name.length)shell+=`
 _defaultName=(`+OpenShiftNodes.instances.name.join(' ')+`)
 OCP=(`+OpenShiftNodes.instances.name.join(' ')+`)
+CLOUD=(`+OpenShiftNodes.instances.cloud.join(' ')+`)
 ETCHOSTS=(`+OpenShiftNodes.instances.etchosts.join(' ')+`)
 EXTNET=(`+OpenShiftNodes.instances.extnet.join(' ')+`)
 OS_env=(`+OpenShiftNodes.instances.osenv.join(' ')+`)
@@ -551,6 +565,17 @@ FLAVORWORKER=(`+OpenShiftNodes.instances.flavorWorker.join(' ')+`)
 EXTDNS=(`+OpenShiftNodes.instances.extdns.join(' ')+`)
 NBVOLUMES=(`+OpenShiftNodes.instances.nbVolumes.join(' ')+`)`;
 
+if(VanillaNodes.instances && VanillaNodes.instances.name.length)shell+=`
+_defaultName=(`+VanillaNodes.instances.name.join(' ')+`)
+VANILLA=(`+VanillaNodes.instances.name.join(' ')+`)
+VANILLACLOUD=(`+VanillaNodes.instances.cloud.join(' ')+`)
+VANILLANODES=(`+VanillaNodes.instances.nodes.join(' ')+`)
+VANILLAFLAVOR=(`+VanillaNodes.instances.flavor.join(' ')+`)
+VANILLALOCATION=(`+VanillaNodes.instances.location.join(' ')+`)
+VANILLASSHKEY=("`+VanillaNodes.instances.sshKey.join('" "')+`")
+`;
+
+
 if(BaremetalNodes.clusters && Object.keys(BaremetalNodes.clusters).length)shell+=`
 _defaultName=(`+Object.keys(BaremetalNodes.clusters).join(' ')+`)
 OCPBM=(`+Object.keys(BaremetalNodes.clusters).join(' ')+`)
@@ -563,6 +588,7 @@ RHELSECRET='`+Misc.getValue('rhel_pullsecret')+`'
 while [[ "$#" -gt 0 ]]; do case $1 in
   -d|--deploy) _deploy=true; _displayedAction="Deploying"; state=present ; OCP=($\{2:-$\{OCP[@]:-$_defaultName}}) ; shift;;
   -u|--undeploy|--destroy) _deploy=false ; _displayedAction="Undeploying"; state=absent ; OCP=($\{2:-$\{OCP[@]:-$_defaultName}}); shift;;
+  -c|--cloud) CLOUD=($2); shift;;
   -e|--OSenv) OS_env=($2); shift;;
   -n|--OSnetwork) oc_network="$2"; shift;;
   -o|--domain) DOMAIN=($2); shift;;
@@ -623,17 +649,41 @@ _fail_() {
   return shell;
 }
 
+// Collect all  user's warnings and ask confirmation in interactive mode
+var userWarning= new Object;
+userWarning.init = function(){
+  userWarning.messages = new Array();
+}
+// Add a message to the list, do not duplicate
+userWarning.add = function(message){
+  if(userWarning.messages.indexOf(message) < 0)userWarning.messages.push(message);
+}
+// Prompt the user if interactive, and return the boolean user choice to continue (true) or stop (false)
+userWarning.promptAndContinue = function(){
+  if(Misc.getValue('headless') || userWarning.messages.length == 0)return true;
+  if(confirm(userWarning.messages.join('\n')))return true;
+  userOutput(userWarning.messages.join('\n'));
+  return false;
+}
+
 function outputInstallerShell(){
 	var shellOpenStack='';
 	var shellOpenShift='';
   var shellTerraform='';
   var shellBaremetal='';
+  var shellVanilla='';
 	Nodes.cloudNodes=undefined;
+  userWarning.init();
 
   // OCP4 clusters if any
   if(!OpenShiftNodes.isEmpty()){
     shellTerraform=buildOCP4Deployer();
     if(!shellTerraform)return false;
+  }
+  // Vanilla kubernetes clusters
+  if(!VanillaNodes.isEmpty()){
+    shellVanilla=buildVanillaDeployer();
+    if(!shellVanilla)return false;
   }
   if(!BaremetalNodes.isEmpty()){
     shellBaremetal=buildOCP4BaremetalDeployer();
@@ -646,11 +696,12 @@ function outputInstallerShell(){
   }
 
 	// Add OpenShift resources except if an OpenShift cluster was deployed before: the OCP deployment includes the resources deployment
-  if(OpenShiftNodes.isEmpty() && BaremetalNodes.isEmpty() && (!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}))){
+  if(OpenShiftNodes.isEmpty() && VanillaNodes.isEmpty() && BaremetalNodes.isEmpty() && (!Nodes.cloudNodes || !Nodes.cloudNodes.some(function(e){return e.isEms;}))){
 		shellOpenShift=buildNetworkFunctions();
 		if(hpe5gResources.projects.length && !shellOpenShift)return false;
 	}
-	var shell=shellHeader()+shellTerraform+shellBaremetal+shellOpenStack+shellOpenShift+"\nexit 0";
+  if(!userWarning.promptAndContinue())return false;
+	var shell=shellHeader()+shellTerraform+shellVanilla+shellBaremetal+shellOpenStack+shellOpenShift+"\nexit 0";
 	
 	// Show to the user and save to hpe5g.sh
     userOutput(shell);

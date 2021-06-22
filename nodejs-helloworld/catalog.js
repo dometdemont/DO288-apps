@@ -152,12 +152,6 @@ function importCatalog(jsonCatalog = catalogImport.content, silent = false){
   return result;
 }
 
-// Gratitude to https://stackoverflow.com/questions/1199352/smart-way-to-truncate-long-strings
-String.prototype.trunc = String.prototype.trunc ||
-function(n){
-    return (n != 0 && this.length > n) ? this.substr(0, n-1) + '&hellip;' : this;
-};
-
 // Gratitude to https://stackoverflow.com/questions/5612787/converting-an-object-to-a-string
 var catalog_display_depth=0;
 var catalog_display_ellipse=0;

@@ -1,7 +1,7 @@
 #! /bin/bash
 _usage() {
     echo "
-HPE 5G resources automated deployer: 2021-04-14 Version 0.92
+HPE 5G resources automated deployer: 2021-06-21 Version 0.97
 This client deploys and undeploys 
 - OpenShift clusters hosted on OpenStack 
 - Individual OpenStack resources as a stack
@@ -9,9 +9,12 @@ This client deploys and undeploys
  
 Usage: $0 
     -d|--deploy <name> : name of the OpenShift instance and OpenStack stack to deploy; default: hpe5g
+    -c|--cloud <cloud type>: type of the target cloud: openstack|azure
     -o|--domain <domain name> : domain name of the OpenShift instance to deploy; default: localdomain
     -n|--OSnetwork <network root>: default OpenStack network root as 3 unique digits like 192.168.199
-    -e|--OSenv <OpenStackEnvironmentFile> : name of the file providing the OpenStack environment. Retrieved from the OpenStack GUI: Project/API access
+    -e|--OSenv <EnvironmentFile> : name of the file providing the infrastructure environment. 
+      For Azure, this file can be typically used for setting the PATH to point to the target openshift and oc CLI
+      For OpenStack , this environment is typically retrieved from the GUI: Project/API access
       By default, this file prompts the user for his password; to make the deployment unattended, replace the prompt with the actual password in the variable OS_PASSWORD
       Mandatory additional variables:
       - OS_CACERT: path to a file providing a specific cacert in case the SSL cert is signed by an unknown CA
@@ -74,12 +77,14 @@ NBVOLUMES=10
 
 _defaultName=(steel)
 OCPBM=(steel)
+OCPBMNODES=('["eins", "vier"]')
 OCPBMOFF=("ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.16 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.17 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.19 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.15 power off && ipmitool -I lanplus -U admin -P HP1nvent -H 10.33.0.18 power off")
 RHELSECRET='{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K2RvbWV0ZGVtb250MXhjMXp2N3VhbjNhbTloamNrb2h1Y2tscTBjOlM2QVc3WUlCSDFMRFhSRkhBNU1WM1dOWUFNQjRSTDk4MU1JRE1PQzFYQUVBMDRLWlRKNVk3SzQwUFFVODlOOUo=","email":"dominique.domet-de-mont@hpe.com"},"registry.connect.redhat.com":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"},"registry.redhat.io":{"auth":"NDM4MTY3MHx1aGMtMVhjMVp2N1VhTjNBbTloSmNrb2h1Y0tMcTBjOmV5SmhiR2NpT2lKU1V6VXhNaUo5LmV5SnpkV0lpT2lJMk4yUmpOMlZtWTJNMU5qSTBPVEZsT1RneVpXTTBOVGM1TUdGa1pUQTNaQ0o5Lkp2dWsybEo2Q3dLLTY5WnBkbDg1enk0RFUtdzV3aTVPWE5aZ0hDUDBlbXNCVmZDXzkzN3Fhdk5OZDZqdjRBU0NSRllPb3ZCTmxYTEhJbjA5amhIaTJiZDRfQ2xwMVhBaTdPYWVwN21qc0x5NVdrSEZHU3lHcU02RU43Y1N3bmFRWm00Q3lDNmNHaFItbVhtYnVDUTdYdWl0MVJCNEh5X0laZHV6dUhOa3hmam5aX2ZmWHNRb1ZVTmoxdW44bFlZMjQzLXpOMkpvN0p2M3MwZkZYYnBnbzBtMUNia284MzIzRWhGc3h5SFM5UXNYWUk3VDRJX21JRnBHMTZSVGotUGUyalluNjVJTnBxVFF4Y0FQaHpuQkxLYUNwd01Yb2F2V0hPMXpRWEs1QTF2dGR3Z1VUZEh0VWplX3FYUm13ZUQwYkVOeDRiVHgySGx2X0RlcnZuMEVfc3ZuRU4zVlpkNEc0VFNHZlo2d1c1LVlvSjJxZkdxeGVqeVZWdThqeDFyazFWRk52NERXaDd4amlTZ2I5d3dNTWVWVW9pSXFMZUN2NTZzUW4ycTRUdUpmdDNIVGR2UXhBSldHQWtGbDBFVUJKT0R2aGZrWGtSTWtjbmk5RVdiZVU0NWYwUThhQ1NmeG84anBzNE80endUMUxSQlVTVE5ZekN3bjhrTFdYR2FkaGo1aHdDNW9XNjlzUW5wYmpEY2JWR0dCSkdhNUtRREJpNmRVNzFoUTY3cThncUZ1UHhOaXJCcFNleTg0VWxtMS1PVjBzVXN4dnRwaVYxWFFvUVJrcHRVNnNBMFJaMTE2c25JT0gxR2piWm9paTB6M2hJbUltcmRPeG1ReHhYcC1nTWhsc2txcDZRVGtSWFdPZ0lyYWJ0UkNvV2pRc3JZb1EyZFNiRzBBODNB","email":"dominique.domet-de-mont@hpe.com"}}}'
 
 while [[ "$#" -gt 0 ]]; do case $1 in
   -d|--deploy) _deploy=true; _displayedAction="Deploying"; state=present ; OCP=(${2:-${OCP[@]:-$_defaultName}}) ; shift;;
   -u|--undeploy|--destroy) _deploy=false ; _displayedAction="Undeploying"; state=absent ; OCP=(${2:-${OCP[@]:-$_defaultName}}); shift;;
+  -c|--cloud) CLOUD=($2); shift;;
   -e|--OSenv) OS_env=($2); shift;;
   -n|--OSnetwork) oc_network="$2"; shift;;
   -o|--domain) DOMAIN=($2); shift;;
@@ -139,10 +144,11 @@ _fail_() {
 
 # Reference documentation for OpenShift deployment on bare metal: https://openshift-kni.github.io/baremetal-deploy/4.6/Deployment.html
 # Deployment
-# Input parameters: cluster name and command to power off all nodes part of this cluster
+# Input parameters: cluster name, command to power off all nodes part of this cluster, list of nodes providing local storage as a json array
 deployOCPBM() {
   local _name=$1
   local _powerOff=$2
+  local _localStorageNodes=$3
   
   # Check openshift deployments CLIs
   which oc > /dev/null && _log_ "oc CLI available version $(oc version 2> /dev/null | grep 'Client Version'  | awk '{print $3}')" || _fail_ "Missing oc CLI "
@@ -214,13 +220,15 @@ _cmd_with_retry() {
    return 0
 }
 
-cat > openshift_project_sanity.yaml << 'EOFILE'
+# File naming convention for Network functions: openshift_project_<project>.yaml
+_templateYaml=openshift_project_sanity.yaml
+cat > $_templateYaml << 'EOFILE'
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: sanity
   annotations:
-    description: network functions and backing services for project sanity
+    description: 'An OpenShift cluster on 5 baremetal servers, 3 masters and 2 workers, one jenkins pipeline deployed.'
 objects:
   - kind: ImageStream
     apiVersion: v1
@@ -371,6 +379,8 @@ objects:
       type: ClusterIP
   
 EOFILE
+# Cluster specific variables resolution:
+sed -i "s/~LOCAL_STORAGE_NODES~/$_localStorageNodes/" $_templateYaml
 # CustomApps deployment scripts
 if $_deploy ; then 
 	_ocAction="apply"
@@ -386,7 +396,7 @@ test -n "$oc_user" && [ "$oc_user" != "system:admin" ] || _fail_ "Current user i
 _log_ "$_displayedAction CMS5G Core Stack as user $oc_user"
 _log_ "Checking projects"
 oc_projects="sanity"
-for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-04-14 Version 0.92 on: Thu Apr 15 2021 10:50:12 GMT+0200 (Central European Summer Time) An OpenShift cluster on 5 baremetal servers, 3 masters and 2 workers, one jenkins pipeline deployed.' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
+for _project in $oc_projects ; do if [[ "$_project" =~ ^openshift.* ]] ; then _newproject_prefix="adm" ; else _newproject_prefix="" ; fi ; oc project $_project &>> $logfile || oc $_newproject_prefix new-project $_project --display-name="Project $_project" --description='From HPE5g automated deployer 2021-06-21 Version 0.97 on: Mon Jun 21 2021 15:05:27 GMT+0200 (Central European Summer Time) An OpenShift cluster on 5 baremetal servers, 3 masters and 2 workers, one jenkins pipeline deployed.' &>> $logfile || _fail_ "Cannot find or create project $_project missing" ; done
 if echo guess | oc login -u system:admin &>> $logfile ; then
 _log_ "Listing nodes as system:admin"
 oc get nodes -o wide &>> $logfile
@@ -547,7 +557,7 @@ fi  # If deployment, create one directory per OCP cluster, and drop install-conf
 
 # For all instance names, deploy or undeploy
 i=0 && while (( i <  ${#OCPBM[@]} )) ; do 
-  $_deploy && deployOCPBM ${OCPBM[i]:-$OCPBM} "${OCPBMOFF[i]}" || undeployOCPBM ${OCPBM[i]:-$OCPBM}  
+  $_deploy && deployOCPBM ${OCPBM[i]:-$OCPBM} "${OCPBMOFF[i]}" "${OCPBMNODES[i]}"  || undeployOCPBM ${OCPBM[i]:-$OCPBM}  
   ((i+=1))
 done
 

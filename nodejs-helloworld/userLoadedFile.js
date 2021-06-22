@@ -98,8 +98,8 @@ userLoadedFile.prototype.view = function(){
 	userOutput(this.content);
 }
 // Ensure that both the content and the path are defined
-userLoadedFile.prototype.isDefined = function(){
-	return this.content != undefined && this.content != '' && this.path != undefined && this.path != '';
+userLoadedFile.prototype.hasContent = function(){
+	return this.content != undefined && this.content != ''
 }
 // Ensure that neither the content nor the path are defined
 userLoadedFile.prototype.isUndefined = function(){
@@ -107,5 +107,5 @@ userLoadedFile.prototype.isUndefined = function(){
 }
 // Check that both path and content are either defined or undefined
 userLoadedFile.prototype.isConsistent = function(){
-	return this.isDefined() || this.isUndefined();
+	return this.hasContent() || this.isUndefined();
 }
